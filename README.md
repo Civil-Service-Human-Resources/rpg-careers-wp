@@ -1,1 +1,1 @@
-# rpg-careers-wp
+# WP-careers-theme
