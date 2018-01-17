@@ -125,7 +125,7 @@ add_filter('wp_die_handler', 'rpgCareers_custom_error_handler');
 function rpgCareers_amend_admin_menu() {
     global $menu;
 	//EXAMPLE ARRAY...
-	//$restricted = array('Comments','Posts');
+	$restricted = array('Comments','Posts');
     end ($menu);
 
     while (prev($menu)){
@@ -137,3 +137,18 @@ function rpgCareers_amend_admin_menu() {
     }
 }
 add_action('admin_menu', 'rpgCareers_amend_admin_menu');
+
+//FOOTER HOOK
+function rpgCareers_footer_hook() {
+	//TODO:
+}
+add_action( 'wp_footer', 'rpgCareers_footer_hook' );
+
+
+//SHORTCODE FOR FOOTER
+function rpgCareers_footer_content() {
+	//TODO:
+	return '';
+}
+
+add_shortcode('rpg_footer_content', 'rpgCareers_footer_content');

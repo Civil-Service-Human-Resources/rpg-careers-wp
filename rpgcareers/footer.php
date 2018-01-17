@@ -13,8 +13,7 @@
     </div>
 </main><!-- /main -->
 
-<footer class="footer"></footer><!-- /footer -->
-
+<footer class="footer"><?php echo do_shortcode("[rpg_footer_content]"); ?></footer>
 <?php wp_footer(); ?>
 </body>
 </html>
