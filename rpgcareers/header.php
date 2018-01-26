@@ -25,6 +25,7 @@
 </head>
 
 <body <?php body_class(); ?>>
+<?php do_action( 'body_open' ); ?>
 <!--<a class="skip-link screen-reader-text" href="#content"><?php esc_html_e( 'Skip to content', 'civil-service-careers' ); ?></a>-->
 <header class="masthead">
 	<div class="masthead__first">
