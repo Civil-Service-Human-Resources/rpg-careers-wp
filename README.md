@@ -22,10 +22,10 @@ WordPress 4.9.1 installed
 
 Clone repo
 ```
-git clone https://github.com/Civil-Service-Human-Resources/rpg-careers-wp-theme
+git clone https://github.com/Civil-Service-Human-Resources/rpg-careers-wp.git
 ```
 
-## To install
+## To install theme
 
 Create a zip file of the theme contents - then from the admin pages install via the zip file
 
