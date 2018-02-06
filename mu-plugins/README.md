@@ -1,5 +1,10 @@
 # RPG Must use plugins / extensions 
 
+## RPG Careers WP Utils Plugin
+
+Plugin providing various helper functions to supoprt the CMS - sits in mu-plugins folder so automatically run.
+
+
 ## Careers WP Snippet Plugin
 
 Plugin to allow for management of bespoke HTML snippets.  Snippet can be created in WP admin and then a shortcode is used on pages to pull that through:
