@@ -224,7 +224,7 @@ class OW_History_Service {
 					LEFT JOIN
 					{$wpdb->users} AS C
 					ON A.assign_actor_id = C.ID
-					LEFT JOIN (SELECT XX.name, WW.post_id FROM ebdb.wp_postmeta WW LEFT JOIN wp_terms XX ON XX.term_id = WW.meta_value where meta_key = 'rpg-team') AS G
+					LEFT JOIN (SELECT XX.name, WW.post_id FROM wp_postmeta WW LEFT JOIN wp_terms XX ON XX.term_id = WW.meta_value where meta_key = 'rpg-team') AS G
                     ON A.post_id = G.post_id
 					LEFT JOIN
 					(SELECT AA.*, BB.name as wf_name, BB.version FROM " . OW_Utility::instance()->get_workflow_steps_table_name() . " AS AA LEFT JOIN " . OW_Utility::instance()->get_workflows_table_name() . " AS BB ON AA.workflow_id = BB.ID) AS D

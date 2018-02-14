@@ -162,7 +162,7 @@ class OW_Report_Service {
       			LEFT OUTER JOIN  " . OW_Utility::instance()->get_action_table_name() . " B ON A.ID = B.action_history_id
       			AND B.review_status = 'assignment'
 					LEFT JOIN {$wpdb->posts} AS posts ON posts.ID = A.post_id
-					LEFT JOIN (SELECT XX.name, WW.post_id FROM ebdb.wp_postmeta WW LEFT JOIN wp_terms XX ON XX.term_id = WW.meta_value where meta_key = 'rpg-team') AS G
+					LEFT JOIN (SELECT XX.name, WW.post_id FROM wp_postmeta WW LEFT JOIN wp_terms XX ON XX.term_id = WW.meta_value where meta_key = 'rpg-team') AS G
                     ON A.post_id = G.post_id"
 					. OW_Utility::instance()->get_team_filter('A','D') .
 					"LEFT JOIN {$wpdb->base_prefix}users AS users ON users.ID = posts.post_author
