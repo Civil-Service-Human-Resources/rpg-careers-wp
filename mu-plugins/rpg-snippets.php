@@ -25,20 +25,20 @@ class rpgsnippets{
 
     function initialize(){
         $this->settings = array(
-            'name'                => __('RPG Snippets', 'rpgsnippets'),
-            'version'            => $this->version,
+            'name'              => __('RPG Snippets', 'rpgsnippets'),
+            'version'           => $this->version,
             'capability'        => 'manage_rpgsnippets',
-            'posttype'            => 'rpg-snippets'
+            'posttype'          => 'rpg-snippets'
         );
 
         //REGISTER CUSTOM POST TYPE
-        add_action('init', array($this,'register_post_types'), 5);
+		add_action('init', array($this,'register_post_types'), 5);
 
         //ADD MENU ITEM
-        add_action('admin_menu', array($this,'admin_menu'));
+		add_action('admin_menu', array($this,'admin_menu'));
 
         //ADD SHORTCODE
-        add_shortcode('rpg_snippet', array($this,'snippet_shortcode'));
+		add_shortcode('rpg_snippet', array($this,'snippet_shortcode'));
 
         //REGISTER FILTERS + ACTIONS
         add_filter('manage_rpg-snippets_posts_columns', array($this,'modify_columns'));
@@ -50,7 +50,8 @@ class rpgsnippets{
         add_filter('views_edit-rpg-snippets',array($this,'snippet_quick_links'));
         add_action('manage_posts_extra_tablenav', array($this,'bespoke_js_script'));
         add_filter('post_updated_messages', array($this,'snippet_post_update_message'), 10, 1);
-        add_filter( 'bulk_post_updated_messages', array($this,'snippet_post_bulk_update_message'), 10, 2 );
+        add_filter('bulk_post_updated_messages', array($this,'snippet_post_bulk_update_message'), 10, 2 );
+		
     }
 
     function bespoke_js_script($which){
@@ -168,9 +169,9 @@ class rpgsnippets{
     }
 
     function register_post_types() {
-        $cap = $this->get_setting('capability');
-        
-        register_post_type('rpg-snippets', array(
+       $cap = $this->get_setting('capability');
+       
+       register_post_type('rpg-snippets', array(
             'labels'            => array(
                 'name'                    => __( 'Snippets', 'rpgsnippets' ),
                 'singular_name'            => __( 'Snippet', 'rpgsnippets' ),
