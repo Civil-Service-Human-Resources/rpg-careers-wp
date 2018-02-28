@@ -8,9 +8,8 @@ function rpgCareers_content_width() {
 }
 add_action('after_setup_theme', 'rpgCareers_content_width', 0);
 
-//TODO: IS THIS STILL NEEDED?
 function rpgCareers_setup() {
-
+	register_nav_menu('primary', 'main-nav');
 }
 add_action('after_setup_theme', 'rpgCareers_setup');
 
@@ -54,6 +53,10 @@ function rpgCareers_widgets_init() {
 	);
 	
 	register_sidebar($widget_args_1);
+
+	global $wp_widget_factory;
+	remove_action('wp_head', array($wp_widget_factory->widgets['WP_Widget_Recent_Comments'], 'recent_comments_style'));
+
 }
 add_action('widgets_init', 'rpgCareers_widgets_init');
 
@@ -152,3 +155,20 @@ function rpgCareers_footer_content() {
 }
 
 add_shortcode('rpg_footer_content', 'rpgCareers_footer_content');
+
+//REMOVE ALL AUTO-GENERATED IDs AND CLASSES FROM MENU ITEMS
+function filter_menu_li($classes){
+	$bespoke_classes = array();
+	
+	if( in_array('current-menu-item', $classes) ){
+		$bespoke_classes[] = 'active-nav';
+	}
+	return $bespoke_classes;
+}
+
+function filter_menu_id(){
+    return; 
+}
+
+add_filter('nav_menu_item_id', 'filter_menu_id');
+add_filter('nav_menu_css_class', 'filter_menu_li');

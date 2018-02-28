@@ -6,14 +6,13 @@
  *
  * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
  *
- * @package Civil_Service_Careers
+ * @package RPG_Careers
  */
 
 ?>
-    </div>
-</main><!-- /main -->
-
-<footer class="footer"><?php echo do_shortcode("[rpg_footer_content]"); ?></footer>
+	</main>
+</div>
+<footer id="footer"><div id="footer-main"><?php echo do_shortcode("[rpg_snippet tagcode='138']"); ?></div></footer>
 <?php wp_footer(); ?>
 </body>
 </html>
