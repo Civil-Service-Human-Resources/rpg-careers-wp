@@ -1211,7 +1211,7 @@ class OW_Process_Flow {
 				   JOIN {$wpdb->posts} AS posts ON posts.ID = A.post_id
 					LEFT OUTER JOIN {$wpdb->postmeta} AS postmeta ON postmeta.post_id = A.post_id
 					AND postmeta.meta_key = '_oasis_task_priority'
-					LEFT JOIN (SELECT XX.name, WW.post_id FROM ebdb.wp_postmeta WW LEFT JOIN wp_terms XX ON XX.term_id = WW.meta_value where meta_key = 'rpg-team') AS D ON posts.ID = D.post_id 
+					LEFT JOIN (SELECT XX.name, WW.post_id FROM wp_postmeta WW LEFT JOIN wp_terms XX ON XX.term_id = WW.meta_value where meta_key = 'rpg-team') AS D ON posts.ID = D.post_id 
 					LEFT JOIN {$wpdb->base_prefix}users AS users ON users.ID = posts.post_author
 					WHERE 1 = 1 AND A.action_status = 'assignment' ";
 
@@ -1365,13 +1365,13 @@ class OW_Process_Flow {
 
       // get post details
       if ( $post_type === "all" ) {
-         $sql = "SELECT posts.ID, posts.post_author, posts.post_title, posts.post_type, posts.post_date, G.name as team FROM " . $wpdb->posts . " as posts LEFT JOIN (SELECT XX.name, WW.post_id FROM ebdb.wp_postmeta WW LEFT JOIN wp_terms XX ON XX.term_id = WW.meta_value where meta_key = 'rpg-team') AS G
+         $sql = "SELECT posts.ID, posts.post_author, posts.post_title, posts.post_type, posts.post_date, G.name as team FROM " . $wpdb->posts . " as posts LEFT JOIN (SELECT XX.name, WW.post_id FROM wp_postmeta WW LEFT JOIN wp_terms XX ON XX.term_id = WW.meta_value where meta_key = 'rpg-team') AS G
                     ON posts.ID = G.post_id "
 					. OW_Utility::instance()->get_team_filter('posts','C','ID') .
 					"WHERE posts.ID IN (" . implode( $assign_post_ids, "," ) . ") ORDER BY posts.ID DESC";
 		 $submited_posts = $wpdb->get_results( $sql );
       } else {
-         $sql = "SELECT posts.ID, posts.post_author, posts.post_title, posts.post_type, posts.post_date, G.name as team FROM " . $wpdb->posts . " as posts LEFT JOIN (SELECT XX.name, WW.post_id FROM ebdb.wp_postmeta WW LEFT JOIN wp_terms XX ON XX.term_id = WW.meta_value where meta_key = 'rpg-team') AS G
+         $sql = "SELECT posts.ID, posts.post_author, posts.post_title, posts.post_type, posts.post_date, G.name as team FROM " . $wpdb->posts . " as posts LEFT JOIN (SELECT XX.name, WW.post_id FROM wp_postmeta WW LEFT JOIN wp_terms XX ON XX.term_id = WW.meta_value where meta_key = 'rpg-team') AS G
                     ON posts.ID = G.post_id "
 					. OW_Utility::instance()->get_team_filter('posts','C','ID') .
 					"WHERE post_type = %s AND ID IN (" . implode( $assign_post_ids, "," ) . ") ORDER BY ID DESC";
