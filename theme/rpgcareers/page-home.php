@@ -3,9 +3,12 @@
  * Template Name: Home
  */
 get_header(); ?>
-	<?php $image = get_field('hero_image'); ?>
+	<h1 class="heading-xlarge"><?php the_title(); ?></h1>
+	<?php $image = get_field('hero_image'); 
+		if($image):
+	?>
 	<div style="width:100%;height:500px;position:absolute;top:86px;left:0;background-image:url(<?php echo $image['url']; ?>);background-size: cover;background-position:0 -300px;"></div>
-
+	<?php endif; ?>
 	<?php if( have_rows('hero_headline') ): ?>
 	<div style="position:relative;margin-top:440px;">
 		<?php while( have_rows('hero_headline') ): the_row();  ?>
