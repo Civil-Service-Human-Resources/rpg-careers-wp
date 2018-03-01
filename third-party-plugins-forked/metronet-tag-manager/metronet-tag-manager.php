@@ -193,7 +193,7 @@ class Metronet_Tag_Manager {
 		add_action( 'admin_print_scripts-post-new.php', array( $this, 'print_scripts_settings' ) );
 		
 		//Plugin meta box
-		add_action( 'add_meta_boxes', array( $this, 'meta_box_init' ), 10, 1 );
+		//add_action( 'add_meta_boxes', array( $this, 'meta_box_init' ), 10, 1 );
 		
 		//Save post hook for the metabox variables
 		add_action( 'save_post', array( $this, 'meta_box_save' ), 10, 1 );
