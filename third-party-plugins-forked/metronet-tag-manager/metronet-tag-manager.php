@@ -116,8 +116,8 @@ class Metronet_Tag_Manager {
 	
 	private function get_default_options() {
 		$defaults = array(
-			'code' => '',
-			'code_head' => '',
+			'code' => '<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=!!CONTAINER_ID!!" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>',
+			'code_head' => "<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({\'gtm.start\':new Date().getTime(),event:\'gtm.js\'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!=\'dataLayer\'?\'&amp;l=\'+l:\'\';j.async=true;j.src=\'https://www.googletagmanager.com/gtm.js?id=\'+i+dl;f.parentNode.insertBefore(j,f);})(window,document,\'script\',\'dataLayer\',\'!!CONTAINER_ID!!\');</script>",
 			'variables' => array(
 				0 => array(
 					'name' => 'title',
