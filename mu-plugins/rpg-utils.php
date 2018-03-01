@@ -12,6 +12,8 @@ Domain Path: /lang
 
 if(!defined('ABSPATH')) exit; //EXIT IF ACCESSED DIRECTLY
 
+$cookie_banner_set = false;
+
 if(!class_exists('rpgutils')):
 
 class rpgutils{
@@ -25,7 +27,7 @@ class rpgutils{
 
     function initialize(){
         $this->settings = array(
-            'name'                => __('RPG Roles', 'rpgutils'),
+            'name'                => __('RPG Utils', 'rpgutils'),
             'version'            => $this->version,
             'all_teams'            => '',
             'users_teams'        => '',
@@ -34,6 +36,7 @@ class rpgutils{
         //REGISTER ACTIONS/FILTERS
         add_action('init', array($this, 'add_roles'));
         add_action('init', array($this, 'register_user_taxonomy'));
+		add_action('init', array($this, 'check_cookie_banner_cookie'));
         add_action('init', array($this, 'remove_hooks'), 999);
         add_filter('login_redirect', array($this, 'login_redirect'), 10, 3);
         
@@ -44,8 +47,34 @@ class rpgutils{
         add_action('admin_init', array($this, 'admin_init'));
 
         add_filter('filter_gtm_instance', array($this, 'filter_gtm_instance'),1);
+		add_filter('post_date_column_time' , array($this, 'custom_date_column_time') , 10 , 2);
+
+		add_action('user_profile_update_errors', array($this, 'check_profile_errors'));
+		add_filter('pre_option_default_role', array($this, 'set_default_role'));
+
         //add_action('shutdown', array($this, 'sql_logger'));
+
+		//MEDIA FILES
+		add_action('pre_get_posts',  array($this, 'filter_media_files'));
+		add_filter('attachment_fields_to_edit', array($this, 'media_team_fields_create'), 10, 2);
+		add_filter('attachment_fields_to_save', array($this, 'media_team_fields_save'), 10, 2);
+		add_action('wp_ajax_save-attachment', array($this, 'media_save_ajax'), 0, 1); 
+		add_action('wp_ajax_save-attachment-compat', array($this, 'media_team_fields_save_ajax'), 0, 1); 
+		add_filter('manage_media_columns', array($this, 'media_team_add_custom_columns'));
+		add_action('manage_media_custom_column', array($this, 'media_team_manage_custom_columns'), 10, 2);
+		add_action('admin_enqueue_scripts', array($this, 'media_team_scripts'));
+		add_action('add_attachment', array($this, 'media_add_attachment'));
+		add_filter('upload_mimes', array($this, 'media_mime_types'), 1, 1);
+		add_filter('wp_handle_upload_prefilter', array($this, 'media_check_size'));
+		add_action('admin_head', array($this, 'media_css'));
+		add_action('post-upload-ui', array($this, 'media_max_size_info'));
+
     }
+
+	function check_profile_errors(&$errors) {
+		if ( empty( $_POST['content_team'] ) )
+			$errors->add( 'empty_missing_', '<strong>ERROR</strong>: Profile not saved - a team must be selected' );
+	}
 
     function sql_logger() {
         //PLUS define( 'SAVEQUERIES', true ); IN wp-config.php
@@ -62,7 +91,6 @@ class rpgutils{
         add_action('save_post', array($this, 'save_post'),10, 3);
         add_action('admin_notices', array($this, 'handle_admin_error'));
         add_action('load-edit.php', array($this, 'load_edit'));
-        
 
         //GET ALL CURRENT TEAMS AND STORE THEM - SAVES LOOKUPS LATER ON IN CODE
         $teams = array();
@@ -88,7 +116,7 @@ class rpgutils{
         //UNCOMMENT THIS TO REMOVE UNWANTED CAPABILITIES - SET THEM IN THE FUNCTION
         //$this->clean_unwanted_caps();
 
-        add_meta_box('submitdiv', 'Publish', array($this, 'custom_sumbit_meta_box'), 'page', 'side', 'high');
+        //add_meta_box('submitdiv', 'Publish', array($this, 'custom_sumbit_meta_box'), 'page', 'side', 'high');
 
         //***START: KEEP AT BOTTOM OF FUNCTION***
         //NB: KEEP AT BOTTOM OF FUNCTION AS A FEW return STATEMENTS TO BE CAREFUL OF
@@ -107,35 +135,131 @@ class rpgutils{
         //***END: KEEP AT BOTTOM OF FUNCTION***
     }
     
-    function custom_sumbit_meta_box(){
+    function custom_sumbit_meta_box($post, $args = array()){
         global $post;
-        
-        if($post->post_type!=='page'){ return;}
+		global $pagenow;
+
+		if($post->post_type!=='page'){ return;}
+
+		$edit_page = false;
+		if (($pagenow=='post.php') && ($post->post_type=='page')) {$edit_page = true;}
 
         remove_meta_box('submitdiv', 'page', 'side');
-
+		$post_type_object = get_post_type_object($post->post_type);
+		$can_publish = current_user_can($post_type_object->cap->publish_posts);
     ?>
-        <div class="submitbox" id="submitpost">
-        <div id="minor-publishing">
-        <div style="display:none;">
-        <p class="submit"><input type="submit" name="save" id="save" class="button" value="Save"></p></div>
+        <div class="submitbox" id="submitpost"><div id="minor-publishing"><div style="display:none;">
+        <?php submit_button( __( 'Save' ), '', 'save' ); ?>
+		</div>
 
-        <div id="minor-publishing-actions">
-        <div id="save-action">
-        <input type="submit" name="save" id="save-post" value="Save" class="button">
-        <span class="spinner"></span>
-        </div>
-        <div id="preview-action">
-        <a class="preview button" href="http://develop.bg4bibpwqg.eu-west-1.elasticbeanstalk.com/?page_id=523&amp;preview=true" target="wp-preview-523" id="post-preview">Preview<span class="screen-reader-text"> (opens in a new window)</span></a>
-        <input type="hidden" name="wp-preview" id="wp-preview" value="">
-        </div>
-        <div class="clear"></div>
-        </div>
-        
+		<div id="minor-publishing-actions">
+		<div id="save-action">
+		<?php if ( 'publish' != $post->post_status && 'future' != $post->post_status && 'pending' != $post->post_status ) { ?>
+		<input <?php if ( 'private' == $post->post_status ) { ?>style="display:none"<?php } ?> type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save Draft'); ?>" class="button" />
+		<span class="spinner"></span>
+		<?php } elseif ( 'pending' == $post->post_status && $can_publish ) { ?>
+		<input type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save as Pending'); ?>" class="button" />
+		<span class="spinner"></span>
+		<?php } ?>
+		</div>
+		<?php if ( is_post_type_viewable( $post_type_object ) ) : ?>
+		<div id="preview-action">
+		<?php
+		$preview_link = esc_url( get_preview_post_link( $post ) );
+		if ( 'publish' == $post->post_status ) {
+			$preview_button_text = __( 'Preview Changes' );
+		} else {
+			$preview_button_text = __( 'Preview' );
+		}
+
+		$preview_button = sprintf( '%1$s<span class="screen-reader-text"> %2$s</span>',
+			$preview_button_text,
+			/* translators: accessibility text */
+			__( '(opens in a new window)' )
+		);
+		?>
+		<a class="preview button" href="<?php echo $preview_link; ?>" target="wp-preview-<?php echo (int) $post->ID; ?>" id="post-preview"><?php echo $preview_button; ?></a>
+		<input type="hidden" name="wp-preview" id="wp-preview" value="" />
+		</div>
+		<?php endif; // public post type ?>
+		<?php
+		/**
+		 * Fires before the post time/date setting in the Publish meta box.
+		 *
+		 * @since 4.4.0
+		 *
+		 * @param WP_Post $post WP_Post object for the current post.
+		 */
+		do_action( 'post_submitbox_minor_actions', $post );
+		?>
+		<div class="clear"></div>
+		</div>
         <div id="misc-publishing-actions">
         <div class="misc-pub-section misc-pub-post-status">
-        Status: <span id="post-status-display"><?php echo ucfirst($post->post_status); ?></span>
+        Status: <span id="post-status-display"><?php
+switch ($post->post_status) {
+	case 'private':
+		_e('Privately Published');
+		break;
+	case 'publish':
+		_e('Published');
+		break;
+	case 'future':
+		_e('Scheduled');
+		break;
+	case 'pending':
+		_e('Pending Review');
+		break;
+	case 'draft':
+	case 'auto-draft':
+		_e('Draft');
+		break;
+}
+?></span>
         </div>
+		<?php 
+		$revision_count = count(wp_get_post_revisions($post->ID));
+		$latest_revision = current(wp_get_post_revisions($post->ID));
+		$revision_id = $latest_revision->ID;
+
+		if ($revision_count>0) : ?>
+<div class="misc-pub-section misc-pub-revisions">
+	<?php
+		/* translators: Post revisions heading. 1: The number of available revisions */
+		printf( __( 'Revisions: %s' ), '<b>' . number_format_i18n($revision_count) . '</b>' );
+	?>
+	<a class="hide-if-no-js" href="<?php echo esc_url(get_edit_post_link($revision_id)); ?>"><span aria-hidden="true"><?php _ex( 'Browse', 'revisions' ); ?></span> <span class="screen-reader-text"><?php _e( 'Browse revisions' ); ?></span></a>
+</div>
+<?php endif; 
+
+$datef = __( 'M j, Y @ H:i' );
+if ( 0 != $post->ID ) {
+	if ( 'future' == $post->post_status ) { // scheduled for publishing at a future date
+		/* translators: Post date information. 1: Date on which the post is currently scheduled to be published */
+		$stamp = __('Scheduled for: <b>%1$s</b>');
+	} elseif ( 'publish' == $post->post_status || 'private' == $post->post_status ) { // already published
+		/* translators: Post date information. 1: Date on which the post was published */
+		$stamp = __('Published on: <b>%1$s</b>');
+	} elseif ( '0000-00-00 00:00:00' == $post->post_date_gmt ) { // draft, 1 or more saves, no date specified
+		$stamp = __('Publish <b>immediately</b>');
+	} elseif ( time() < strtotime( $post->post_date_gmt . ' +0000' ) ) { // draft, 1 or more saves, future date specified
+		/* translators: Post date information. 1: Date on which the post is to be published */
+		$stamp = __('Schedule for: <b>%1$s</b>');
+	} else { // draft, 1 or more saves, date specified
+		/* translators: Post date information. 1: Date on which the post is to be published */
+		$stamp = __('Publish on: <b>%1$s</b>');
+	}
+	$date = date_i18n( $datef, strtotime( $post->post_date ) );
+} else { // draft (no saves, and thus no date specified)
+	$stamp = __('Publish <b>immediately</b>');
+	$date = date_i18n( $datef, strtotime( current_time('mysql') ) );
+}
+?>
+	<div class="misc-pub-section curtime misc-pub-curtime">
+		<span id="timestamp">
+		<?php printf($stamp, $date); ?></span>
+	</div>
+<?php if($edit_page){echo '';} ?>
         </div>
         </div>
 
@@ -160,6 +284,452 @@ class rpgutils{
         return $code_tag;
     }
 
+	function filter_media_files($query){
+
+		//ONLY FOR ADMIN PAGES
+		if(is_admin()){
+			$post_type = $query->query["post_type"];
+
+			//ON THE MEDIA LIBRARY BACKEND PAGE OR DOING A REVISION (I.E. DIRECT URL ROUTE)?
+			if(isset($post_type) && $post_type === 'attachment'){
+
+				//IF USER CAN SEE manage_options (i.e. ADMIN TYPE USE) - NO FILTERING
+				if(!$this->restrict_access()){
+					return;
+				}
+
+				 //GET TEAMS CURRENT USER IS MEMBER OF
+				$teams = $this->get_setting('users_teams');
+
+				if($post_type === 'attachment'){
+					//FILTER MEDIA BASED ON TEAMS MEMBER OF - BUILD QUERY VAR
+					if(count($teams)>0){
+
+						if(count($teams) > 1) {
+							$meta_query = array('relation' => 'OR');
+						}
+					
+						foreach ($teams as $team) {
+							$values_to_search[] = $team->term_id;
+						}
+					}else{
+						//NOT IN ANY TEAMS SO CANNOT SEE ANYTHING - SET KEY TO ONE THAT WILL NEVER BE VALID - FORCES 'NO MEDIA FOUND' MESSAGE TO SHOW
+						$values_to_search[] = 'NOT-VALID';
+					}
+
+					foreach ($values_to_search as $value) {
+						$meta_query[] = array(
+							'key'       => 'team-access-'.$value,
+							'value'     => '1',
+							'compare'   => '=',
+						);
+					}
+
+					//ADD QUERY VAR
+					$query->set('meta_query', $meta_query);
+				}
+
+				if($post_type === 'revision'){
+					//LOOP ROUND TEAMS AND CHECK META DATA FOR POST
+					if(count($teams)>0){
+						foreach ($teams as $team) {
+							$check = get_post_meta(get_the_ID(), 'team-access-'.$team->term_id, true);
+							if(strlen($check)>0){
+								//GOT A MATCH...
+								$fail = false;
+								break;
+							}else{
+								$fail = true;
+							}
+						}
+					}else{
+						//NOT IN ANY TEAMS
+						$fail = true;
+					}
+
+					//NO MATCHES THEN DISPLAY MESSAGE BACK
+					if($fail){
+						echo $this->get_die_html('Unable to edit post','Sorry it is not possible to edit that post.');
+						exit();
+					}
+				}
+				
+			}
+		}
+	}
+
+	function media_team_fields_create($form_fields, $post) {
+
+ 		//GET TEAMS CURRENT USER IS MEMBER OF
+		$teams = $this->get_setting('users_teams');
+		
+		//GET THE NON DUPLICATES BETWEEN IMAGE TEAMS AND USERS TEAMS - NEED TO CHECK THESE AGAINST USERS TEAMS WHEN RENDERING
+		$user_teams = array();
+		$unique_items =  $this->get_teams_non_dupes($post->ID, $user_teams);
+
+		//RENDER CHECKBOXES
+		if(count($teams)>0){
+			$match = false;
+			
+			//ANY ASSIGNED IMAGE TEAMS THAT CURRENT USER DOES NOT HAVE ACCESS TO?
+			foreach($unique_items as $team_no_access){
+				if(!in_array($team_no_access,$user_teams)){
+					$match = true;
+					break;
+				}
+			}
+
+			//RENDER CHECKBOXES FOR USER TEAMS
+			$loop = 0;
+			foreach ($user_teams as $key => $team) {
+				$field_id = 'team-'.$user_teams[$key];
+				$form_fields[$field_id] = array(
+					'label' => (($loop==0)?'Assign to':''),
+					'input' => 'html',
+					'html' => '<label class="selectit" style="display:inline-block;margin-top:6px;" for="attachments['.$post->ID.']['.$field_id.']"><input type="checkbox" value="1"'. ((get_post_meta( $post->ID, 'team-access-'.$user_teams[$key], true )=='1') ? ' checked="checked"' : '')  .' name="attachments['.$post->ID.']['.$field_id.']" id="attachments['.$post->ID.']['.$field_id.']"'. (count($teams)==1 && !$match ? ' onclick="this.checked=!this.checked;" checked="checked"': '') .' style="margin-top:-3px;" />'.$teams[$key]->name.'</label>'
+				);
+				$loop++;
+			}
+			
+			//RENDER CHECKBOXES FOR ASSIGNED IMAGE TEAMS THAT USER DOES NOT HAVE ACCESS TO
+			$loop = 0;
+			//DEAL WITH UNIQUE TEAMS - CHECK TO SEE IF NOT IN $user_teams
+			foreach($unique_items as $team_no_access){
+				if(!in_array($team_no_access,$user_teams)){
+					$field_id = 'team-'.$team_no_access;
+					$form_fields[$field_id] = array(
+						'label' => (($loop==0)?'Also assigned to':''),
+						'input' => 'html',
+						'html' => '<label class="selectit" style="display:inline-block;margin-top:6px;" for="attachments['.$post->ID.']['.$field_id.']"><input type="checkbox" value="1" checked="checked" name="attachments['.$post->ID.']['.$field_id.']" id="attachments['.$post->ID.']['.$field_id.']" disabled="disabled" style="margin-top:-3px;" />'.get_term_by('id', $team_no_access, 'content_team')->name.'</label>'
+					);
+					$loop++;
+				}
+			}
+
+			$field_id = 'team-save-msg';
+
+			$form_fields[$field_id] = array(
+                'label' => '',
+                'input' => 'html',
+                'html' => '<span id="attachments['.$post->ID.']['.$field_id.']" style="font-weight:bold;color:#ff0000;"></span>',
+                'show_in_edit' => false,
+			);
+
+		}else{
+			//NOT IN ANY TEAMS - SO DO NOT ALLOW ANY MEDIA TO BE ADDED
+		}
+		return $form_fields;
+	}
+ 
+	function media_team_fields_save($post, $attachment) {
+		$fail = false;
+		$failcount = 0;
+		$post_id = $post['post_ID'];
+		//CHECK THE POSTED VALUES
+
+		//IF AJAX RETURN AS media_team_fields_save_ajax ALREADY RUN
+		if(wp_doing_ajax()){
+			return $post;
+		}
+
+		//GET TEAMS CURRENT USER IS MEMBER OF
+		$teams = $this->get_setting('users_teams');
+
+		//GET THE NON DUPLICATES BETWEEN IMAGE TEAMS AND USERS TEAMS - NEED TO CHECK THESE AGAINST USERS TEAMS WHEN RENDERING
+		$user_teams = array();
+		$unique_items =  $this->get_teams_non_dupes($post_id, $user_teams);
+
+		//FILTER MEDIA BASED ON TEAMS MEMBER OF - BUILD QUERY VAR
+		if(count($teams)>0){
+			$match = false;
+
+			//ANY ASSIGNED IMAGE TEAMS THAT CURRENT USER DOES NOT HAVE ACCESS TO?
+			foreach($unique_items as $team_no_access){
+				if(!in_array($team_no_access,$user_teams)){
+					$match = true;
+					break;
+				}
+			}
+
+			//ONLY CHECK IF NO OTHER ASSIGNED TEAMS SELECTED 
+			if(!$match){
+				foreach ($teams as $team) {
+					$field_id = 'team-'.$team->term_id;
+
+					//CHECK THAT AT LEAST ONE TEAM HAS BEEN selected
+					if(!isset($attachment[$field_id])){
+						$failcount++;
+					}
+
+					if($failcount===count($teams)){
+						//NO TEAMS SELECTED
+						$fail = true;
+					}
+				}
+			}
+
+			if(!$fail){
+				foreach ($teams as $team) {
+					$field_id = 'team-'.$team->term_id;
+					//IF AT LEAST ONE TEAM SELECTED UPDATE THE POST META DATA
+					if(isset($attachment[$field_id])){
+						update_post_meta($post_id, 'team-access-'.$team->term_id, $attachment[$field_id]);
+					} else {
+						update_post_meta($post_id, 'team-access-'.$team->term_id, '0');
+					}
+				}
+			}
+		}else{
+			//NOT IN ANY TEAMS - SO DO NOT ALLOW MEDIA TO BE SAVED
+			$fail = true;
+		}
+
+		if($fail){
+			echo $this->get_die_html('Saving media file','Unable to save changes to media - no team selected.<br/><br/><a href="javascript:history.back();">Go back and fix the media</a>');
+			exit();
+		}
+
+
+		//CHECK THE ALT TEXT
+		if(isset($post['_wp_attachment_image_alt'])){
+			if(trim($post['_wp_attachment_image_alt']) === ''){
+				echo $this->get_die_html('Saving media file','Unable to save changes to media - alt text has been left blank.<br/><br/><a href="javascript:history.back();">Go back and fix the media</a>');
+				exit();
+			}
+		}
+
+		return $post;
+	}
+
+	function media_team_add_custom_columns($posts_columns) {
+		unset($posts_columns['date']);
+		//ADD IN DATE + TEAM COLUMN
+		$posts_columns['media_date'] = _x('Date', 'column name');
+		$posts_columns['media_teams'] = _x('Teams', 'column name');
+		return $posts_columns;
+	}
+
+	function media_team_manage_custom_columns($column_name, $id) {
+		switch($column_name) {
+			case 'media_teams':
+				$meta = get_post_meta($id, '');
+				$empty = true;
+				$teams='';
+
+				foreach($meta as $key => $value){
+					if (strpos($key, 'team-access-') === 0) {
+						if($value[0]==='1'){
+							$teams.= get_term_by('id', (int)substr($key, strlen('team-access-')), 'content_team')->name.', ';
+							$empty = false;
+						}
+					}
+				}
+				if($empty){
+					echo '&mdash;';
+				} else {
+					echo rtrim($teams, ', ');
+				}
+				break;
+			case 'media_date':
+				echo get_post_time('d/m/Y', false, $id);
+				break;
+
+			default:
+				break;
+		}
+	}
+
+	function media_save_ajax() {
+		$post_id = $_POST['id'];
+		$err = 'Media not saved - ';
+		$fail = false;
+
+		$changes = $_POST['changes'];
+
+		if(isset($changes["alt"])){
+			if(trim($changes['alt']) === ''){
+				$err.='Alt Text cannot be blank';
+				$fail = true;
+			}
+		}
+		
+		if($fail){
+			wp_send_json_error(array('attachments['.$post_id.'][team-save-msg]' => __($err)));
+		}
+
+		clean_post_cache($post_id);
+	}
+
+	function media_team_fields_save_ajax() {
+		$post_id = $_POST['id'];
+		$fail = false;
+		$failcount = 0;
+		$attachments = $_POST['attachments'][$post_id];
+		
+		//GET TEAMS CURRENT USER IS MEMBER OF
+		$teams = $this->get_setting('users_teams');
+
+		//GET THE NON DUPLICATES BETWEEN IMAGE TEAMS AND USERS TEAMS - NEED TO CHECK THESE AGAINST USERS TEAMS WHEN RENDERING
+		$user_teams = array();
+		$unique_items =  $this->get_teams_non_dupes($post_id, $user_teams);
+
+		//FILTER MEDIA BASED ON TEAMS MEMBER OF - BUILD QUERY VAR
+		if(count($teams)>0){
+			$match = false;
+
+			//ANY ASSIGNED IMAGE TEAMS THAT CURRENT USER DOES NOT HAVE ACCESS TO?
+			foreach($unique_items as $team_no_access){
+				if(!in_array($team_no_access,$user_teams)){
+					$match = true;
+					break;
+				}
+			}
+
+			//ONLY CHECK IF NO OTHER ASSIGNED TEAMS SELECTED 
+			if(!$match){
+				foreach ($teams as $team) {
+					$field_id = 'team-'.$team->term_id;
+
+					//CHECK THAT AT LEAST ONE TEAM HAS BEEN selected
+					if(!isset($attachments[$field_id])){
+						$failcount++;
+					}
+
+					if($failcount===count($teams)){
+						//NO TEAMS SELECTED
+						$fail = true;
+					}
+				}
+			}
+
+			if(!$fail){
+				foreach ($teams as $team) {
+					$field_id = 'team-'.$team->term_id;
+					//IF AT LEAST ONE TEAM SELECTED UPDATE THE POST META DATA
+					if(isset($attachments[$field_id])){
+						update_post_meta($post_id, 'team-access-'.$team->term_id, $attachments[$field_id]);
+					} else {
+						update_post_meta($post_id, 'team-access-'.$team->term_id, '0');
+					}
+				}
+			}
+		}else{
+			//NOT IN ANY TEAMS - SO DO NOT ALLOW MEDIA TO BE SAVED
+			$fail = true;
+		}
+
+		if($fail){
+			wp_send_json_error(array('attachments['.$post_id.'][team-save-msg]' => __('Media not saved - a team must be selected')));
+		}
+
+		clean_post_cache($post_id);
+	} 
+
+	function media_team_scripts($hook){
+		wp_enqueue_script('custom_media_script', get_template_directory_uri() . '/customMedia.js', '','',true );
+	?>
+<script type="text/javascript">(function(){window.wprpg = {'mediateams':'<?php echo count($this->get_setting('users_teams')); ?>'};})();</script>
+	<?php
+	}
+
+	function media_add_attachment($post_ID){
+		//ATTACHMENT JUST BEEN ADDED - NEED TO SORT TEAM META DATA
+		$teams = $this->get_setting('users_teams');
+
+		//IF CURRENT USER ONLY IN ONE TEAM - JUST UPDATE META DATA TO REFLECT THIS
+		if(count($teams)>0){
+			if(count($teams)===1){
+				update_post_meta($post_ID, 'team-access-'.$teams[0]->term_id, '1');
+			}else{
+				//MORE THAN ONE TEAM - CUSTOM js HANDLES THIS USING A RE-DIRECT - SEE customMedia.js IN THEME
+			}
+
+			//SET META DATA ON THE ATTACHMENT
+			if (wp_attachment_is_image($post_ID)) {
+				$image_title = get_post($post_ID)->post_title;
+				$image_title = preg_replace('%\s*[-_\s]+\s*%', ' ',$image_title);
+				$image_title = ucwords(strtolower($image_title));
+				$image_meta = array(
+					'ID' => $post_ID,
+					'post_title' => $image_title,
+				);
+
+				//ALT TEXT
+				update_post_meta($post_ID, '_wp_attachment_image_alt', $image_title);
+				
+				// Set the image meta (e.g. Title, Excerpt, Content)
+				wp_update_post($image_meta);
+			}
+
+		}else{
+			//USER IN NO TEAMS - REMOVE MEDIA - WARN USER
+			wp_delete_attachment($post_ID, 'true');
+			wp_send_json_error(array('message' => 'Media cannot be added - no teams available'));
+		}
+	}
+
+	function media_mime_types($mime_types){
+
+		//ADD IN ADDITIONAL MIME TYPES
+		$mime_types['svg'] = 'image/svg+xml';
+  
+		//REMOVE UNWANTED STD MIME TYPES
+		unset($mime_types['ico']);
+		unset($mime_types['pdf']);
+		unset($mime_types['doc']);
+		unset($mime_types['docx']);
+		unset($mime_types['ppt']);
+		unset($mime_types['pptx']);
+		unset($mime_types['pps']);
+		unset($mime_types['ppsx']);
+		unset($mime_types['odt']);
+		unset($mime_types['xls']);
+		unset($mime_types['xlsx']);
+		unset($mime_types['psd']);
+  
+		unset($mime_types['mp3']);
+		unset($mime_types['m4a']);
+		unset($mime_types['ogg']);
+		unset($mime_types['wav']);
+
+		unset($mime_types['m4v']);
+		unset($mime_types['mov']);
+		unset($mime_types['wmv']);
+		unset($mime_types['avi']);
+		unset($mime_types['mpg']);
+		unset($mime_types['ogv']);
+		unset($mime_types['3gp']);
+		unset($mime_types['3g2']);
+
+		return $mime_types;
+	}
+
+	function media_check_size($file){
+
+		$media_size = $file['size']/1024;
+		$media_limit_large = MEDIA_LIMIT_LARGE;
+		$media_limit = MEDIA_LIMIT;
+		$media_is_video = false;
+
+		if (strpos($file['type'], 'video') !== false) {
+			$media_limit = $media_limit_large;
+		}
+
+		if ($media_size > $media_limit){
+			$file['error'] = 'Media cannot be added - file size is too large.  The maximum allowed size is '. $media_limit .'KB.';
+		}
+
+		return $file;
+	}
+
+	function media_css(){
+		echo '<style>.max-upload-size{display:none;}</style>';
+	}
+
+	function media_max_size_info(){
+		echo '<p>Maximum upload file size: Images: '.((MEDIA_LIMIT < 1000)? MEDIA_LIMIT.' kb': (MEDIA_LIMIT/1000).' MB').' Videos: '.((MEDIA_LIMIT_LARGE < 1000)? (MEDIA_LIMIT_LARGE).' kb': (MEDIA_LIMIT_LARGE/1000).' MB').'</p>';
+	}
+
     function load_edit(){
         if ($_GET['post_type'] !== 'page') return;
         add_filter('posts_join', array($this, 'posts_join'), 10, 2);
@@ -179,7 +749,6 @@ class rpgutils{
 <script type="text/javascript">jQuery(document).ready(function($){var a=jQuery("h3:contains('Relationships')").next('.form-table').find('tr').has('td'); b=a.find('input[type="checkbox"]'),c=a.find('a');if(b){b.each(function(){$(this).attr('disabled','disabled');});}if(c){c.each(function(){$(this).attr('style','display:none');});}});</script>
     <?php
     }
-
 
     function bespoke_js_script(){
         global $pagenow;
@@ -395,7 +964,7 @@ class rpgutils{
 
                 //FAILED ACCESS CONTROL - REDIRECT BACK TO PAGE LISTING
                 if(!$canaccess){
-                    wp_redirect(admin_url('/edit.php?post_type=page', 'http'), 302);
+                    wp_redirect(admin_url('/edit.php?post_type=page', 'https'), 302);
                     exit;
                 }
             }
@@ -453,11 +1022,8 @@ class rpgutils{
                     }
                 }
 
-                $output .= '<li id="rpg-'.$team->slug.'"><label class="selectit"><input value="'.$team->term_id.'" name="rpg-team'.$team->term_id.'" id="in-rpg-'.$team->slug.'" ' .$checked. ' type="checkbox">'.$team->name.'</label></li>';
+                $output .= '<li id="rpg-'.$team->slug.'"><label class="selectit"><input value="'.$team->term_id.'" name="rpg-team'.$team->term_id.'" id="in-rpg-'.$team->slug.'" ' .$checked. ' type="checkbox"'. (count($teams)==1 ? ' onclick="this.checked=!this.checked;""': '').'>'.$team->name.'</label></li>';
             }
-
-            //ADD IN NONCE FIELD?
-            //$output .= wp_nonce_field(self::SET_GROUPS, self::NONCE, true, false);
 
             $output .= '</ul>';
         }else{
@@ -504,6 +1070,19 @@ class rpgutils{
         return $column_headers;
     }
 
+	function custom_date_column_time($h_time, $post) {
+		$h_time = get_post_time('d/m/Y', false, $post);
+		return $h_time;
+	}
+
+	function check_cookie_banner_cookie(){
+		global $cookie_banner_set;
+		if(!isset($_COOKIE[COOKIE_BANNER_COOKIE_NAME])) {
+			setcookie(COOKIE_BANNER_COOKIE_NAME, 'yes', time() + (86400 * 30), COOKIEPATH, COOKIE_DOMAIN);
+			$cookie_banner_set = true;
+		}
+	}
+
     function remove_hooks(){
         remove_action('init', 'wp_register_default_user_group_taxonomy');
         remove_action('init', 'wp_register_default_user_type_taxonomy');
@@ -518,92 +1097,101 @@ class rpgutils{
 
         //DEFINE CAPABILITIES
         $contentAuthorCaps = array(
-            'read'                        => true,
-            'edit_pages'                => true,
-            'ow_submit_to_workflow'        => true,
+            'read'							=> true,
+            'edit_pages'					=> true,
+			'edit_posts'					=> true,
+            'edit_others_posts'				=> true,
+			'upload_files'					=> true,
+            'ow_submit_to_workflow'			=> true,
         );
 
         $contentApproverCaps = array(
-            'read'                        => true,
-            'edit_pages'                => true,
-            'edit_others_pages'            => true,
-            'publish_pages'                => true,
-            'read_private_pages'        => true,
-            'delete_pages'                => true,
-            'delete_private_pages'        => true,
-            'delete_published_pages'    => true,
-            'delete_others_pages'        => true,
-            'edit_private_pages'        => true,
-            'edit_published_pages'        => true,
-            'upload_files'                => true,
-            'ow_reassign_task'            => true,
-            'ow_sign_off_step'            => true,
-            'ow_skip_workflow'            => true,
-            'ow_submit_to_workflow'        => true,
-            'ow_view_others_inbox'        => true,
-            'ow_view_reports'            => true,
-            'ow_view_workflow_history'    => true,
+            'read'							=> true,
+            'edit_pages'					=> true,
+            'edit_others_pages'				=> true,
+            'publish_pages'					=> true,
+            'read_private_pages'			=> true,
+            'delete_pages'					=> true,
+            'delete_private_pages'			=> true,
+            'delete_published_pages'		=> true,
+            'delete_others_pages'			=> true,
+            'edit_private_pages'			=> true,
+            'edit_published_pages'			=> true,
+			'edit_posts'					=> true,
+            'edit_others_posts'				=> true,
+            'upload_files'					=> true,
+            'ow_reassign_task'				=> true,
+            'ow_sign_off_step'				=> true,
+            'ow_skip_workflow'				=> true,
+            'ow_submit_to_workflow'			=> true,
+            'ow_view_others_inbox'			=> true,
+            'ow_view_reports'				=> true,
+            'ow_view_workflow_history'		=> true,
         );
 
         $contentPublisherCaps = array(
-            'read'                        => true,
-            'edit_pages'                => true,
-            'edit_others_pages'            => true,
-            'publish_pages'                => true,
-            'read_private_pages'        => true,
-            'delete_pages'                => true,
-            'delete_private_pages'        => true,
-            'delete_published_pages'    => true,
-            'delete_others_pages'        => true,
-            'edit_private_pages'        => true,
-            'edit_published_pages'        => true,
-            'upload_files'                => true,
-            'ow_reassign_task'            => true,
-            'ow_sign_off_step'            => true,
-            'ow_skip_workflow'            => true,
-            'ow_submit_to_workflow'        => true,
-            'ow_view_others_inbox'        => true,
-            'ow_view_reports'            => true,
-            'ow_view_workflow_history'    => true,
+            'read'							=> true,
+            'edit_pages'					=> true,
+            'edit_others_pages'				=> true,
+            'publish_pages'					=> true,
+            'read_private_pages'			=> true,
+            'delete_pages'					=> true,
+            'delete_private_pages'			=> true,
+            'delete_published_pages'		=> true,
+            'delete_others_pages'			=> true,
+            'edit_private_pages'			=> true,
+            'edit_published_pages'			=> true,
+			'edit_posts'					=> true,
+            'edit_others_posts'				=> true,
+            'upload_files'					=> true,
+            'ow_reassign_task'				=> true,
+            'ow_sign_off_step'				=> true,
+            'ow_skip_workflow'				=> true,
+            'ow_submit_to_workflow'			=> true,
+            'ow_view_others_inbox'			=> true,
+            'ow_view_reports'				=> true,
+            'ow_view_workflow_history'		=> true,
         );
 
         $contentAdminCaps = array(
-            'read'                        => true,
-            'edit_dashboard'            => true,
-            'edit_pages'                => true,
-            'edit_others_pages'            => true,
-            'publish_pages'                => true,
-            'read_private_pages'        => true,
-            'delete_pages'                => true,
-            'delete_private_pages'        => true,
-            'delete_published_pages'    => true,
-            'delete_others_pages'        => true,
-            'edit_private_pages'        => true,
-            'edit_published_pages'        => true,
-            'upload_files'                => true,
-            'manage_rpgsnippets'        => true,
-            'create_roles'                => true,
-            'create_users'                => true,
-            'delete_roles'                => true,
-            'delete_users'                => true,
-            'edit_roles'                => true,
-            'edit_users'                => true,
-            'list_roles'                => true,
-            'list_users'                => true,
-            'promote_users'                => true,
-            'remove_users'                => true,
-            'ow_reassign_task'            => true,
-            'ow_sign_off_step'            => true,
-            'ow_skip_workflow'            => true,
-            'ow_submit_to_workflow'        => true,
-            'ow_view_others_inbox'        => true,
-            'ow_view_reports'            => true,
-            'ow_view_workflow_history'    => true,
+            'read'							=> true,
+            'edit_dashboard'				=> true,
+            'edit_pages'					=> true,
+            'edit_others_pages'				=> true,
+            'publish_pages'					=> true,
+            'read_private_pages'			=> true,
+            'delete_pages'					=> true,
+            'delete_private_pages'			=> true,
+            'delete_published_pages'		=> true,
+            'delete_others_pages'			=> true,
+            'edit_private_pages'			=> true,
+            'edit_published_pages'			=> true,
+			'edit_posts'					=> true,
+            'edit_others_posts'				=> true,
+            'upload_files'					=> true,
+            'manage_rpgsnippets'			=> true,
+            'create_roles'					=> true,
+            'create_users'					=> true,
+            'delete_roles'					=> true,
+            'delete_users'					=> true,
+            'edit_roles'					=> true,
+            'edit_users'					=> true,
+            'list_roles'					=> true,
+            'list_users'					=> true,
+            'promote_users'					=> true,
+            'remove_users'					=> true,
+            'ow_reassign_task'				=> true,
+            'ow_sign_off_step'				=> true,
+            'ow_skip_workflow'				=> true,
+            'ow_submit_to_workflow'			=> true,
+            'ow_view_others_inbox'			=> true,
+            'ow_view_reports'				=> true,
+            'ow_view_workflow_history'		=> true,
         );
 
         $contentSnippets = array(
-            'manage_rpgsnippets'        => true,
-            'read'                        => true,
+            'manage_rpgsnippets'			=> true,
+            'read'							=> true,
         );
 
         //CREATE CUSTOM ROLES
@@ -613,6 +1201,10 @@ class rpgutils{
         add_role('content_admin', __('Content Admin'), $contentAdminCaps);
         add_role('content_snippets', __('Content Snippets'), $contentSnippets);
     }
+
+	function set_default_role($default_role){
+		return 'content_author';
+	}
 
     function clean_unwanted_caps(){
         $delete_caps = array('ow_delete_workflow_history');
@@ -645,12 +1237,55 @@ class rpgutils{
         return $value;
     }
 
+	function get_teams_non_dupes($post_id, &$user_teams){
+		global $wpdb;
+
+		//GET TEAMS CURRENTLY ASSIGNED TO THE IMAGE
+		$teams_for_image = $wpdb->get_results("SELECT RIGHT(meta_key, LENGTH(meta_key) - 12) as term_id FROM {$wpdb->postmeta} where post_id = " . $post_id . " and meta_key LIKE 'team-access-%' and meta_value = 1;");
+		
+		//CONVERT term_id TO int - WP DEFAULTS TO STRING
+		$image_teams = array();
+
+		foreach($teams_for_image as $image_team){
+			$image_teams[] = absint($image_team->term_id);
+		}
+
+ 		//GET TEAMS CURRENT USER IS MEMBER OF
+		$teams = $this->get_setting('users_teams');
+		
+		//EXTRACT OUT term_id INTO SEPARATE ARRAY
+		foreach($teams as $user_team){
+			$user_teams[] = $user_team->term_id;
+		}
+
+		//GET THE NON DUPLICATES BETWEEN IMAGE TEAMS AND USERS TEAMS - NEED TO CHECK THESE AGAINST USERS TEAMS WHEN RENDERING
+		return array_diff(array_merge($user_teams,$image_teams),array_intersect($user_teams,$image_teams));
+	}
+
     function restrict_access(){
         //IF CURRENT USER HAS manage_options CAPABILITY THEN CAN SEE EVERYTHING
         $restrict = true;
-        if(current_user_can('manage_options')) $restrict = false;
+
+		//ONLY CHECK IF NOT DEBUGGING
+		if(!$this->is_debug()){
+			if(current_user_can('manage_options')) $restrict = false;
+		}
         return $restrict;
     }
+
+	function get_die_html($title,$message){
+		$page = '<!DOCTYPE html><html lang="en-GB"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta name="viewport" content="width=device-width"><meta name="robots" content="noindex,follow" /><title>'.$title.'</title>';
+		$page.= '<style type="text/css">html {background: #f1f1f1;}body {background: #fff;color: #444;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;margin: 2em auto;padding: 1em 2em;max-width: 700px;-webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.13);box-shadow: 0 1px 3px rgba(0,0,0,0.13);}h1 {border-bottom: 1px solid #dadada;clear: both;color: #666;font-size: 24px;margin: 30px 0 0 0;padding: 0;padding-bottom: 7px;}#error-page {margin-top: 50px;}#error-page p {font-size: 14px;line-height: 1.5;margin: 25px 0 20px;}#error-page code {font-family: Consolas, Monaco, monospace;}ul li {margin-bottom: 10px;font-size: 14px;}a {color: #0073aa;}a:hover,a:active {color: #00a0d2;}a:focus {color: #124964;-webkit-box-shadow:0 0 0 1px #5b9dd9,0 0 2px 1px rgba(30, 140, 190, .8);box-shadow:0 0 0 1px #5b9dd9,0 0 2px 1px rgba(30, 140, 190, .8);outline: none;}.button {background: #f7f7f7;border: 1px solid #ccc;color: #555;display: inline-block;text-decoration: none;font-size: 13px;line-height: 26px;height: 28px;margin: 0;padding: 0 10px 1px;cursor: pointer;-webkit-border-radius: 3px;-webkit-appearance: none;border-radius: 3px;white-space: nowrap;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;-webkit-box-shadow: 0 1px 0 #ccc;box-shadow: 0 1px 0 #ccc;vertical-align: top;}.button.button-large {height: 30px;line-height: 28px;padding: 0 12px 2px;}.button:hover,.button:focus {background: #fafafa;border-color: #999;color: #23282d;}.button:focus  {border-color: #5b9dd9;-webkit-box-shadow: 0 0 3px rgba( 0, 115, 170, .8 );box-shadow: 0 0 3px rgba( 0, 115, 170, .8 );outline: none;}.button:active {background: #eee;border-color: #999;-webkit-box-shadow: inset 0 2px 5px -3px rgba( 0, 0, 0, 0.5 );box-shadow: inset 0 2px 5px -3px rgba( 0, 0, 0, 0.5 );-webkit-transform: translateY(1px);-ms-transform: translateY(1px);transform: translateY(1px);}</style></head><body id="error-page"><p>'.$message.'</p></body></html>';
+		return $page;
+	}
+
+	function is_debug(){
+		if (defined('WP_DEBUG')){
+			return WP_DEBUG;
+		}
+		return false;
+	}
+
 }
 
 function rpgutils() {
