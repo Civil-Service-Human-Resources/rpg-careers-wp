@@ -48,24 +48,25 @@ $header = $ow_inbox_service->get_table_header();
             <input type="hidden" id="hidden_task_user" value="<?php echo esc_attr( $selected_user ); ?>" />
             <?php if( current_user_can( 'ow_view_others_inbox' ) ) { ?>
                <div class="alignleft actions">
-                   <select id="inbox_filter">
+					<?php
+                    $assigned_users = $ow_process_flow->get_assigned_users();
+                   if( $assigned_users ) { ?>
+				   <select id="inbox_filter">
                        <option value=<?php echo get_current_user_id(); ?> selected="selected"><?php echo __( "View inbox of ", "oasisworkflow" ) ?></option>
                        <?php
-                       $assigned_users = $ow_process_flow->get_assigned_users();
-                       if( $assigned_users ) {
                           foreach ( $assigned_users as $assigned_user ) {
                              if( ( isset( $_GET['user'] ) && $_GET["user"] == $assigned_user->ID ) )
                                 echo "<option value={$assigned_user->ID} selected>{$assigned_user->display_name}</option>";
                              else
                                 echo "<option value={$assigned_user->ID}>{$assigned_user->display_name}</option>";
                           }
-                       }
                        ?>
                    </select>
 
                    <a href="javascript:window.open('<?php echo admin_url( 'admin.php?page=oasiswf-inbox&user=' ) ?>' + jQuery('#inbox_filter').val(), '_self')">
                        <input type="button" class="button-secondary action" value="<?php echo __( "Show", "oasisworkflow" ); ?>" />
                    </a>
+				   <?php } ?>
                </div>
             <?php } ?>
             <ul class="subsubsub"></ul>

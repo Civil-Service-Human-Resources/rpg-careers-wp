@@ -6,7 +6,7 @@
  *
  * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
  *
- * @package Civil_Service_Careers
+ * @package RPG_Careers
  */
 
 ?>
@@ -23,32 +23,19 @@
 	<style id="fKill">body{display:none!important;}</style>
 	<script type="text/javascript">if(self===top){var f=document.getElementById('fKill');f.parentNode.removeChild(f);}else{top.location=self.location;}</script>
 </head>
-
 <body <?php body_class(); ?>>
 <?php do_action( 'body_open' ); ?>
-<!--<a class="skip-link screen-reader-text" href="#content"><?php esc_html_e( 'Skip to content', 'civil-service-careers' ); ?></a>-->
-<header class="masthead">
-	<div class="masthead__first">
-		<div class="masthead__inner">
-			<a class="masthead__logo" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a>
-		</div>
-	</div>
-
-	<div class="masthead__last">
-		<div class="masthead__inner">
-			<div class="navigation">
-				<?php
-					wp_nav_menu( array(
-						'theme_location' => 'main-nav',
-						'menu_id' => false,
-						'container' => 'nav',
-					) );
-				?>
-			</div>
-		</div>
-	</div>
-
+<div id="skiplink-container"><div><a href="#content" class="skiplink">Skip to main content</a></div></div>
+<div id="global-cookie-message"<?php global $cookie_banner_set; if($cookie_banner_set){ echo ' style="display:block;"';}?>><p>GOV.UK uses cookies to make the site simpler. <a href="<?php echo get_site_url(); ?>/cookies">Find out more about cookies</a></p></div>
+<header role="banner">
+	<nav role="navigation" aria-label="site" class="main-nav">
+	<input type="checkbox" id="menu-toggle" /><label for="menu-toggle" class="label-menu-toggle"></label><label for="menu-toggle" class="label-menu-toggle-off"></label><?php
+	  wp_nav_menu(array(
+		'container'			=> false,
+		'items_wrap'		=> '<ul class="main-nav-items">%3$s</ul>',
+		'theme_location'	=> 'main-nav',
+	  ));
+	?></nav>
 </header>
-
-<main class="content">
-	<div class="content__inner">
+<div id="main">
+	<main id="content" role="main">
