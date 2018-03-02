@@ -39,6 +39,11 @@ class rpgutils{
 		add_action('init', array($this, 'check_cookie_banner_cookie'));
         add_action('init', array($this, 'remove_hooks'), 999);
         add_filter('login_redirect', array($this, 'login_redirect'), 10, 3);
+
+		//PAGE EDITS
+		add_filter('post_row_actions', array($this, 'amend_quick_links'), 10, 2);
+		add_filter('page_row_actions', array($this, 'amend_quick_links'), 10, 2);
+		add_filter('tag_row_actions', array($this, 'amend_quick_links'), 10, 2);
         
         //TEAMS ACCESS CONTROL
         add_filter('manage_page_posts_columns', array($this, 'manage_columns'));
@@ -150,6 +155,26 @@ class rpgutils{
         //***END: KEEP AT BOTTOM OF FUNCTION***
     }
     
+	function amend_quick_links($actions, $post) {
+
+		if (isset($actions['inline hide-if-no-js'])) {
+			unset($actions['inline hide-if-no-js']);
+		}
+
+		//ALLOW DELETE LINK FOR TEAMS
+		if(isset($post->taxonomy)) {
+			if($post->taxonomy == 'content_team'){
+				return $actions;
+			}
+		}
+
+		if (isset($actions['trash'])) {
+			unset($actions['trash']);
+		}
+
+		return $actions;
+	}
+
     function custom_sumbit_meta_box($post, $args = array()){
         global $post;
 		global $pagenow;
