@@ -27,9 +27,9 @@ class rpgutils{
 
     function initialize(){
         $this->settings = array(
-            'name'                => __('RPG Utils', 'rpgutils'),
+            'name'               => __('RPG Utils', 'rpgutils'),
             'version'            => $this->version,
-            'all_teams'            => '',
+            'all_teams'          => '',
             'users_teams'        => '',
         );
 
@@ -51,6 +51,10 @@ class rpgutils{
 
 		add_action('user_profile_update_errors', array($this, 'check_profile_errors'));
 		add_filter('pre_option_default_role', array($this, 'set_default_role'));
+		add_action('admin_menu', array($this, 'amend_menus'));
+
+		add_action('get_header', array($this, 'remove_admin_login_header'));
+		show_admin_bar(false);
 
         //add_action('shutdown', array($this, 'sql_logger'));
 
@@ -68,8 +72,19 @@ class rpgutils{
 		add_filter('wp_handle_upload_prefilter', array($this, 'media_check_size'));
 		add_action('admin_head', array($this, 'media_css'));
 		add_action('post-upload-ui', array($this, 'media_max_size_info'));
+		add_filter('option_uploads_use_yearmonth_folders', '__return_false', 100);
 
     }
+
+	function remove_admin_login_header() {
+        remove_action('wp_head', '_admin_bar_bump_cb');
+	}
+
+	function amend_menus() {
+		remove_action('admin_notices', 'update_nag', 3);
+		remove_menu_page('edit.php');
+		remove_menu_page('edit-comments.php');
+	}
 
 	function check_profile_errors(&$errors) {
 		if ( empty( $_POST['content_team'] ) )
