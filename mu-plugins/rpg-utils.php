@@ -39,12 +39,12 @@ class rpgutils{
 		add_action('init', array($this, 'check_cookie_banner_cookie'));
         add_action('init', array($this, 'remove_hooks'), 999);
         add_filter('login_redirect', array($this, 'login_redirect'), 10, 3);
-
+        
 		//PAGE EDITS
 		add_filter('post_row_actions', array($this, 'amend_quick_links'), 10, 2);
 		add_filter('page_row_actions', array($this, 'amend_quick_links'), 10, 2);
 		add_filter('tag_row_actions', array($this, 'amend_quick_links'), 10, 2);
-        
+
         //TEAMS ACCESS CONTROL
         add_filter('manage_page_posts_columns', array($this, 'manage_columns'));
         add_action('manage_page_posts_custom_column', array($this, 'custom_column'), 10, 2);
@@ -78,6 +78,13 @@ class rpgutils{
 		add_action('admin_head', array($this, 'media_css'));
 		add_action('post-upload-ui', array($this, 'media_max_size_info'));
 		add_filter('option_uploads_use_yearmonth_folders', '__return_false', 100);
+		add_filter('wp_calculate_image_sizes', array($this, 'adjust_image_sizes_attr'), 10 , 2);
+
+		//MENU FILTERS
+		add_filter('nav_menu_css_class', array($this, 'custom_wp_nav_menu'));
+		add_filter('nav_menu_item_id', array($this, 'custom_wp_nav_menu'));
+		add_filter('page_css_class', array($this, 'custom_wp_nav_menu'));
+		add_filter ('wp_nav_menu', array($this, 'current_to_active'));
 
     }
 
@@ -156,7 +163,6 @@ class rpgutils{
     }
     
 	function amend_quick_links($actions, $post) {
-
 		if (isset($actions['inline hide-if-no-js'])) {
 			unset($actions['inline hide-if-no-js']);
 		}
@@ -770,6 +776,11 @@ if ( 0 != $post->ID ) {
 		echo '<p>Maximum upload file size: Images: '.((MEDIA_LIMIT < 1000)? MEDIA_LIMIT.' kb': (MEDIA_LIMIT/1000).' MB').' Videos: '.((MEDIA_LIMIT_LARGE < 1000)? (MEDIA_LIMIT_LARGE).' kb': (MEDIA_LIMIT_LARGE/1000).' MB').'</p>';
 	}
 
+	function adjust_image_sizes_attr($sizes, $size) {
+	   //$sizes = '(max-width: 709px) 85vw, (max-width: 909px) 67vw, (max-width: 1362px) 62vw, 840px';
+	   return $sizes;
+	}
+
     function load_edit(){
         if ($_GET['post_type'] !== 'page') return;
         add_filter('posts_join', array($this, 'posts_join'), 10, 2);
@@ -1121,6 +1132,29 @@ if ( 0 != $post->ID ) {
 			setcookie(COOKIE_BANNER_COOKIE_NAME, 'yes', time() + (86400 * 30), COOKIEPATH, COOKIE_DOMAIN);
 			$cookie_banner_set = true;
 		}
+	}
+
+	function custom_wp_nav_menu($var) {
+		return is_array($var) ? array_intersect($var, array(
+				'current_page_item',
+				'current_page_parent',
+				'current_page_ancestor',
+				'first',
+				'last',
+				'vertical',
+				'horizontal'
+			)
+		) : '';
+	}
+
+	function current_to_active($text){
+		$replace = array(
+			'current_page_item' => 'active-nav',
+			'current_page_parent' => 'active-nav',
+			'current_page_ancestor' => 'active-nav',
+		);
+		$text = str_replace(array_keys($replace), $replace, $text);
+		return $text;
 	}
 
     function remove_hooks(){
