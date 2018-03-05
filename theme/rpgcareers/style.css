@@ -74,6 +74,15 @@ footer{background-color:#000;min-height:8rem;}
 #global-cookie-message {width:100%;background-color:#d5e8f3;padding: 1rem 0;display:none;}
 #global-cookie-message p{margin: 0 auto;max-width:120rem;}
 
+img.alignright {float:right; margin:0 0 1rem 1rem}
+img.alignleft {float:left; margin:0 1rem 1rem 0}
+img.aligncenter {display: block; margin:4rem auto;}
+a img.alignright {float:right; margin:0 0 1rem 1rem}
+a img.alignleft {float:left; margin:0 1rem 1rem 0}
+a img.aligncenter {display: block; margin-left: auto; margin-right: auto}
+.heading-xlarge{font-size: 2.7rem;margin: 2.5rem 0;font-weight: bold;text-transform: uppercase;}
+img {display: block;margin: 0 auto;max-width: 100%;}
+
 @media print{
 
 }
