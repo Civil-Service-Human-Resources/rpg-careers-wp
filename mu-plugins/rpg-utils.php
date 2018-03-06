@@ -133,6 +133,23 @@ class rpgutils{
         update_option('date_format', 'd/m/y');
         update_option('time_format', 'H:i');
 
+		//SET DEFAULT IMAGE SIZES
+		update_option('thumbnail_size_w', 180);
+		update_option('thumbnail_size_h', 180);	
+		update_option('thumbnail_crop', 1);
+		
+		update_option('medium_size_w', 320);
+		update_option('medium_size_h', 240);
+		
+		update_option('medium_large_size_w', 480);
+		update_option('medium_large_size_h', 360);
+		
+		update_option('large_size_w', 800);
+		update_option('large_size_h', 600);
+
+		update_option('image_default_align', 'center');
+		update_option('image_default_size', 'large');
+
         //UNCOMMENT THIS TO REMOVE UNWANTED CAPABILITIES - SET THEM IN THE FUNCTION
         //$this->clean_unwanted_caps();
 
@@ -1134,6 +1151,13 @@ if ( 0 != $post->ID ) {
         remove_role('editor');
         remove_role('contributor');
         remove_role('author');
+
+		//REMOVE CUSTOM ROLES - ENSURES CAPABILITIES ARE ALWAYS SET CORRECTLY
+		remove_role('content_author');
+        remove_role('content_approver');
+        remove_role('content_publisher');
+        remove_role('content_admin');
+		remove_role('content_snippets');
 
         //DEFINE CAPABILITIES
         $contentAuthorCaps = array(
