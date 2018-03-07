@@ -34,6 +34,7 @@
 		'container'			=> false,
 		'items_wrap'		=> '<ul class="main-nav-items">%3$s</ul>',
 		'theme_location'	=> 'main-nav',
+		'walker' => new RPG_Walker_Nav_Menu(),
 	  ));
 	?></nav>
 </header>
