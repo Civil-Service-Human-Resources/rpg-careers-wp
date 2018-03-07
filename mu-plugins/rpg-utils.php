@@ -34,17 +34,15 @@ class rpgutils{
         );
 
         //REGISTER ACTIONS/FILTERS
-        add_action('init', array($this, 'add_roles'));
-        add_action('init', array($this, 'register_user_taxonomy'));
+		add_action('init', array($this, 'register_user_taxonomy'));
 		add_action('init', array($this, 'check_cookie_banner_cookie'));
-        add_action('init', array($this, 'remove_hooks'), 999);
         add_filter('login_redirect', array($this, 'login_redirect'), 10, 3);
-        
+
 		//PAGE EDITS
 		add_filter('post_row_actions', array($this, 'amend_quick_links'), 10, 2);
 		add_filter('page_row_actions', array($this, 'amend_quick_links'), 10, 2);
 		add_filter('tag_row_actions', array($this, 'amend_quick_links'), 10, 2);
-
+        
         //TEAMS ACCESS CONTROL
         add_filter('manage_page_posts_columns', array($this, 'manage_columns'));
         add_action('manage_page_posts_custom_column', array($this, 'custom_column'), 10, 2);
@@ -78,13 +76,17 @@ class rpgutils{
 		add_action('admin_head', array($this, 'media_css'));
 		add_action('post-upload-ui', array($this, 'media_max_size_info'));
 		add_filter('option_uploads_use_yearmonth_folders', '__return_false', 100);
-		add_filter('wp_calculate_image_sizes', array($this, 'adjust_image_sizes_attr'), 10 , 2);
 
-		//MENU FILTERS
-		add_filter('nav_menu_css_class', array($this, 'custom_wp_nav_menu'));
-		add_filter('nav_menu_item_id', array($this, 'custom_wp_nav_menu'));
-		add_filter('page_css_class', array($this, 'custom_wp_nav_menu'));
-		add_filter ('wp_nav_menu', array($this, 'current_to_active'));
+		//FORCE IMAGE SIZES - UNABLE TO UPDATE VIA ADMIN SCREENS
+		add_filter('pre_update_option_thumbnail_size_w', function(){ return 180; });
+		add_filter('pre_update_option_thumbnail_size_h', function(){ return 180; });
+		add_filter('pre_update_option_thumbnail_crop', function(){ return 0; });
+		add_filter('pre_update_option_medium_size_w', function(){ return 320; });
+		add_filter('pre_update_option_medium_size_h', function(){ return 240; });
+		add_filter('pre_update_option_medium_large_size_w', function(){ return 480; });
+		add_filter('pre_update_option_medium_large_size_h', function(){ return 360; });
+		add_filter('pre_update_option_large_size_w', function(){ return 800; });
+		add_filter('pre_update_option_large_size_h', function(){ return 600; });
 
     }
 
@@ -136,27 +138,6 @@ class rpgutils{
         //NB: HOOKS INTO FUNCTION FROM THE 'WP User Groups' PLUGIN
         $this->settings['users_teams'] = (wp_get_terms_for_user(get_current_user_id(), 'content_team')) ? wp_get_terms_for_user(get_current_user_id(), 'content_team') : array();
 
-        //FORCE DATE FORMAT + TIME FORMAT
-        update_option('date_format', 'd/m/y');
-        update_option('time_format', 'H:i');
-
-		//SET DEFAULT IMAGE SIZES
-		update_option('thumbnail_size_w', 180);
-		update_option('thumbnail_size_h', 180);	
-		update_option('thumbnail_crop', 1);
-		
-		update_option('medium_size_w', 320);
-		update_option('medium_size_h', 240);
-		
-		update_option('medium_large_size_w', 480);
-		update_option('medium_large_size_h', 360);
-		
-		update_option('large_size_w', 800);
-		update_option('large_size_h', 600);
-
-		update_option('image_default_align', 'center');
-		update_option('image_default_size', 'large');
-
         //UNCOMMENT THIS TO REMOVE UNWANTED CAPABILITIES - SET THEM IN THE FUNCTION
         //$this->clean_unwanted_caps();
 
@@ -180,6 +161,7 @@ class rpgutils{
     }
     
 	function amend_quick_links($actions, $post) {
+
 		if (isset($actions['inline hide-if-no-js'])) {
 			unset($actions['inline hide-if-no-js']);
 		}
@@ -793,11 +775,6 @@ if ( 0 != $post->ID ) {
 		echo '<p>Maximum upload file size: Images: '.((MEDIA_LIMIT < 1000)? MEDIA_LIMIT.' kb': (MEDIA_LIMIT/1000).' MB').' Videos: '.((MEDIA_LIMIT_LARGE < 1000)? (MEDIA_LIMIT_LARGE).' kb': (MEDIA_LIMIT_LARGE/1000).' MB').'</p>';
 	}
 
-	function adjust_image_sizes_attr($sizes, $size) {
-	   //$sizes = '(max-width: 709px) 85vw, (max-width: 909px) 67vw, (max-width: 1362px) 62vw, 840px';
-	   return $sizes;
-	}
-
     function load_edit(){
         if ($_GET['post_type'] !== 'page') return;
         add_filter('posts_join', array($this, 'posts_join'), 10, 2);
@@ -1151,153 +1128,18 @@ if ( 0 != $post->ID ) {
 		}
 	}
 
-	function custom_wp_nav_menu($var) {
-		return is_array($var) ? array_intersect($var, array(
-				'current_page_item',
-				'current_page_parent',
-				'current_page_ancestor',
-				'first',
-				'last',
-				'vertical',
-				'horizontal'
-			)
-		) : '';
-	}
+	function register_user_taxonomy() {
+        //IF CLASS NOT AVAILABLE BAIL
+        if (!class_exists('WP_User_Taxonomy')){
+            return;
+        }
 
-	function current_to_active($text){
-		$replace = array(
-			'current_page_item' => 'active-nav',
-			'current_page_parent' => 'active-nav',
-			'current_page_ancestor' => 'active-nav',
-		);
-		$text = str_replace(array_keys($replace), $replace, $text);
-		return $text;
-	}
-
-    function remove_hooks(){
-        remove_action('init', 'wp_register_default_user_group_taxonomy');
-        remove_action('init', 'wp_register_default_user_type_taxonomy');
-    }
-
-    function add_roles(){
-        //REMOVE OOTB ROLES
-        remove_role('subscriber');
-        remove_role('editor');
-        remove_role('contributor');
-        remove_role('author');
-
-		//REMOVE CUSTOM ROLES - ENSURES CAPABILITIES ARE ALWAYS SET CORRECTLY
-		remove_role('content_author');
-        remove_role('content_approver');
-        remove_role('content_publisher');
-        remove_role('content_admin');
-		remove_role('content_snippets');
-
-        //DEFINE CAPABILITIES
-        $contentAuthorCaps = array(
-            'read'							=> true,
-            'edit_pages'					=> true,
-			'edit_posts'					=> true,
-            'edit_others_posts'				=> true,
-			'upload_files'					=> true,
-            'ow_submit_to_workflow'			=> true,
-        );
-
-        $contentApproverCaps = array(
-            'read'							=> true,
-            'edit_pages'					=> true,
-            'edit_others_pages'				=> true,
-            'publish_pages'					=> true,
-            'read_private_pages'			=> true,
-            'delete_pages'					=> true,
-            'delete_private_pages'			=> true,
-            'delete_published_pages'		=> true,
-            'delete_others_pages'			=> true,
-            'edit_private_pages'			=> true,
-            'edit_published_pages'			=> true,
-			'edit_posts'					=> true,
-            'edit_others_posts'				=> true,
-            'upload_files'					=> true,
-            'ow_reassign_task'				=> true,
-            'ow_sign_off_step'				=> true,
-            'ow_skip_workflow'				=> true,
-            'ow_submit_to_workflow'			=> true,
-            'ow_view_others_inbox'			=> true,
-            'ow_view_reports'				=> true,
-            'ow_view_workflow_history'		=> true,
-        );
-
-        $contentPublisherCaps = array(
-            'read'							=> true,
-            'edit_pages'					=> true,
-            'edit_others_pages'				=> true,
-            'publish_pages'					=> true,
-            'read_private_pages'			=> true,
-            'delete_pages'					=> true,
-            'delete_private_pages'			=> true,
-            'delete_published_pages'		=> true,
-            'delete_others_pages'			=> true,
-            'edit_private_pages'			=> true,
-            'edit_published_pages'			=> true,
-			'edit_posts'					=> true,
-            'edit_others_posts'				=> true,
-            'upload_files'					=> true,
-            'ow_reassign_task'				=> true,
-            'ow_sign_off_step'				=> true,
-            'ow_skip_workflow'				=> true,
-            'ow_submit_to_workflow'			=> true,
-            'ow_view_others_inbox'			=> true,
-            'ow_view_reports'				=> true,
-            'ow_view_workflow_history'		=> true,
-        );
-
-        $contentAdminCaps = array(
-            'read'							=> true,
-            'edit_dashboard'				=> true,
-            'edit_pages'					=> true,
-            'edit_others_pages'				=> true,
-            'publish_pages'					=> true,
-            'read_private_pages'			=> true,
-            'delete_pages'					=> true,
-            'delete_private_pages'			=> true,
-            'delete_published_pages'		=> true,
-            'delete_others_pages'			=> true,
-            'edit_private_pages'			=> true,
-            'edit_published_pages'			=> true,
-			'edit_posts'					=> true,
-            'edit_others_posts'				=> true,
-            'upload_files'					=> true,
-            'manage_rpgsnippets'			=> true,
-            'create_roles'					=> true,
-            'create_users'					=> true,
-            'delete_roles'					=> true,
-            'delete_users'					=> true,
-            'edit_roles'					=> true,
-            'edit_users'					=> true,
-            'list_roles'					=> true,
-            'list_users'					=> true,
-            'promote_users'					=> true,
-            'remove_users'					=> true,
-            'ow_reassign_task'				=> true,
-            'ow_sign_off_step'				=> true,
-            'ow_skip_workflow'				=> true,
-            'ow_submit_to_workflow'			=> true,
-            'ow_view_others_inbox'			=> true,
-            'ow_view_reports'				=> true,
-            'ow_view_workflow_history'		=> true,
-        );
-
-        $contentSnippets = array(
-            'manage_rpgsnippets'			=> true,
-            'read'							=> true,
-        );
-
-        //CREATE CUSTOM ROLES
-        add_role('content_author', __('Content Author'), $contentAuthorCaps);
-        add_role('content_approver', __('Content Approver'), $contentApproverCaps);
-        add_role('content_publisher', __('Content Publisher'), $contentPublisherCaps);
-        add_role('content_admin', __('Content Admin'), $contentAdminCaps);
-        add_role('content_snippets', __('Content Snippets'), $contentSnippets);
+        //CREATE THE NEW USER TAXONOMY
+        new WP_User_Taxonomy('content_team', 'users/content-team', array(
+            'singular' => __('Team',  'rpgutils'),
+            'plural'   => __('Teams', 'rpgutils'),
+            'exclusive' => false,
+       ));
     }
 
 	function set_default_role($default_role){
@@ -1312,20 +1154,6 @@ if ( 0 != $post->ID ) {
                 $wp_roles->remove_cap($role, $cap);
             }
         }
-    }
-
-    function register_user_taxonomy() {
-        //IF CLASS NOT AVAILABLE BAIL
-        if (!class_exists('WP_User_Taxonomy')){
-            return;
-        }
-
-        //CREATE THE NEW USER TAXONOMY
-        new WP_User_Taxonomy('content_team', 'users/content-team', array(
-            'singular' => __('Team',  'rpgutils'),
-            'plural'   => __('Teams', 'rpgutils'),
-            'exclusive' => false,
-       ));
     }
 
     function get_setting($name, $value = null){
