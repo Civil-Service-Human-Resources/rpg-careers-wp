@@ -76,6 +76,7 @@ class rpgutils{
 		add_action('admin_head', array($this, 'media_css'));
 		add_action('post-upload-ui', array($this, 'media_max_size_info'));
 		add_filter('option_uploads_use_yearmonth_folders', '__return_false', 100);
+		add_filter('wp_calculate_image_sizes', array($this, 'adjust_image_sizes_attr'), 10 , 2);
 
 		//FORCE IMAGE SIZES - UNABLE TO UPDATE VIA ADMIN SCREENS
 		add_filter('pre_update_option_thumbnail_size_w', function(){ return 180; });
@@ -773,6 +774,11 @@ if ( 0 != $post->ID ) {
 
 	function media_max_size_info(){
 		echo '<p>Maximum upload file size: Images: '.((MEDIA_LIMIT < 1000)? MEDIA_LIMIT.' kb': (MEDIA_LIMIT/1000).' MB').' Videos: '.((MEDIA_LIMIT_LARGE < 1000)? (MEDIA_LIMIT_LARGE).' kb': (MEDIA_LIMIT_LARGE/1000).' MB').'</p>';
+	}
+
+	function adjust_image_sizes_attr($sizes, $size) {
+		$sizes = '(max-width: 320px) 280px,(max-width: 480px) 440px,800px';
+		return $sizes;
 	}
 
     function load_edit(){
