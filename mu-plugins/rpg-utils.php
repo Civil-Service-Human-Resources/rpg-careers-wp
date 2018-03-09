@@ -42,12 +42,15 @@ class rpgutils{
 		add_filter('post_row_actions', array($this, 'amend_quick_links'), 10, 2);
 		add_filter('page_row_actions', array($this, 'amend_quick_links'), 10, 2);
 		add_filter('tag_row_actions', array($this, 'amend_quick_links'), 10, 2);
+		add_filter('bulk_actions-edit-page', '__return_empty_array');
+		add_action('pre_get_posts',  array($this, 'filter_pages'));
         
         //TEAMS ACCESS CONTROL
         add_filter('manage_page_posts_columns', array($this, 'manage_columns'));
         add_action('manage_page_posts_custom_column', array($this, 'custom_column'), 10, 2);
         add_action('add_meta_boxes_page', array($this, 'add_meta_boxes'), 10, 2);
         add_action('admin_init', array($this, 'admin_init'));
+		add_filter('manage_users_columns', array($this, 'manage_users_columns'));
 
         add_filter('filter_gtm_instance', array($this, 'filter_gtm_instance'),1);
 		add_filter('post_date_column_time' , array($this, 'custom_date_column_time') , 10 , 2);
@@ -55,11 +58,13 @@ class rpgutils{
 		add_action('user_profile_update_errors', array($this, 'check_profile_errors'));
 		add_filter('pre_option_default_role', array($this, 'set_default_role'));
 		add_action('admin_menu', array($this, 'amend_menus'));
+		add_filter('custom_menu_order', '__return_true');
+		add_filter('menu_order', array($this, 'custom_menu_order'));
 
 		add_action('get_header', array($this, 'remove_admin_login_header'));
 		show_admin_bar(false);
 
-        //add_action('shutdown', array($this, 'sql_logger'));
+        //add_action('shutdown', array($this, 'sql_logger'),10,1);
 
 		//MEDIA FILES
 		add_action('pre_get_posts',  array($this, 'filter_media_files'));
@@ -101,6 +106,26 @@ class rpgutils{
 		remove_menu_page('edit-comments.php');
 	}
 
+	function custom_menu_order($menu_ord) {
+		if (!$menu_ord) return true;
+     
+		return array(
+			'index.php', //Dashboard
+			'separator1', 
+			'edit.php?post_type=page', //Pages
+			'oasiswf-inbox',  //Workflows
+			'upload.php', //Media
+			'separator2',
+			'users.php', //Users
+			'themes.php', //Appearance
+			'plugins.php', //Plugins
+			'edit.php?post_type=acf-field-group', //Custom Fields
+			'tools.php', //Tools
+			'options-general.php', //Settings
+			'separator-last',
+		);
+	}
+
 	function check_profile_errors(&$errors) {
 		if ( empty( $_POST['content_team'] ) )
 			$errors->add( 'empty_missing_', '<strong>ERROR</strong>: Profile not saved - a team must be selected' );
@@ -108,13 +133,14 @@ class rpgutils{
 
     function sql_logger() {
         //PLUS define( 'SAVEQUERIES', true ); IN wp-config.php
-        global $wpdb;
-        $log_file = fopen(ABSPATH.'/sql_log.txt', 'a');
-        fwrite($log_file, "//////////////////////////////////////////\n\n" . date("F j, Y, g:i:s a")."\n");
-        foreach($wpdb->queries as $q) {
-            fwrite($log_file, $q[0] . " - ($q[1] s)" . "\n\n");
-        }
-        fclose($log_file);
+		global $wpdb;
+		if(is_admin()){
+			if(!wp_doing_ajax()){
+				foreach($wpdb->queries as $q) {
+					echo  '<div style="margin-left:200px;margin-bottom:50px;">'.$q[0] . '<span style="font-size:8px;margin-left:15px;">['.$q[1].' s]</span></div>';
+				}
+			}
+		}
     }
 
     function admin_init(){
@@ -781,13 +807,6 @@ if ( 0 != $post->ID ) {
 		return $sizes;
 	}
 
-    function load_edit(){
-        if ($_GET['post_type'] !== 'page') return;
-        add_filter('posts_join', array($this, 'posts_join'), 10, 2);
-        add_filter('posts_where', array($this, 'posts_where'),10, 2);
-        add_filter('views_edit-page', array($this, 'fix_post_counts')); 
-    }
-
     function login_redirect( $redirect_to, $request, $user ){
         if(isset($_REQUEST['redirect_to'])){
             return $_REQUEST['redirect_to'];
@@ -816,6 +835,7 @@ if ( 0 != $post->ID ) {
     }
 
     function save_post($post_id, $post, $update){
+
         if($post->post_type==='page'){
 
             $error = false;
@@ -848,6 +868,7 @@ if ( 0 != $post->ID ) {
             }
 
             if ($error) {
+
                 //TRIGGER THE ERROR MESSAGE
                 add_filter('redirect_post_location', function($location) use ($error) {
                     return add_query_arg(array('rpg-team'=>$error->get_error_code(), 'message'=>10), $location);
@@ -878,112 +899,74 @@ if ( 0 != $post->ID ) {
         }
     }
 
-    function fix_post_counts($views){
-        global $current_user, $wp_query;
+	function filter_pages($query){
+		global $post_type, $pagenow; 
 
-        if($this->restrict_access()){
+		if($query->is_main_query()){
 
-            unset($views['mine']);
+			if($pagenow == 'edit.php' && $post_type == 'page'){
+				$args = array(
+					'post_type'  => 'page',
+					'posts_per_page'  => 1000,
+					'no-paging'=> true,
+					'meta_query' => array(
+						array(
+							'key'     => 'rpg-team',
+							'value'   => array(2,3),
+							'compare' => 'IN',
+						),
+					)
+				);
+				$query->query_vars = $args;
+			}
+		}
+	}
 
-            $types = array( 
-                array('status' =>  NULL),  
-                array('status' => 'publish'),  
-                array('status' => 'draft'),  
-                array('status' => 'pending'),  
-                array('status' => 'trash')  
-            );  
+    function load_edit(){
+		if(isset($_GET['post_type'])){
+			if ($_GET['post_type'] !== 'page') return;
+			add_filter('posts_where', array($this, 'posts_where'),10, 2);
+			add_filter('views_edit-page', array($this, 'remove_post_links')); 
+		}
+    }
 
-            //GET THE QUERY VAR post_status
-            $status = isset($wp_query->query_vars['post_status']) ? $wp_query->query_vars['post_status'] : NULL;
-
-            foreach($types as $type) {  
-                $query = array( 
-                    'post_type'   => 'page',  
-                    'post_status' => $type['status']  
-                );  
-                $result = new WP_Query($query); 
-
-                switch($type['status']){
-                    case NULL:
-                        if($result->found_posts > 0){
-                            $class = ($status == NULL) ? ' class="current"' : '';  
-                            $views['all'] = sprintf(__('<a href="%s" '.$class.'>All <span class="count">(%d)</span></a>', 'all'), admin_url('edit.php?post_type=page'), $result->found_posts); 
-                        }
-                        break;
-
-                    case 'publish':
-                        if($result->found_posts > 0){
-                            $class = ($status == 'publish') ? ' class="current"' : '';  
-                            $views['publish'] = sprintf(__('<a href="%s" '.$class.'>Published <span class="count">(%d)</span></a>', 'publish'), admin_url('edit.php?post_status=publish&post_type=page'), $result->found_posts); 
-                        }
-                        break;
-
-                    case 'draft':
-                        if($result->found_posts > 0){
-                            $class = ($status == 'draft') ? ' class="current"' : ''; 
-                            $views['draft'] = sprintf(__('<a href="%s" '.$class.'>Draft'. ((sizeof($result->posts) > 1) ? "s" : "") .' <span class="count">(%d)</span></a>', 'draft'), admin_url('edit.php?post_status=draft&post_type=page'), $result->found_posts);
-                        }
-                        break;
-                
-                    case 'pending':
-                        if($result->found_posts > 0){
-                            $class = ($status == 'pending') ? ' class="current"' : ''; 
-                            $views['pending'] = sprintf(__('<a href="%s" '.$class.'>Pending <span class="count">(%d)</span></a>', 'pending'), admin_url('edit.php?post_status=pending&post_type=page'), $result->found_posts); 
-                        }
-                        break;
-
-                    case 'trash':
-                        if($result->found_posts > 0){
-                            $class = ($status == 'trash') ? ' class="current"' : ''; 
-                            $views['trash'] = sprintf(__('<a href="%s" '.$class.'>Bin <span class="count">(%d)</span></a>', 'trash'), admin_url('edit.php?post_status=trash&post_type=page'), $result->found_posts);  
-                        }
-                        break;
-                }
-            }
-        }
-
-        return $views;
+    function remove_post_links($views){
+		return __return_empty_array();
     }
 
     function posts_where($where, $query) {
-        global $pagenow, $wpdb;
+        global $pagenow, $wpdb, $post_type;
 
-        if (is_admin()){
-            if ($pagenow == 'edit.php') {
+		if (is_admin()){
+			if($query->is_main_query()){
+				if ($pagenow == 'edit.php' && $post_type == 'page') {
                 
-                if($this->restrict_access()){
-                    //GET TEAMS CURRENT USER IS MEMBER OF
-                    $teams = $this->get_setting('users_teams');
+					if($this->restrict_access()){
 
-                    //FILTER THE LIST BASED ON TEAMS MEMBER OF
-                    if(count($teams)>0){
-                        $where .= " AND ($wpdb->postmeta.meta_key = 'rpg-team' AND $wpdb->postmeta.meta_value IN (";
-                        foreach ($teams as $team) {
-                            $where .= $team->term_id.',';
-                        }
+						//GET TEAMS CURRENT USER IS MEMBER OF
+						$teams = $this->get_setting('users_teams');
 
-                        $where = rtrim($where,',');
-                        $where .= '))';
-                    }
-                }
-            }
+						//FILTER THE LIST BASED ON TEAMS MEMBER OF
+						if(count($teams)>0){
+							$where = " AND (($wpdb->postmeta.meta_key = 'rpg-team' AND $wpdb->postmeta.meta_value IN (";
+							foreach ($teams as $team) {
+								$where .= $team->term_id.',';
+							}
+
+							$where = rtrim($where,',');
+							$where .= ') OR ';
+						}else{
+							$where = ' AND ';
+						}
+
+						$where .= 'post_author = '. get_current_user_id() .'))';
+						$where .= " AND $wpdb->posts.post_type = 'page' AND ($wpdb->posts.post_status = 'publish' OR $wpdb->posts.post_status = 'acf-disabled' OR $wpdb->posts.post_status = 'future' OR $wpdb->posts.post_status = 'draft' OR $wpdb->posts.post_status = 'pending' OR $wpdb->posts.post_status = 'ready-to-publish' OR $wpdb->posts.post_status = 'with-approver' OR $wpdb->posts.post_status = 'with-author' OR $wpdb->posts.post_status = 'private')"; 
+					}
+				}
+			}
         }
 
         return $where;
-    }
-
-    function posts_join($join, $query) {
-        global $pagenow, $wpdb;
-
-        if (is_admin()){
-            if ($pagenow == 'edit.php') {
-                if($this->restrict_access()){
-                    $join .= "LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id ";
-                }
-            }
-        }
-
-        return $join;
     }
 
     function add_meta_boxes($post) {
@@ -1000,17 +983,25 @@ if ( 0 != $post->ID ) {
                     $canaccess = true;
                 }else{
                     //EDITING A PAGE SO CHECK CAN ACCESS
-                    $teams = $this->get_setting('users_teams');
-                    $post_teams = get_post_meta($post->ID, 'rpg-team');
 
-                    if(count($teams)>0){
-                        foreach ($teams as $team) {
-                            if(in_array($team->term_id, $post_teams)){
-                                $canaccess = true;
-                                break;
-                            }
-                        }
-                    }
+					//TEST FOR 'missing-team' VALIDATION ERRORS
+					if (stripos($_SERVER['QUERY_STRING'], 'rpg-team=missing-team') !== false) {
+						$canaccess = true;
+					}
+
+					if(!$canaccess){
+						$teams = $this->get_setting('users_teams');
+						$post_teams = get_post_meta($post->ID, 'rpg-team');
+
+						if(count($teams)>0){
+							foreach ($teams as $team) {
+								if(in_array($team->term_id, $post_teams)){
+									$canaccess = true;
+									break;
+								}
+							}
+						}
+					}
                 }
 
                 //FAILED ACCESS CONTROL - REDIRECT BACK TO PAGE LISTING
@@ -1112,12 +1103,20 @@ if ( 0 != $post->ID ) {
         echo $output;
     }
 
+	function manage_users_columns($column_headers) {
+		unset($column_headers['posts']);
+		return $column_headers;
+	}
+
     function manage_columns($column_headers) {
         $column_headers['teams-read'] = sprintf(
             '<span title="%s">%s</span>',
             esc_attr(__('One or more teams granting access to pages.', 'teams')),
             esc_html(_x('Teams', 'Column header', 'teams'))
         );
+
+		unset($column_headers['comments']);
+
         return $column_headers;
     }
 
