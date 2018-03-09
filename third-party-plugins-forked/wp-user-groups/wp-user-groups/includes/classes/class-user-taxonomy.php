@@ -136,10 +136,12 @@ class WP_User_Taxonomy {
 		// Update the groups when the edit user page is updated
 		add_action( 'personal_options_update',  array( $this, 'save_terms_for_user' ) );
 		add_action( 'edit_user_profile_update', array( $this, 'save_terms_for_user' ) );
+		add_action( 'user_register', array( $this, 'save_terms_for_user' ) );
 
 		// Add section to the edit user page in the admin to select group
 		add_action( 'show_user_profile', array( $this, 'edit_user_relationships' ), 99 );
 		add_action( 'edit_user_profile', array( $this, 'edit_user_relationships' ), 99 );
+		add_action( 'user_new_form', array( $this, 'edit_user_relationships' ), 99 );
 
 		// Cleanup stuff
 		add_action( 'delete_user',   array( $this, 'delete_term_relationships' ) );
@@ -395,9 +397,17 @@ class WP_User_Taxonomy {
 
 		$tax = get_taxonomy( $this->taxonomy );
 
-		// Make sure the user can assign terms of the group taxonomy before proceeding.
-		if ( ! current_user_can( 'edit_user', $user->ID ) || ! current_user_can( $tax->cap->assign_terms ) ) {
-			return;
+		if(isset($user)){
+			// Make sure the user can assign terms of the group taxonomy before proceeding.
+			if($user=='add-new-user'){
+				if(!current_user_can( $tax->cap->assign_terms ) ) {
+					return;
+				}
+			}else{
+				if ( ! current_user_can( 'edit_user', $user->ID ) || ! current_user_can( $tax->cap->assign_terms ) ) {
+					return;
+				}
+			}
 		}
 
 		// Bail if no UI for taxonomy
@@ -478,7 +488,14 @@ class WP_User_Taxonomy {
 				<?php if ( ! empty( $terms ) ) :
 
 					foreach ( $terms as $term ) :
-						$active = is_object_in_term( $user->ID, $this->taxonomy, $term->slug ); ?>
+
+						if($user=='add-new-user'){
+							$active = false;
+						}else{
+							$active = is_object_in_term( $user->ID, $this->taxonomy, $term->slug ); 
+						}
+						
+						?>
 
 						<tr class="<?php echo ( true === $active ) ? 'active' : 'inactive'; ?>">
 							<th scope="row" class="check-column">
