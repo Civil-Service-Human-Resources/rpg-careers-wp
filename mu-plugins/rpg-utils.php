@@ -147,6 +147,7 @@ class rpgutils{
         add_action('save_post', array($this, 'save_post'),10, 3);
         add_action('admin_notices', array($this, 'handle_admin_error'));
         add_action('load-edit.php', array($this, 'load_edit'));
+		add_filter('get_search_form', create_function('$a', "return null;"));
 
         //GET ALL CURRENT TEAMS AND STORE THEM - SAVES LOOKUPS LATER ON IN CODE
         $teams = array();
@@ -168,7 +169,7 @@ class rpgutils{
         //UNCOMMENT THIS TO REMOVE UNWANTED CAPABILITIES - SET THEM IN THE FUNCTION
         //$this->clean_unwanted_caps();
 
-        //add_meta_box('submitdiv', 'Publish', array($this, 'custom_sumbit_meta_box'), 'page', 'side', 'high');
+        add_meta_box('submitdiv', 'Publish', array($this, 'custom_submit_meta_box'), 'page', 'side', 'low');
 
         //***START: KEEP AT BOTTOM OF FUNCTION***
         //NB: KEEP AT BOTTOM OF FUNCTION AS A FEW return STATEMENTS TO BE CAREFUL OF
@@ -207,7 +208,7 @@ class rpgutils{
 		return $actions;
 	}
 
-    function custom_sumbit_meta_box($post, $args = array()){
+    function custom_submit_meta_box($post, $args = array()){
         global $post;
 		global $pagenow;
 
@@ -219,57 +220,19 @@ class rpgutils{
         remove_meta_box('submitdiv', 'page', 'side');
 		$post_type_object = get_post_type_object($post->post_type);
 		$can_publish = current_user_can($post_type_object->cap->publish_posts);
+		$post_status = get_post_status($post->ID);
     ?>
         <div class="submitbox" id="submitpost"><div id="minor-publishing"><div style="display:none;">
         <?php submit_button( __( 'Save' ), '', 'save' ); ?>
 		</div>
-
-		<div id="minor-publishing-actions">
-		<div id="save-action">
-		<?php if ( 'publish' != $post->post_status && 'future' != $post->post_status && 'pending' != $post->post_status ) { ?>
-		<input <?php if ( 'private' == $post->post_status ) { ?>style="display:none"<?php } ?> type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save Draft'); ?>" class="button" />
-		<span class="spinner"></span>
-		<?php } elseif ( 'pending' == $post->post_status && $can_publish ) { ?>
-		<input type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save as Pending'); ?>" class="button" />
-		<span class="spinner"></span>
-		<?php } ?>
-		</div>
-		<?php if ( is_post_type_viewable( $post_type_object ) ) : ?>
-		<div id="preview-action">
-		<?php
-		$preview_link = esc_url( get_preview_post_link( $post ) );
-		if ( 'publish' == $post->post_status ) {
-			$preview_button_text = __( 'Preview Changes' );
-		} else {
-			$preview_button_text = __( 'Preview' );
-		}
-
-		$preview_button = sprintf( '%1$s<span class="screen-reader-text"> %2$s</span>',
-			$preview_button_text,
-			/* translators: accessibility text */
-			__( '(opens in a new window)' )
-		);
-		?>
-		<a class="preview button" href="<?php echo $preview_link; ?>" target="wp-preview-<?php echo (int) $post->ID; ?>" id="post-preview"><?php echo $preview_button; ?></a>
-		<input type="hidden" name="wp-preview" id="wp-preview" value="" />
-		</div>
-		<?php endif; // public post type ?>
-		<?php
-		/**
-		 * Fires before the post time/date setting in the Publish meta box.
-		 *
-		 * @since 4.4.0
-		 *
-		 * @param WP_Post $post WP_Post object for the current post.
-		 */
-		do_action( 'post_submitbox_minor_actions', $post );
-		?>
-		<div class="clear"></div>
-		</div>
+		<?php do_action( 'post_submitbox_minor_actions', $post );?>
         <div id="misc-publishing-actions">
-        <div class="misc-pub-section misc-pub-post-status">
-        Status: <span id="post-status-display"><?php
-switch ($post->post_status) {
+	        <div class="misc-pub-section misc-pub-post-status">Status: <span id="post-status-display"><?php
+switch ($post_status) {
+	case 'draft':
+	case 'auto-draft':
+		_e('Draft');
+		break;
 	case 'private':
 		_e('Privately Published');
 		break;
@@ -282,69 +245,234 @@ switch ($post->post_status) {
 	case 'pending':
 		_e('Pending Review');
 		break;
-	case 'draft':
-	case 'auto-draft':
-		_e('Draft');
-		break;
-}
-?></span>
-        </div>
-		<?php 
-		$revision_count = count(wp_get_post_revisions($post->ID));
+	case 'with-approver-delete':
+	case 'ready-to-bin':
+		_e('Deletion');
+}?></span></div>
+<?php   $revision_count = count(wp_get_post_revisions($post->ID));
 		$latest_revision = current(wp_get_post_revisions($post->ID));
-		$revision_id = $latest_revision->ID;
+		$revision_id = isset($latest_revision->ID) ? $latest_revision->ID : '';
 
 		if ($revision_count>0) : ?>
-<div class="misc-pub-section misc-pub-revisions">
-	<?php
-		/* translators: Post revisions heading. 1: The number of available revisions */
-		printf( __( 'Revisions: %s' ), '<b>' . number_format_i18n($revision_count) . '</b>' );
-	?>
-	<a class="hide-if-no-js" href="<?php echo esc_url(get_edit_post_link($revision_id)); ?>"><span aria-hidden="true"><?php _ex( 'Browse', 'revisions' ); ?></span> <span class="screen-reader-text"><?php _e( 'Browse revisions' ); ?></span></a>
-</div>
+			<div class="misc-pub-section misc-pub-revisions">
+				<?php
+					/* translators: Post revisions heading. 1: The number of available revisions */
+					printf( __( 'Revisions: %s' ), '<b>' . number_format_i18n($revision_count) . '</b>' );
+				?>
+				<a class="hide-if-no-js" href="<?php echo esc_url(get_edit_post_link($revision_id)); ?>"><span aria-hidden="true"><?php _ex( 'Browse', 'revisions' ); ?></span> <span class="screen-reader-text"><?php _e( 'Browse revisions' ); ?></span></a>
+			</div>
 <?php endif; 
-
-$datef = __( 'M j, Y @ H:i' );
-if ( 0 != $post->ID ) {
-	if ( 'future' == $post->post_status ) { // scheduled for publishing at a future date
-		/* translators: Post date information. 1: Date on which the post is currently scheduled to be published */
-		$stamp = __('Scheduled for: <b>%1$s</b>');
-	} elseif ( 'publish' == $post->post_status || 'private' == $post->post_status ) { // already published
-		/* translators: Post date information. 1: Date on which the post was published */
-		$stamp = __('Published on: <b>%1$s</b>');
-	} elseif ( '0000-00-00 00:00:00' == $post->post_date_gmt ) { // draft, 1 or more saves, no date specified
-		$stamp = __('Publish <b>immediately</b>');
-	} elseif ( time() < strtotime( $post->post_date_gmt . ' +0000' ) ) { // draft, 1 or more saves, future date specified
-		/* translators: Post date information. 1: Date on which the post is to be published */
-		$stamp = __('Schedule for: <b>%1$s</b>');
-	} else { // draft, 1 or more saves, date specified
-		/* translators: Post date information. 1: Date on which the post is to be published */
-		$stamp = __('Publish on: <b>%1$s</b>');
-	}
-	$date = date_i18n( $datef, strtotime( $post->post_date ) );
-} else { // draft (no saves, and thus no date specified)
-	$stamp = __('Publish <b>immediately</b>');
-	$date = date_i18n( $datef, strtotime( current_time('mysql') ) );
-}
+		$datef = __( 'M j, Y @ H:i' );
+		if ( 0 != $post->ID ) {
+			if('future' == $post_status ) { // scheduled for publishing at a future date
+				/* translators: Post date information. 1: Date on which the post is currently scheduled to be published */
+				$stamp = __('Scheduled12 for: <b>%1$s</b>');
+			} elseif ( 'publish' == $post_status || 'private' == $post_status ) { // already published
+				/* translators: Post date information. 1: Date on which the post was published */
+				$stamp = __('Published on: <b>%1$s</b>');
+			} elseif ( '0000-00-00 00:00:00' == $post->post_date_gmt ) { // draft, 1 or more saves, no date specified
+				$stamp = '';
+			} elseif ( time() < strtotime( $post->post_date_gmt . ' +0000' ) ) { // draft, 1 or more saves, future date specified
+				/* translators: Post date information. 1: Date on which the post is to be published */
+				$stamp = __('Schedule for: <b>%1$s</b>');
+			} elseif ( 'with-approver-delete' == $post_status || 'ready-to-bin' == $post_status ) {
+				$stamp = '';
+			} else { // draft, 1 or more saves, date specified
+				/* translators: Post date information. 1: Date on which the post is to be published */
+				$stamp = __('Publish on: <b>%1$s</b>');
+			}
+			$date = date_i18n( $datef, strtotime( $post->post_date ) );
+		} else { // draft (no saves, and thus no date specified)
+			$stamp = '';
+			$date = date_i18n( $datef, strtotime( current_time('mysql') ) );
+		}
 ?>
+<?php if($stamp!==''){?>
 	<div class="misc-pub-section curtime misc-pub-curtime">
 		<span id="timestamp">
 		<?php printf($stamp, $date); ?></span>
 	</div>
-<?php if($edit_page){echo '';} ?>
-        </div>
-        </div>
+<?php }?>
+			<div class="misc-pub-section">
+			<fieldset><legend style="font-weight:bold;">Actions</legend>
+			<ul style="margin-top:4px;">
+			<?php if($post_status!='with-approver-delete' && $post_status!='ready-to-bin'){?>
+			<li><input type="radio" id="action1" name="page_action" value="save"><label for="action1">Save</label></li>
+			<li><input type="radio" id="action2" name="page_action" value="publish" checked><label for="action2">Publish</label></li>
+			<?php }?>
 
-        <div id="major-publishing-actions">
+			<li><input type="radio" id="action3" name="page_action" value="delete" <?php if($post_status==='with-approver-delete' || $post_status==='ready-to-bin'){?>checked<?php }?>><label for="action3">Delete</label></li>
+			</ul>
+			</fieldset>
+			</div>
+		</div>
+    </div>
+	<div id="major-publishing-actions">
         <div id="publishing-action" style="width: 100%;">
+		<?php if ( is_post_type_viewable( $post_type_object ) ) : ?>
+		<div id="preview-action">
+		<?php
+		$preview_link = esc_url( get_preview_post_link( $post ) );
+		if ( 'publish' == $post_status ) {
+			$preview_button_text = __( 'Preview changes' );
+		} else {
+			$preview_button_text = __( 'Preview' );
+		}
+
+		$preview_button = sprintf( '%1$s<span class="screen-reader-text"> %2$s</span>',$preview_button_text,__('(opens in a new window)'));
+		?>
+		<a style="float:left;" class="preview button" href="<?php echo $preview_link; ?>" target="wp-preview-<?php echo (int) $post->ID; ?>" id="post-preview"><?php echo $preview_button; ?></a>
+		<input type="hidden" name="wp-preview" id="wp-preview" value="" />
+		</div>
+		<?php endif; // public post type ?>
         <span class="spinner"></span>
         <input name="original_publish" type="hidden" id="original_publish" value="Publish">
         <input type="submit" name="publish" id="publish" class="button button-primary button-large" value="Publish" style="display: none;">
+		<?php if ( 'publish' != $post_status && 'future' != $post_status && 'pending' != $post_status ) { ?>
+		<input <?php if ( 'private' == $post_status ) { ?>style="display:none"<?php } ?> type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save Draft'); ?>" class="button button-primary button-large" />
+		<span class="spinner"></span>
+		<?php } elseif ( 'pending' == $post_status && $can_publish ) { ?>
+		<input type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save as Pending'); ?>" class="button button-primary button-large" />
+		<?php } ?>
         </div>
         <div class="clear"></div>
+	</div>
         </div>
-        </div>
-        <?php
+		<script type="text/javascript">
+			(function(){
+				var j = document.getElementById('submitdiv');
+				var e = document.querySelectorAll('input[name=page_action]'), f = document.querySelector('input[name=page_action]:checked');
+				var g = document.getElementById('save-post'), h = document.getElementById('workflow_submit'), i, l, m, n;
+				var o = '<?php echo $post_status;?>';
+
+				j.setAttribute('style','opacity:0.3;');
+
+				switch(o){
+					case 'with-approver-delete':
+					case 'ready-to-bin':
+						g.setAttribute('style','display:none;');
+						i = setInterval(getElementD, 500);
+						break;
+					case 'with-approver':
+					case 'ready-to-publish':
+						g.setAttribute('style','display:none;');
+						i = setInterval(getElementE, 500);
+						break;
+					default:
+						if(h===null){
+							i = setInterval(getElement, 500);
+						}
+						break;
+				}
+
+				if(o ==='with-approver-delete' || o === 'ready-to-bin'){
+					
+				}else{
+					
+				}
+
+				function wireUp(){
+					if(f){
+						if(f.getAttribute('value')!=='save'){
+							g.setAttribute('style','display:none;');
+						}else{
+							h.setAttribute('style','display:none;');
+							g.setAttribute('style','float:right;');
+						}
+
+						l = document.querySelector('div.dialog-title');
+						l.innerHTML = '<strong><span style="text-transform: capitalize;" id="title-hook">' + f.getAttribute('value') + '</span> content</strong>';
+						n = document.getElementById('owf_action_name');
+						n.setAttribute('value', f.getAttribute('value'));
+					}
+
+					if(e){
+						var k = e.length;
+						while(k--){
+							e[k].onclick = function(){
+								setState(this.getAttribute('value'));
+							};
+						}
+					}
+
+				}
+
+				function setState(a){
+					switch(a){
+						case 'save':
+							h.setAttribute('style','display:none;');
+							g.setAttribute('style','float:right;');
+							break;
+						default:
+							g.setAttribute('style','display:none;');
+							h.setAttribute('style','');
+							m = document.getElementById('title-hook');
+							m.innerHTML = a;
+							n = document.getElementById('owf_action_name');
+							n.setAttribute('value', a);
+							break;
+					}
+				}
+
+				function getElement(){
+					h = document.getElementById('workflow_submit');
+					
+					if(h!==null){
+						clearInterval(i);
+						i = setInterval(getElementB, 500);
+					}else{
+						if(typeof(exit_wfid)!=='undefined'){
+							//ABORT WORKFLOW BUTTON
+							clearInterval(i);
+							i = setInterval(getElementC, 500);
+						}
+					}
+				}
+
+				function getElementB(){
+					n = document.getElementById('owf_action_name');
+					if(n!==null){
+						wireUp();
+						clearInterval(i);
+						j.setAttribute('style','opacity:1;');
+					}
+				}
+
+				function getElementC(){
+					h = document.getElementById('exit_link');
+					if(h!==null){
+						clearInterval(i);
+						i = setInterval(getElementB, 500);
+					}
+				}
+
+				function getElementD(){
+					h = document.getElementById('step_submit');
+					if(h!==null){
+						clearInterval(i);
+						j.setAttribute('style','opacity:1;');
+					}else{
+						clearInterval(i);
+						i = setInterval(getElementE, 500);
+
+					}
+				}
+
+				function getElementE(){
+					h = document.getElementById('exit_link');
+					if(h!==null){
+						clearInterval(i);
+						j.setAttribute('style','opacity:1;');
+					}else{
+						clearInterval(i);
+						i = setInterval(getElementD, 500);
+					}
+				}
+
+
+			})();
+		</script>
+<?php
     }
 
     function filter_gtm_instance($code_tag){
@@ -912,7 +1040,7 @@ if ( 0 != $post->ID ) {
 					'meta_query' => array(
 						array(
 							'key'     => 'rpg-team',
-							'value'   => array(2,3),
+							'value'   => array(9999999),
 							'compare' => 'IN',
 						),
 					)
@@ -926,12 +1054,25 @@ if ( 0 != $post->ID ) {
 		if(isset($_GET['post_type'])){
 			if ($_GET['post_type'] !== 'page') return;
 			add_filter('posts_where', array($this, 'posts_where'),10, 2);
-			add_filter('views_edit-page', array($this, 'remove_post_links')); 
+			add_filter('views_edit-page', array($this, 'amend_post_links')); 
 		}
     }
 
-    function remove_post_links($views){
-		return __return_empty_array();
+    function amend_post_links($views){
+		unset($views['mine']);
+		unset($views['publish']);
+		unset($views['draft']);
+		unset($views['ready-to-publish']);
+		unset($views['with-approver']);
+		unset($views['with-approver-delete']);
+		unset($views['ready-to-bin']);
+
+		foreach ($views as $index => $view) {
+			$views[$index] = preg_replace('/<span class="count">\([0-9]+\)<\/span>/', '', $view);
+		}
+
+		return $views;
+		
     }
 
     function posts_where($where, $query) {
@@ -940,7 +1081,6 @@ if ( 0 != $post->ID ) {
 		if (is_admin()){
 			if($query->is_main_query()){
 				if ($pagenow == 'edit.php' && $post_type == 'page') {
-                
 					if($this->restrict_access()){
 
 						//GET TEAMS CURRENT USER IS MEMBER OF
@@ -960,7 +1100,15 @@ if ( 0 != $post->ID ) {
 						}
 
 						$where .= 'post_author = '. get_current_user_id() .'))';
-						$where .= " AND $wpdb->posts.post_type = 'page' AND ($wpdb->posts.post_status = 'publish' OR $wpdb->posts.post_status = 'acf-disabled' OR $wpdb->posts.post_status = 'future' OR $wpdb->posts.post_status = 'draft' OR $wpdb->posts.post_status = 'pending' OR $wpdb->posts.post_status = 'ready-to-publish' OR $wpdb->posts.post_status = 'with-approver' OR $wpdb->posts.post_status = 'with-author' OR $wpdb->posts.post_status = 'private')"; 
+
+						if(isset($query->query['post_status'])){
+							if($query->query['post_status'] === 'trash'){
+								$where .= " AND $wpdb->posts.post_type = 'page' AND $wpdb->posts.post_status = 'trash'";
+								return $where;
+							}
+						} 
+
+						$where .= " AND $wpdb->posts.post_type = 'page' AND ($wpdb->posts.post_status = 'publish' OR $wpdb->posts.post_status = 'acf-disabled' OR $wpdb->posts.post_status = 'future' OR $wpdb->posts.post_status = 'draft' OR $wpdb->posts.post_status = 'pending' OR $wpdb->posts.post_status = 'ready-to-publish' OR $wpdb->posts.post_status = 'with-approver' OR $wpdb->posts.post_status = 'with-approver-delete' OR $wpdb->posts.post_status = 'with-author' OR $wpdb->posts.post_status = 'private' OR $wpdb->posts.post_status = 'ready-to-bin')"; 
 					}
 				}
 			}
@@ -992,12 +1140,20 @@ if ( 0 != $post->ID ) {
 					if(!$canaccess){
 						$teams = $this->get_setting('users_teams');
 						$post_teams = get_post_meta($post->ID, 'rpg-team');
+						
+						//TEST WHETHER PAGE IS IN DRAFT, WITH NO TEAM AND content_author IS CURRENT USER i.e. PREVIOUS 'missing-team' VALIDATION ERROR WAS THROWN AND ACCESSING FROM THE PAGE LISTING
+						if($post->post_status ='draft' && $post->post_author = get_current_user_id() && count($post_teams) == 0){
+							$canaccess = true;
+						}
 
-						if(count($teams)>0){
-							foreach ($teams as $team) {
-								if(in_array($team->term_id, $post_teams)){
-									$canaccess = true;
-									break;
+						if(!$canaccess){
+							//TEST THE USERS TEAMS AGAINST TEAMS ASSIGNED TO THE POST
+							if(count($teams)>0){
+								foreach ($teams as $team) {
+									if(in_array($team->term_id, $post_teams)){
+										$canaccess = true;
+										break;
+									}
 								}
 							}
 						}
@@ -1064,7 +1220,7 @@ if ( 0 != $post->ID ) {
                     }
                 }
 
-                $output .= '<li id="rpg-'.$team->slug.'"><label class="selectit"><input value="'.$team->term_id.'" name="rpg-team'.$team->term_id.'" id="in-rpg-'.$team->slug.'" ' .$checked. ' type="checkbox"'. (count($teams)==1 ? ' onclick="this.checked=!this.checked;""': '').'>'.$team->name.'</label></li>';
+                $output .= '<li id="rpg-'.$team->slug.'"><label class="selectit"><input value="'.$team->term_id.'" name="rpg-team'.$team->term_id.'" id="in-rpg-'.$team->slug.'" ' .$checked. ' type="checkbox"'. (count($teams)==1 ? ' onclick="this.checked=!this.checked;"': '').'>'.$team->name.'</label></li>';
             }
 
             $output .= '</ul>';

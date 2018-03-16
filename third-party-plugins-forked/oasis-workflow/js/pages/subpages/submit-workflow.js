@@ -21,7 +21,8 @@
                  "<input type='hidden' id='hi_due_date' name='hi_due_date' />" +
                  "<input type='hidden' id='hi_publish_datetime' name='hi_publish_datetime' />" +
                  "<input type='hidden' id='hi_comment' name='hi_comment' />" +
-                 "<input type='hidden' id='save_action' name='save_action' />"
+                 "<input type='hidden' id='save_action' name='save_action' />" +
+                 "<input type='hidden' id='owf_action_name' name='owf_action_name' value='publish' />"
                  );
       }
    }

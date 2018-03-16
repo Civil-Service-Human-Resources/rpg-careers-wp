@@ -23,7 +23,20 @@ if( $action_history_id ) {
    $step_info = json_decode( $current_step->step_info );
    $process_type = $step_info->process;
    $post_id = $current_action->post_id;
+
+   $action_name = '';
+   switch (get_post_status($post_id)){
+		case 'ready-to-bin':
+		case 'with-approver-delete':
+		case 'trash':
+			$action_name = 'delete';
+			break;
+		default:
+			$action_name = 'publish';
+			break;
+   }
 }
+
 $default_due_days = get_option( 'oasiswf_default_due_days' );
 $default_date = date_i18n( OASISWF_EDIT_DATE_FORMAT, current_time( 'timestamp' ) );
 if( !empty( $default_due_days ) ) {
@@ -174,5 +187,6 @@ $priority_label = ! empty( $workflow_terminology_options['taskPriorityText'] ) ?
     <input type="hidden" id="hi_parrent_page" value="<?php echo esc_attr( $parent_page ); ?>" />
     <input type="hidden" id="hi_current_process" value="<?php echo esc_attr( $process ); ?>" />
     <input type="hidden" id="hi_task_user" value="<?php echo esc_attr( $task_user ); ?>" />
-    <input type="hidden" name="owf_signoff_ajax_nonce" id="owf_signoff_ajax_nonce" value="<?php echo wp_create_nonce( 'owf_signoff_ajax_nonce' ); ?>" />
+    <input type="hidden" id="owf_signoff_ajax_nonce" name="owf_signoff_ajax_nonce" value="<?php echo wp_create_nonce( 'owf_signoff_ajax_nonce' ); ?>" />
+	<input type="hidden" id="owf_action_name" name="owf_action_name" value="<?php echo esc_attr( $action_name ); ?>" />
 </div>
