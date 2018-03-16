@@ -131,6 +131,7 @@ class OW_Process_Flow {
 
       $form = $_POST[ 'form' ];
       parse_str( $form, $_POST );
+	  $action_name = '';
 
       $post_tag_count = 0;
       if ( ! empty( $_POST[ 'tax_input' ][ 'post_tag' ] ) ) {
@@ -148,11 +149,8 @@ class OW_Process_Flow {
       }
 
       $post_title = isset( $data["post_title"] ) ? $data["post_title"] : '' ;
-
       $post_excerpt = isset( $data[ 'excerpt' ] ) ? $data[ 'excerpt' ] : '';
-
-       $post_content =  isset( $_POST['content'] ) ? $_POST['content'] : '';
-
+      $post_content =  isset( $_POST['content'] ) ? $_POST['content'] : '';
       $user_provided_due_date = $data[ 'hi_due_date' ];
 
       // returns the post id of autosave post
@@ -191,20 +189,25 @@ class OW_Process_Flow {
          wp_send_json_error( array( 'errorMessage' => $messages ) );
       }
 
-      $post_status = "draft"; // default status, if nothing found
-      // get post_status according to first step
-      $ow_workflow_service = new OW_Workflow_Service();
-      $step = $ow_workflow_service->get_step_by_id( $step_id );
-      if ( $step && $workflow = $ow_workflow_service->get_workflow_by_id( $step->workflow_id ) ) {
-         $wf_info = json_decode( $workflow->wf_info );
-         if ( $wf_info->first_step && count( $wf_info->first_step ) == 1 ) {
-            $first_step = $wf_info->first_step[ 0 ];
-            if ( is_object( $first_step ) && isset( $first_step->post_status ) &&
-                    ! empty( $first_step->post_status ) ) {
-               $post_status = $first_step->post_status;
-            }
-         }
+	  if (!empty($_POST['owf_action_name'])) {
+         $action_name = sanitize_text_field($_POST['owf_action_name']);
       }
+
+      $post_status = "draft"; // default status, if nothing found
+
+		// get post_status according to first step
+		$ow_workflow_service = new OW_Workflow_Service();
+		$step = $ow_workflow_service->get_step_by_id($step_id);
+
+		if ( $step && $workflow = $ow_workflow_service->get_workflow_by_id( $step->workflow_id ) ) {
+			$wf_info = json_decode( $workflow->wf_info );
+			if ( $wf_info->first_step && count( $wf_info->first_step ) == 1 ) {
+				$first_step = $wf_info->first_step[ 0 ];
+				if ( is_object( $first_step ) && isset( $first_step->post_status ) && ! empty( $first_step->post_status ) ) {
+					$post_status = $first_step->post_status.(($action_name === 'delete')?'-delete':'');
+				}
+			}
+		}
 
       // No validation errors found, continue with submission to workflow
       wp_send_json_success( array( 'post_status' => $post_status ) );
@@ -340,6 +343,7 @@ class OW_Process_Flow {
 
       // sanitize post_id
       $post_id = intval( $_POST['post_id'] );
+	  $action_name = '';
 
       // capability check
       if ( ! OW_Utility::instance()->is_post_editable( $post_id ) ) {
@@ -379,10 +383,13 @@ class OW_Process_Flow {
 
       $history_id = isset( $_POST[ "history_id" ] ) ? intval( $_POST[ "history_id" ] ) : null;
 
+	  if (!empty($_POST['owf_action_name'])) {
+         $action_name = sanitize_text_field($_POST['owf_action_name']);
+      }
+
       // $_POST will get changed after the call to get_post_data, so get all the $_POST data before this call
       // get post data, either from the form or from the post_id
       $post_data = $this->get_post_data( $post_id );
-
 
       // returns the post id of autosave post
       // ref :  https://wordpress.org/support/topic/need-to-invoke-autosave-programmatically-before-running-a-custom-action?replies=4#post-7853159
@@ -403,11 +410,11 @@ class OW_Process_Flow {
           "post_tag" => $post_data[ 'post_tag_count' ],
           "category" => $post_data[ 'post_category_count' ],
           "post_excerpt" => $post_data[ 'post_excerpt' ],
-          "current_page" => $post_data['current_page']
+          "current_page" => $post_data['current_page'],
+		  "action_name" => $action_name
       );
 
       $validation_result = array();
-
       $validation_result = $this->validate_workflow_sign_off( $post_id, $sign_off_workflow_params );
 
       // Check if due date selected is past date if yes than show error messages
@@ -441,8 +448,13 @@ class OW_Process_Flow {
       $source_step_id = $history_details->step_id;
       $target_step_id = $step_id;
 
-      $new_post_status = $this->get_post_status_from_step_transition( $post_id, $source_step_id, $target_step_id );
-      $submit_post_to_step_results[ "new_post_status" ] = $new_post_status;
+	  if($action_name === 'delete') {
+		$new_post_status = 'ready-to-bin';
+	  } else {
+		$new_post_status = $this->get_post_status_from_step_transition( $post_id, $source_step_id, $target_step_id );
+	  }
+
+	  $submit_post_to_step_results[ "new_post_status" ] = $new_post_status;
 
       wp_send_json_success( $submit_post_to_step_results );
    }
@@ -655,6 +667,7 @@ class OW_Process_Flow {
 
        // sanitize post_id
       $post_id = intval( $_POST['post_id'] );
+	  $action_name = '';
 
       // capability check
       if ( ! OW_Utility::instance()->is_post_editable( $post_id ) ) {
@@ -682,10 +695,13 @@ class OW_Process_Flow {
       // where is action executed from - is this from Inbox page Or Post Edit page
       $parent_page = sanitize_text_field( $_POST[ "parent_page" ] );
 
+	  if (!empty($_POST['owf_action_name'])) {
+         $action_name = sanitize_text_field($_POST['owf_action_name']);
+      }
+
       // $_POST will get changed after the call to get_post_data, so get all the $_POST data before this call
       // get post data, either from the form or from the post_id
       $post_data = $this->get_post_data( $post_id );
-
 
       // create an array of all the inputs
       $workflow_complete_params = array(
@@ -699,7 +715,8 @@ class OW_Process_Flow {
           "post_tag" => $post_data[ 'post_tag_count' ],
           "category" => $post_data[ 'post_category_count' ],
           "post_excerpt" => $post_data[ 'post_excerpt' ],
-          "current_page" => $post_data['current_page']
+          "current_page" => $post_data['current_page'],
+		  "action_name" => $action_name
       );
 
       $validation_result = $this->validate_workflow_complete( $post_id, $workflow_complete_params );
@@ -729,7 +746,12 @@ class OW_Process_Flow {
 
       $complete_workflow_results = array();
 
-      $new_post_status = get_post_status( $post_id );
+	   if($action_name === 'delete') {
+		$new_post_status = 'ready-to-bin';
+	  } else {
+		$new_post_status = get_post_status( $post_id );
+	  }
+      
       $complete_workflow_results[ "new_post_status" ] = $result_array["new_action_history_id"];
 
       wp_send_json_success( $complete_workflow_results );
@@ -2044,7 +2066,7 @@ class OW_Process_Flow {
     *
     * @return string $step_status
     */
-   public function copy_step_status_to_post( $post_id, $from_step_id, $new_action_history_id, $current_page, $publish_datetime = null, $immediately = null ) {
+   public function copy_step_status_to_post( $post_id, $from_step_id, $new_action_history_id, $current_page, $publish_datetime = null, $immediately = null, $action_name = 'publish' ) {
       global $wpdb;
 
       $from_step_id = intval( $from_step_id );
@@ -2080,6 +2102,7 @@ class OW_Process_Flow {
             $step_status = get_post_status( $post_id );
             // TODO : handle other use cases when publish is NOT the last step, via "is Last Step?"
          }
+
       } else { // get the post_status from the connection info object.
          $step = $ow_workflow_service->get_step_by_id( $target_id );
          $workflow_id = $step->workflow_id;
@@ -2107,6 +2130,18 @@ class OW_Process_Flow {
                } 
             }
          }
+
+		 //HAS AN $action_name BEEN PASSED IN
+		 if($action_name){
+			if($action_name === 'delete'){
+				if (strpos($step_status, 'publish') !== false){
+					$step_status = 'ready-to-bin';
+				}
+				if($previous_status === 'ready-to-bin'){
+					$step_status = 'trash';
+				}
+			}
+		 }
 
          $wpdb->update(
             $wpdb->posts,
@@ -2141,6 +2176,18 @@ class OW_Process_Flow {
             $post_name = sanitize_title($title, $post_id);
          }
          
+		 //HAS AN $action_name BEEN PASSED IN
+		 if($action_name){
+			if($action_name === 'delete'){
+				if (strpos($step_status, 'publish') !== false){
+					$step_status = 'ready-to-bin';
+				}
+				if($previous_status === 'ready-to-bin'){
+					$step_status = 'trash';
+				}
+			}
+		 }
+
          $wpdb->update(
             $wpdb->posts,
             array(
@@ -2270,6 +2317,8 @@ class OW_Process_Flow {
       $publish_date = sanitize_text_field( $_POST[ "hi_publish_datetime" ] );
       $user_provided_publish_date = isset( $publish_date ) ? $publish_date : "";
 
+	  $action_name = sanitize_text_field( $_POST[ "owf_action_name" ] );
+
       // update priority on the post
       update_post_meta( $post_id, "_oasis_task_priority", $priority );
 
@@ -2279,6 +2328,7 @@ class OW_Process_Flow {
       $workflow_submit_data[ 'due_date' ] = $due_date;
       $workflow_submit_data[ 'comments' ] = $comments;
       $workflow_submit_data[ 'publish_date' ] = $user_provided_publish_date;
+	  $workflow_submit_data[ 'action_name' ] = $action_name;
 
       $this->submit_post_to_workflow_internal( $post_id, $workflow_submit_data );
    }
@@ -2357,20 +2407,20 @@ class OW_Process_Flow {
          $this::ow_update_post_publish_date( $post_id, $user_provided_publish_date );
       }
 
-      // Lets update the post status when user do submit post to workflow first time
-      $ow_workflow_service = new OW_Workflow_Service();
-      $step = $ow_workflow_service->get_step_by_id( $step_id );
-      if( $step && $workflow = $ow_workflow_service->get_workflow_by_id( $step->workflow_id ) ) {
-         $wf_info = json_decode( $workflow->wf_info );
-         if( $wf_info->first_step && count( $wf_info->first_step ) == 1 ) {
-            $first_step = $wf_info->first_step[0];
-            if( is_object( $first_step ) &&
-                isset( $first_step->post_status ) &&
-                ! empty( $first_step->post_status ) ) {
-               $this->ow_update_post_status( $post_id, $first_step->post_status );
-            }
-         }
-      }
+		// Lets update the post status when user do submit post to workflow first time
+		$ow_workflow_service = new OW_Workflow_Service();
+		$step = $ow_workflow_service->get_step_by_id( $step_id );
+		if( $step && $workflow = $ow_workflow_service->get_workflow_by_id( $step->workflow_id ) ) {
+			$wf_info = json_decode( $workflow->wf_info );
+			if( $wf_info->first_step && count( $wf_info->first_step ) == 1 ) {
+			$first_step = $wf_info->first_step[0];
+			if( is_object( $first_step ) &&
+				isset( $first_step->post_status ) &&
+				! empty( $first_step->post_status ) ) {
+				$this->ow_update_post_status( $post_id, $first_step->post_status.(($workflow_submit_data['action_name'] === 'delete')?'-delete':''));
+			}
+			}
+		}
 
       update_post_meta( $post_id, "_oasis_is_in_workflow", 1 ); // set the post meta to 1, specifying that the post is in a workflow.
 
@@ -2774,6 +2824,7 @@ class OW_Process_Flow {
       $sign_off_comments = $workflow_signoff_data[ 'comments' ];
       $assigned_actors = $workflow_signoff_data[ 'actors' ];
       $step_decision = $workflow_signoff_data[ 'step_decision' ];
+	  $action_name = $workflow_signoff_data[ 'action_name' ];
 
       // get the history details from fc_action_history
       $history_details = $ow_history_service->get_action_history_by_id( $history_id );
@@ -2788,7 +2839,6 @@ class OW_Process_Flow {
       // this action will allow to change the actor list
       do_action_ref_array( 'owf_get_actors', array( &$actors_info ) );
       $actors = $actors_info[ 0 ];
-
 
       $new_action_history_id = "";
 
@@ -2819,7 +2869,7 @@ class OW_Process_Flow {
          $wpdb->update( $action_table, $review_data, array( "actor_id" => $task_actor_id, "action_history_id" => $history_id ) );
 
          // invoke the review step procedure to make a review decision
-         $new_action_history_id = $this->review_step_procedure( $history_id, $history_details->step_id );
+         $new_action_history_id = $this->review_step_procedure( $history_id, $history_details->step_id, $action_name );
       } else { // the current step is either an assignment or publish step, so no review decision check required
          $data = array(
              'action_status'     => "assignment",
@@ -2837,9 +2887,8 @@ class OW_Process_Flow {
 
          // insert data from the next step
          $new_action_history_id = $this->save_action( $data, $actors, $history_id );
-
          //------post status change----------
-         $this->copy_step_status_to_post( $post_id, $history_details->step_id, $new_action_history_id, $workflow_signoff_data['current_page'] );
+         $this->copy_step_status_to_post( $post_id, $history_details->step_id, $new_action_history_id, $workflow_signoff_data['current_page'], null, null, $action_name );
       }
 
       do_action( 'owf_step_sign_off', $post_id, $new_action_history_id );
@@ -2883,7 +2932,7 @@ class OW_Process_Flow {
     * process for review step
     */
 
-   private function review_step_procedure( $action_history_id, $step_id ) {
+   private function review_step_procedure( $action_history_id, $step_id, $action_name ) {
       global $wpdb;
       $review_setting = "";
 
@@ -2930,15 +2979,16 @@ class OW_Process_Flow {
       }
 
       $new_action_history_id = 0;
+
       switch ( $review_setting ) {
          case "everyone":
-            $new_action_history_id = $this->review_step_everyone( $review_data, $action_history_id );
+            $new_action_history_id = $this->review_step_everyone( $review_data, $action_history_id, $action_name );
             break;
          case "anyone":
-            $new_action_history_id = $this->review_step_anyone( $review_data, $action_history_id );
+            $new_action_history_id = $this->review_step_anyone( $review_data, $action_history_id, $action_name );
             break;
          case "more_than_50":
-            $new_action_history_id = $this->review_step_more_50( $review_data, $action_history_id );
+            $new_action_history_id = $this->review_step_more_50( $review_data, $action_history_id, $action_name );
             break;
       }
 
@@ -2949,7 +2999,7 @@ class OW_Process_Flow {
     * everyone has to approve before the item moves to the next step
     */
 
-   private function review_step_everyone( $review_data, $action_history_id ) {
+   private function review_step_everyone( $review_data, $action_history_id, $action_name ) {
       /*
        * If assignment (not yet completed) are found, return false; we cannot make any decision yet
        * If we find even one rejected review, complete the step as failed.
@@ -2960,12 +3010,12 @@ class OW_Process_Flow {
          return 0; // there are users who haven't completed their review
 
       if ( isset( $review_data[ "unable" ] ) && $review_data[ "unable" ] ) { // even if we see one rejected, we need to go to failure path.
-         $new_action_history_id = $this->save_review_action( $review_data[ "unable" ], $action_history_id, "unable" );
+         $new_action_history_id = $this->save_review_action( $review_data[ "unable" ], $action_history_id, "unable", $action_name );
          return $new_action_history_id; // since we found our condition
       }
 
       if ( isset( $review_data[ "complete" ] ) && $review_data[ "complete" ] ) { // looks like we only have completed/approved reviews, lets complete this step.
-         $new_action_history_id = $this->save_review_action( $review_data[ "complete" ], $action_history_id, "complete" );
+         $new_action_history_id = $this->save_review_action( $review_data[ "complete" ], $action_history_id, "complete", $action_name );
          return $new_action_history_id; // since we found our condition
       }
    }
@@ -2974,7 +3024,7 @@ class OW_Process_Flow {
     * anyone has to approve before the item moves to the next step
     */
 
-   private function review_step_anyone( $review_data, $action_history_id ) {
+   private function review_step_anyone( $review_data, $action_history_id, $action_name ) {
 
       /*
        * First find any approved review, if found, complete the step as pass.
@@ -2983,7 +3033,7 @@ class OW_Process_Flow {
        */
 
       if ( isset( $review_data[ "complete" ] ) && $review_data[ "complete" ] ) { // looks like at least one has approved, lets complete this step.
-         $new_action_history_id = $this->save_review_action( $review_data[ "complete" ], $action_history_id, "complete" );
+         $new_action_history_id = $this->save_review_action( $review_data[ "complete" ], $action_history_id, "complete", $action_name );
 
          // change review status on remaining/not completed tasks as "no_action"
          if ( isset( $review_data[ "assignment" ] ) && $review_data[ "assignment" ] ) {
@@ -2994,7 +3044,7 @@ class OW_Process_Flow {
       }
 
       if ( isset( $review_data[ "unable" ] ) && $review_data[ "unable" ] ) { // looks like at least one has rejected, we need to go to failure path.
-         $new_action_history_id = $this->save_review_action( $review_data[ "unable" ], $action_history_id, "unable" );
+         $new_action_history_id = $this->save_review_action( $review_data[ "unable" ], $action_history_id, "unable", $action_name );
 
          // change review status on remaining/not completed tasks as "no_action"
          if ( isset( $review_data[ "assignment" ] ) && $review_data[ "assignment" ] ) {
@@ -3009,7 +3059,7 @@ class OW_Process_Flow {
     * more than 50% should approve
     */
 
-   private function review_step_more_50( $review_data, $action_history_id ) {
+   private function review_step_more_50( $review_data, $action_history_id, $action_name ) {
       $current_assigned_reviews = 0;
       $current_rejected_reviews = 0;
       $current_approved_reviews = 0;
@@ -3036,7 +3086,7 @@ class OW_Process_Flow {
       $need = floor( $total_reviews / 2 ) + 1; //more than 50%
 
       if ( $current_approved_reviews >= $need && isset( $review_data[ "complete" ] ) && $review_data[ "complete" ] ) { // looks like we have more than 50% approved, lets complete this step.
-         $new_action_history_id = $this->save_review_action( $review_data[ "complete" ], $action_history_id, "complete" );
+         $new_action_history_id = $this->save_review_action( $review_data[ "complete" ], $action_history_id, "complete", $action_name );
 
          // change review status on remaining/not completed tasks as "no_action"
          if ( isset( $review_data[ "assignment" ] ) && $review_data[ "assignment" ] ) {
@@ -3047,7 +3097,7 @@ class OW_Process_Flow {
       }
 
       if ( $current_rejected_reviews >= $need && isset( $review_data[ "unable" ] ) && $review_data[ "unable" ] ) { // looks like we have more than 50% rejected, we need to go to failure path.
-         $new_action_history_id = $this->save_review_action( $review_data[ "unable" ], $action_history_id, "unable" );
+         $new_action_history_id = $this->save_review_action( $review_data[ "unable" ], $action_history_id, "unable", $action_name );
 
          // change review status on remaining/not completed tasks as "no_action"
          if ( isset( $review_data[ "assignment" ] ) && $review_data[ "assignment" ] ) {
@@ -3064,7 +3114,7 @@ class OW_Process_Flow {
        * we should take the failure path
        */
       if ( $current_rejected_reviews == $current_approved_reviews && ! isset( $review_data[ "assignment" ] ) ) {
-         $new_action_history_id = $this->save_review_action( $review_data[ "unable" ], $action_history_id, "unable" );
+         $new_action_history_id = $this->save_review_action( $review_data[ "unable" ], $action_history_id, "unable", $action_name );
          return $new_action_history_id; // since we found our condition
       }
    }
@@ -3091,7 +3141,7 @@ class OW_Process_Flow {
     * Save the review action data
     */
 
-   private function save_review_action( $ddata, $action_history_id, $result ) {
+   private function save_review_action( $ddata, $action_history_id, $result, $action_name ) {
       $ow_history_service = new OW_History_Service();
       $action = $ow_history_service->get_action_history_by_id( $action_history_id );
 
@@ -3147,8 +3197,8 @@ class OW_Process_Flow {
 
       $new_action_history_id = $this->save_action( $review_data, $next_actors, $action->ID );
 
-      //--------post status change---------------
-      $this->copy_step_status_to_post( $action->post_id, $action->step_id, $new_action_history_id, "edit" );
+	  //--------post status change---------------
+      $this->copy_step_status_to_post( $action->post_id, $action->step_id, $new_action_history_id, "edit", null, null, $action_name );
 
       return $new_action_history_id;
    }
@@ -3163,6 +3213,7 @@ class OW_Process_Flow {
       $ow_history_service = new OW_History_Service();
       $history = $ow_history_service->get_action_history_by_id( $workflow_complete_params[ "history_id" ] );
       $currentTime = current_time( 'mysql' );
+	  $action_name = $workflow_complete_params[ 'action_name' ];
 
       $data = array(
           'action_status' => "complete",
@@ -3196,13 +3247,9 @@ class OW_Process_Flow {
                  ), array( 'ID' => $workflow_complete_params[ "history_id" ] ) );
 
          if ( $workflow_complete_params[ "publish_datetime" ] != null && ! $workflow_complete_params[ "publish_immediately" ] ) {
-            $new_post_status = $this->copy_step_status_to_post( $post_id, $history->step_id,
-               $new_action_history_id, $workflow_complete_params['current_page'],
-               $workflow_complete_params[ "publish_datetime" ], false );
+            $new_post_status = $this->copy_step_status_to_post( $post_id, $history->step_id, $new_action_history_id, $workflow_complete_params['current_page'], $workflow_complete_params[ "publish_datetime" ], false, $action_name );
          } else {
-            $new_post_status = $this->copy_step_status_to_post( $post_id, $history->step_id,
-               $new_action_history_id, $workflow_complete_params['current_page'],
-               current_time( 'mysql' ), true );
+            $new_post_status = $this->copy_step_status_to_post( $post_id, $history->step_id, $new_action_history_id, $workflow_complete_params['current_page'], current_time( 'mysql' ), true, $action_name );
          }
       }
       $return_array = array(

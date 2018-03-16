@@ -54,9 +54,6 @@ jQuery( document ).ready( function () {
             }
          } );
       }
-      jQuery( "#publishing-action" ).append( "<a style='float:right;margin-top:10px;' href='admin.php?page=oasiswf-inbox'>" +
-              owf_submit_step_vars.inboxButton + "</a>" );
-
       jQuery( '.inline-edit-status' ).hide();
    }
    
@@ -279,7 +276,8 @@ jQuery( document ).ready( function () {
          step_decision:       jQuery("#decision-select").val(),
          priority:            jQuery("#priority-select").val(),
          form:                jQuery("form#post").serialize(),
-         security:            jQuery("#owf_signoff_ajax_nonce").val()
+         security:            jQuery("#owf_signoff_ajax_nonce").val(),
+         owf_action_name:     jQuery("#owf_action_name").val()  
       };
 
       jQuery.post(ajaxurl, submit_post_to_step_data, function (response) {
@@ -338,7 +336,8 @@ jQuery( document ).ready( function () {
          parent_page:      jQuery( "#hi_parrent_page" ).val(),
          immediately:      im_date,
          form:             jQuery("form#post").serialize(),
-         security:         jQuery( '#owf_signoff_ajax_nonce' ).val()
+         security:         jQuery( '#owf_signoff_ajax_nonce' ).val(),
+         owf_action_name:     jQuery("#owf_action_name").val()  
       };
 
       jQuery.post( ajaxurl, workflow_complete_data, function ( response ) {

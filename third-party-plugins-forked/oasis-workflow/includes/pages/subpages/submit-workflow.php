@@ -29,9 +29,9 @@ if( $workflows && isset( $_GET['post'] ) && $_GET['post'] ) {
 }
 
 $workflow_terminology_options = get_option( 'oasiswf_custom_workflow_terminology' );
-$assign_actors_label = !empty( $workflow_terminology_options['assignActorsText'] ) ? $workflow_terminology_options['assignActorsText'] : __( 'Assign Actor(s)', 'oasisworkflow' );
-$due_date_label = !empty( $workflow_terminology_options['dueDateText'] ) ? $workflow_terminology_options['dueDateText'] : __( 'Due Date', 'oasisworkflow' );
-$publish_date_label = !empty( $workflow_terminology_options['publishDateText'] ) ? $workflow_terminology_options['publishDateText'] : __( 'Publish Date', 'oasisworkflow' );
+$assign_actors_label = !empty( $workflow_terminology_options['assignActorsText'] ) ? $workflow_terminology_options['assignActorsText'] : __( 'Assign actor(s)', 'oasisworkflow' );
+$due_date_label = !empty( $workflow_terminology_options['dueDateText'] ) ? $workflow_terminology_options['dueDateText'] : __( 'Due date', 'oasisworkflow' );
+$publish_date_label = !empty( $workflow_terminology_options['publishDateText'] ) ? $workflow_terminology_options['publishDateText'] : __( 'Publish date', 'oasisworkflow' );
 $priority_label = !empty( $workflow_terminology_options['taskPriorityText'] ) ? $workflow_terminology_options['taskPriorityText'] : __( 'Priority', 'oasisworkflow' );
 
 ?>
@@ -39,9 +39,8 @@ $priority_label = !empty( $workflow_terminology_options['taskPriorityText'] ) ? 
    <div class="dialog-title"><strong><?php echo __( "Submit", "oasisworkflow" ); ?></strong></div>
    <div id="ow-step-messages" class="owf-hidden"></div>
    <div id="submit-workflow-contents">
-      <div class="select-part">
-         <label><?php echo __( "Workflow : ", "oasisworkflow" ); ?>
-         </label>
+      <div class="select-part" style="display:none;">
+         <label><?php echo __( "Workflow:", "oasisworkflow" ); ?></label>
          <select id="workflow-select" style="width:200px;">
             <?php
             $count = count( $workflows );
@@ -93,7 +92,7 @@ ADD_BLANK_OPTION;
       }
       ?>
       <div class="select-info">
-         <label><?php echo __( "Step : ", "oasisworkflow" ); ?></label>
+         <label><?php echo __( "Step:", "oasisworkflow" ); ?></label>
          <select id="step-select" name="step-select" style="width:150px;" real="step-loading-span" disabled="true"></select>
          <span id="step-loading-span"></span>
          <br class="clear">
@@ -101,7 +100,7 @@ ADD_BLANK_OPTION;
 
       <?php if( get_option( 'oasiswf_priority_setting' ) == 'enable_priority' ) { ?>
          <div class="select-info">
-            <label><?php echo $priority_label . " :"; ?></label>
+            <label><?php echo $priority_label . ":"; ?></label>
             <select id="priority-select" name="priority-select" style="width:150px;">
                <?php OW_Utility::instance()->get_priority_dropdown(); ?>
             </select>
@@ -111,14 +110,14 @@ ADD_BLANK_OPTION;
       <?php } ?>
 
       <div id="one-actors-div" class="select-info">
-         <label><?php echo __( "Assign actor : ", "oasisworkflow" ); ?></label>
+         <label><?php echo __( "Assign actor:", "oasisworkflow" ); ?></label>
          <select id="actor-one-select" name="actor-one-select" style="width:150px;" real="assign-loading-span"></select>
          <span class="assign-loading-span">&nbsp;</span>
          <br class="clear">
       </div>
      
          <div id="multiple-actors-div" class="select-info" style="height:140px;">
-            <label><?php echo $assign_actors_label . " :"; ?></label>
+            <label><?php echo $assign_actors_label . ":"; ?></label>
             <div class="select-actors-div">
                <div class="select-actors-list" >
                   <label><?php echo __( "Available", "oasisworkflow" ); ?></label>
@@ -140,7 +139,7 @@ ADD_BLANK_OPTION;
       <?php if ( $default_due_days !== '' || $reminder_days !== '' || $reminder_days_after !== '' ): ?>
          <div class="owf-text-info left full-width">
             <div class="left">
-               <label><?php echo $due_date_label . " : "; ?>
+               <label><?php echo $due_date_label . ":"; ?>
                   <a href="#" title="<?php echo __( 'Specify a date for the assignment to be completed.', "oasisworkflow" ); ?>" class="tooltip">
                      <span title="">
                         <img src="<?php echo OASISWF_URL . '/img/help.png'; ?>" class="help-icon"/></span>
@@ -159,8 +158,8 @@ ADD_BLANK_OPTION;
       <?php if ( $publish_date_settings !== 'hide' ): ?>
       <div class="owf-text-info left full-width">
          <div class="left">
-            <label><?php echo $publish_date_label . " : "; ?>
-               <a href="#" title="<?php echo __( 'Specify a desired publish date for the post.', "oasisworkflow" ); ?>" class="tooltip">
+            <label><?php echo $publish_date_label . ":"; ?>
+               <a href="#" title="<?php echo __( 'Specify a publish date for the content.', "oasisworkflow" ); ?>" class="tooltip">
                   <span title="">
                      <img src="<?php echo OASISWF_URL . '/img/help.png'; ?>" class="help-icon"/></span>
                </a>
@@ -179,7 +178,7 @@ ADD_BLANK_OPTION;
 
       <div class="select-info owf-text-info left full-width" id="comments-div">
          <div class="left full-width">
-            <label><?php echo __( "Comments : ", "oasisworkflow" ); ?></label>
+            <label><?php echo __( "Comments:", "oasisworkflow" ); ?></label>
             <textarea id="workflowComments" style="height:100px;width:400px;margin-top:10px;" ></textarea>
          </div>
          <br class="clear">
