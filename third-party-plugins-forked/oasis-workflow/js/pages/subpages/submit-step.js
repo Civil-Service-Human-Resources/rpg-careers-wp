@@ -370,7 +370,13 @@ jQuery( document ).ready( function () {
             if ( jQuery("#hidden_post_status").length ) {
                jQuery("#hidden_post_status").val(response.data.new_post_status);
             }
-            jQuery( "#save-post" ).click();
+            
+            if(response.data.new_post_status == 'rev-sign-off'){
+                //SHOW PAGE LISTING
+                window.location.replace(window.location.origin + '/wp-admin/edit.php?post_type=page');
+            } else {
+                jQuery( "#save-post" ).click();
+            }
          }
       } );
    } );

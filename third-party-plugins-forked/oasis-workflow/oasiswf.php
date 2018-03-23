@@ -1314,7 +1314,6 @@ class OW_Plugin_Init {
       include_once( OASISWF_PATH . 'includes/class-ow-process-flow.php' );
       include_once( OASISWF_PATH . 'includes/class-ow-history-service.php' );
       include_once( OASISWF_PATH . 'includes/class-ow-inbox-service.php' );
-      include_once( OASISWF_PATH . 'includes/class-ow-review-rating.php' );
       include_once( OASISWF_PATH . 'includes/class-ow-report-service.php' );
 
 		/**
