@@ -94,6 +94,9 @@ class rpgutils{
 		add_filter('pre_update_option_large_size_w', function(){ return 800; });
 		add_filter('pre_update_option_large_size_h', function(){ return 600; });
 
+		//WORKFLOW - FILTER USER LISTINGS
+		add_filter('owf_get_users_in_step', array($this, 'filter_step_user_list'), 10, 3);
+
     }
 
 	function remove_admin_login_header() {
@@ -232,6 +235,9 @@ switch ($post_status) {
 	case 'draft':
 	case 'auto-draft':
 		_e('Draft');
+		if(get_post_meta($post->ID, '_rpg_page_revision_of', true)!==''){
+			echo ' - REVISION';
+		}
 		break;
 	case 'private':
 		_e('Privately Published');
@@ -245,9 +251,23 @@ switch ($post_status) {
 	case 'pending':
 		_e('Pending Review');
 		break;
-	case 'with-approver-delete':
-	case 'ready-to-bin':
-		_e('Deletion');
+	case 'del-with-approver':
+	case 'del-sign-off':
+		_e('Deletion workflow');
+		break;
+	case 'rev-with-approver':
+	case 'rev-sign-off':
+		_e('Revision workflow');
+		break;
+	case 'unpub-with-approver':
+	case 'unpub-sign-off':
+		_e('Unpublish workflow');
+		break;
+	case 'pub-with-approver':
+	case 'pub-sign-off':
+		_e('Publish workflow');
+		break;
+
 }?></span></div>
 <?php   $revision_count = count(wp_get_post_revisions($post->ID));
 		$latest_revision = current(wp_get_post_revisions($post->ID));
@@ -275,7 +295,9 @@ switch ($post_status) {
 			} elseif ( time() < strtotime( $post->post_date_gmt . ' +0000' ) ) { // draft, 1 or more saves, future date specified
 				/* translators: Post date information. 1: Date on which the post is to be published */
 				$stamp = __('Schedule for: <b>%1$s</b>');
-			} elseif ( 'with-approver-delete' == $post_status || 'ready-to-bin' == $post_status ) {
+			} elseif ( 'del-with-approver' == $post_status || 'del-sign-off' == $post_status || 'rev-with-approver'== $post_status
+						|| 'rev-sign-off'== $post_status || 'unpub-with-approver'== $post_status || 'unpub-sign-off'== $post_status 
+						|| 'pub-with-approver'== $post_status || 'pub-sign-off'== $post_status) {
 				$stamp = '';
 			} else { // draft, 1 or more saves, date specified
 				/* translators: Post date information. 1: Date on which the post is to be published */
@@ -292,19 +314,50 @@ switch ($post_status) {
 		<span id="timestamp">
 		<?php printf($stamp, $date); ?></span>
 	</div>
-<?php }?>
-			<div class="misc-pub-section">
-			<fieldset><legend style="font-weight:bold;">Actions</legend>
-			<ul style="margin-top:4px;">
-			<?php if($post_status!='with-approver-delete' && $post_status!='ready-to-bin'){?>
-			<li><input type="radio" id="action1" name="page_action" value="save"><label for="action1">Save</label></li>
-			<li><input type="radio" id="action2" name="page_action" value="publish" checked><label for="action2">Publish</label></li>
-			<?php }?>
-
-			<li><input type="radio" id="action3" name="page_action" value="delete" <?php if($post_status==='with-approver-delete' || $post_status==='ready-to-bin'){?>checked<?php }?>><label for="action3">Delete</label></li>
-			</ul>
-			</fieldset>
-			</div>
+<?php }
+			$action_output = '';
+			$need_nonce = false;
+			switch ($post_status) {
+				case 'draft':
+				case 'auto-draft':
+					$action_output = '<li><input type="radio" id="action1" name="page_action" value="save"><label for="action1">Save</label></li>
+										<li><input type="radio" id="action2" name="page_action" value="publish" checked><label for="action2">Publish</label></li>
+										<li><input type="radio" id="action3" name="page_action" value="delete"><label for="action3">Delete</label></li>';
+					break;
+				case 'publish':
+				case 'future':
+				case 'pending':
+					$action_output = '<li><input type="radio" id="action4" name="page_action" value="unpublish"><label for="action4">Unpublish</label></li>
+										<li><input type="radio" id="action5" name="page_action" value="revise" checked><label for="action5">Revise</label></li>
+										<li><input type="radio" id="action3" name="page_action" value="delete"><label for="action3">Delete</label></li>';
+					$need_nonce = true;
+					break;
+				case 'del-with-approver':
+				case 'del-sign-off':
+					break;
+				case 'rev-with-approver':
+				case 'rev-sign-off':
+					break;
+				case 'unpub-with-approver':
+				case 'unpub-sign-off':
+					break;
+				case 'pub-with-approver':
+				case 'pub-sign-off':
+					break;
+			}
+			
+			if($action_output !=''){ ?>
+				<div class="misc-pub-section">
+				<fieldset><legend style="font-weight:bold;">Actions</legend>
+				<ul style="margin-top:4px;">
+				<?php echo $action_output; ?>	
+				</ul>
+				</fieldset>
+				<?php if($need_nonce){ ?>
+					<input type="hidden" id="owf_revise_ajax_nonce" name="owf_revise_ajax_nonce" value="<?php echo wp_create_nonce('owf_revise_ajax_nonce'); ?>" />
+				<?php } ?>
+				</div>
+			<?php } ?> 
 		</div>
     </div>
 	<div id="major-publishing-actions">
@@ -313,50 +366,48 @@ switch ($post_status) {
 		<div id="preview-action">
 		<?php
 		$preview_link = esc_url( get_preview_post_link( $post ) );
-		if ( 'publish' == $post_status ) {
-			$preview_button_text = __( 'Preview changes' );
-		} else {
-			$preview_button_text = __( 'Preview' );
-		}
-
+		$preview_button_text = __( 'Preview' );
 		$preview_button = sprintf( '%1$s<span class="screen-reader-text"> %2$s</span>',$preview_button_text,__('(opens in a new window)'));
 		?>
 		<a style="float:left;" class="preview button" href="<?php echo $preview_link; ?>" target="wp-preview-<?php echo (int) $post->ID; ?>" id="post-preview"><?php echo $preview_button; ?></a>
 		<input type="hidden" name="wp-preview" id="wp-preview" value="" />
 		</div>
-		<?php endif; // public post type ?>
+		<?php endif; ?>
         <span class="spinner"></span>
         <input name="original_publish" type="hidden" id="original_publish" value="Publish">
         <input type="submit" name="publish" id="publish" class="button button-primary button-large" value="Publish" style="display: none;">
-		<?php if ( 'publish' != $post_status && 'future' != $post_status && 'pending' != $post_status ) { ?>
-		<input <?php if ( 'private' == $post_status ) { ?>style="display:none"<?php } ?> type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save Draft'); ?>" class="button button-primary button-large" />
-		<span class="spinner"></span>
-		<?php } elseif ( 'pending' == $post_status && $can_publish ) { ?>
-		<input type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save as Pending'); ?>" class="button button-primary button-large" />
-		<?php } ?>
+		<input <?php if ( 'private' == $post_status || 'publish' == $post_status || 'future' == $post_status || 'pending' == $post_status ) { ?>style="display:none"<?php } ?> type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save Draft'); ?>" class="button button-primary button-large" />
         </div>
         <div class="clear"></div>
 	</div>
         </div>
 		<script type="text/javascript">
+			var owf_post_status = '<?php echo $post_status;?>';
 			(function(){
 				var j = document.getElementById('submitdiv');
 				var e = document.querySelectorAll('input[name=page_action]'), f = document.querySelector('input[name=page_action]:checked');
 				var g = document.getElementById('save-post'), h = document.getElementById('workflow_submit'), i, l, m, n;
-				var o = '<?php echo $post_status;?>';
+				var o = document.getElementById('workflow_revise_draft');
 
 				j.setAttribute('style','opacity:0.3;');
 
-				switch(o){
-					case 'with-approver-delete':
-					case 'ready-to-bin':
+				switch(owf_post_status){
+					case 'del-with-approver':
+					case 'del-sign-off':
 						g.setAttribute('style','display:none;');
 						i = setInterval(getElementD, 500);
 						break;
-					case 'with-approver':
-					case 'ready-to-publish':
+					case 'pub-with-approver':
+					case 'pub-sign-off':
+					case 'rev-with-approver':
+					case 'rev-sign-off':
 						g.setAttribute('style','display:none;');
 						i = setInterval(getElementE, 500);
+						break;
+					case 'publish':
+						if(h===null){
+							i = setInterval(getElement, 500);
+						}
 						break;
 					default:
 						if(h===null){
@@ -365,21 +416,22 @@ switch ($post_status) {
 						break;
 				}
 
-				if(o ==='with-approver-delete' || o === 'ready-to-bin'){
-					
-				}else{
-					
-				}
-
 				function wireUp(){
 					if(f){
-						if(f.getAttribute('value')!=='save'){
-							g.setAttribute('style','display:none;');
-						}else{
-							h.setAttribute('style','display:none;');
-							g.setAttribute('style','float:right;');
+						switch(f.getAttribute('value')){
+							case 'save':
+								h.setAttribute('style','display:none;');
+								g.setAttribute('style','float:right;');
+								break;
+							case 'revise':
+								h.setAttribute('style','display:none;');
+								break;
+							default:
+								if(g) g.setAttribute('style','display:none;');
+								if(o) o.setAttribute('style','display:none;');
+								break;
 						}
-
+						
 						l = document.querySelector('div.dialog-title');
 						l.innerHTML = '<strong><span style="text-transform: capitalize;" id="title-hook">' + f.getAttribute('value') + '</span> content</strong>';
 						n = document.getElementById('owf_action_name');
@@ -401,10 +453,15 @@ switch ($post_status) {
 					switch(a){
 						case 'save':
 							h.setAttribute('style','display:none;');
-							g.setAttribute('style','float:right;');
+							if(g) g.setAttribute('style','float:right;');
+							break;
+						case 'revise':
+							h.setAttribute('style','display:none;');
+							if(o) o.setAttribute('style','');
 							break;
 						default:
-							g.setAttribute('style','display:none;');
+							if(g) g.setAttribute('style','display:none;');
+							if(o) o.setAttribute('style','display:none;');
 							h.setAttribute('style','');
 							m = document.getElementById('title-hook');
 							m.innerHTML = a;
@@ -418,6 +475,7 @@ switch ($post_status) {
 					h = document.getElementById('workflow_submit');
 					
 					if(h!==null){
+						o = document.getElementById('workflow_revise_draft');
 						clearInterval(i);
 						i = setInterval(getElementB, 500);
 					}else{
@@ -454,7 +512,6 @@ switch ($post_status) {
 					}else{
 						clearInterval(i);
 						i = setInterval(getElementE, 500);
-
 					}
 				}
 
@@ -468,8 +525,6 @@ switch ($post_status) {
 						i = setInterval(getElementD, 500);
 					}
 				}
-
-
 			})();
 		</script>
 <?php
@@ -1062,10 +1117,16 @@ switch ($post_status) {
 		unset($views['mine']);
 		unset($views['publish']);
 		unset($views['draft']);
-		unset($views['ready-to-publish']);
-		unset($views['with-approver']);
-		unset($views['with-approver-delete']);
-		unset($views['ready-to-bin']);
+		
+		unset($views['pub-with-approver']);
+		unset($views['pub-sign-off']);
+		unset($views['del-with-approver']);
+		unset($views['del-sign-off']);
+
+		unset($views['rev-with-approver']);
+		unset($views['rev-sign-off']);
+		unset($views['unpub-with-approver']);
+		unset($views['unpub-sign-off']);
 
 		foreach ($views as $index => $view) {
 			$views[$index] = preg_replace('/<span class="count">\([0-9]+\)<\/span>/', '', $view);
@@ -1108,7 +1169,13 @@ switch ($post_status) {
 							}
 						} 
 
-						$where .= " AND $wpdb->posts.post_type = 'page' AND ($wpdb->posts.post_status = 'publish' OR $wpdb->posts.post_status = 'acf-disabled' OR $wpdb->posts.post_status = 'future' OR $wpdb->posts.post_status = 'draft' OR $wpdb->posts.post_status = 'pending' OR $wpdb->posts.post_status = 'ready-to-publish' OR $wpdb->posts.post_status = 'with-approver' OR $wpdb->posts.post_status = 'with-approver-delete' OR $wpdb->posts.post_status = 'with-author' OR $wpdb->posts.post_status = 'private' OR $wpdb->posts.post_status = 'ready-to-bin')"; 
+						$where .= " AND $wpdb->posts.post_type = 'page' AND ($wpdb->posts.post_status = 'publish' OR $wpdb->posts.post_status = 'acf-disabled' OR $wpdb->posts.post_status = 'future' 
+									OR $wpdb->posts.post_status = 'draft' OR $wpdb->posts.post_status = 'pending' 
+									OR $wpdb->posts.post_status = 'pub-with-approver' OR $wpdb->posts.post_status = 'pub-sign-off'
+									OR $wpdb->posts.post_status = 'del-with-approver' OR $wpdb->posts.post_status = 'del-sign-off'
+									OR $wpdb->posts.post_status = 'unpub-with-approver' OR $wpdb->posts.post_status = 'unpub-sign-off'
+									OR $wpdb->posts.post_status = 'rev-with-approver' OR $wpdb->posts.post_status = 'rev-sign-off'
+									OR $wpdb->posts.post_status = 'with-author' OR $wpdb->posts.post_status = 'private')"; 
 					}
 				}
 			}
@@ -1347,6 +1414,37 @@ switch ($post_status) {
 
 		//GET THE NON DUPLICATES BETWEEN IMAGE TEAMS AND USERS TEAMS - NEED TO CHECK THESE AGAINST USERS TEAMS WHEN RENDERING
 		return array_diff(array_merge($user_teams,$image_teams),array_intersect($user_teams,$image_teams));
+	}
+
+	function filter_step_user_list($users_and_process_info, $post_id, $step_id) {
+		$new_assignees = array();
+		$current_assignees = $users_and_process_info['users'];
+		$current_user_id = get_current_user_id();
+ 
+		//GET TEAMS CURRENT USER IS MEMBER OF
+		$current_user_teams = $this->get_setting('users_teams');
+		$loop_user_teams = array();
+		$diffs = array();
+
+		//FILTER USERS
+		foreach($current_assignees as $key => $loop_user){
+			//DO NOT ALLOW SELF REVIEW
+			if ($loop_user->ID != $current_user_id ) {
+				//IS THE LOOP USER IN THE SAME TEAMS AS THE CURRENT USERS TEAMS
+				$loop_user_teams = wp_get_terms_for_user($loop_user->ID, 'content_team');
+				$diffs = array_udiff($current_user_teams, $loop_user_teams,function ($obj_a, $obj_b) {return strcmp($obj_a->name, $obj_b->name);});
+
+				//AT LEAST ONE COMMON TEAM SO ADD THE LOOP USER					
+				if(count($diffs) != count($current_user_teams)){
+					array_push($new_assignees, $loop_user);	
+				}
+			}
+		}
+ 
+		//REPLACE 'users' KEY WITH NEW SET OF ASSIGNEES
+		$users_and_process_info['users'] = $new_assignees;
+ 
+		return $users_and_process_info;
 	}
 
     function restrict_access(){

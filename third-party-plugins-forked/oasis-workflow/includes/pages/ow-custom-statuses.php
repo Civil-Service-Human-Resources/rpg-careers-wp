@@ -68,14 +68,14 @@ $terms = $ow_custom_statuses->get_all_custom_statuses();
 
                <div class="form-field form-required">
                   <label for="status_name"><?php _e( 'Name', 'oasisworkflow' ); ?></label>
-                  <input type="text" aria-required="true" size="20" maxlength="20" id="status_name" name="status_name" value="<?php esc_attr_e( $term ? $term->name : ''  ); ?>">
-                  <p class="description"><?php _e( 'The name is used to identify the status. (Max: 20 characters)', 'oasisworkflow' ); ?></p>
+                  <input type="text" aria-required="true" size="40" maxlength="40" id="status_name" name="status_name" value="<?php esc_attr_e( $term ? $term->name : ''  ); ?>">
+                  <p class="description"><?php _e( 'The name is used to identify the status. (Max: 40 characters)', 'oasisworkflow' ); ?></p>
                </div>
 
                <div class="form-field form-required">
                   <label for="slug_name"><?php _e( 'Slug', 'oasisworkflow' ); ?></label>
                   <input type="text" aria-required="true" size="20" maxlength="20" id="slug_name" name="slug_name" value="<?php esc_attr_e( $term ? $term->slug : ''  ); ?>" />
-                  <p class="description"><?php _e( 'The slug is the unique ID for the status. It is usually all lowercase and contains only letters, numbers and hyphens.', 'oasisworkflow' ); ?></p>
+                  <p class="description"><?php _e( 'The slug is the unique ID for the status. It is usually all lowercase and contains only letters, numbers and hyphens. (Max: 20 characters)', 'oasisworkflow' ); ?></p>
                </div>
 
                <div class="form-field">
@@ -103,18 +103,3 @@ $terms = $ow_custom_statuses->get_all_custom_statuses();
       </div> <!-- #col-wrap -->
    </div> <!-- #col-left -->
 </div> <!-- .wrap -->
-<script>
-   jQuery(document).ready(function () {
-      jQuery(document).on('blur', '#status_name', function () {
-         var status_name = jQuery(this).val();
-         if (status_name === '') {
-            return false;
-         }
-
-         var slug = status_name.toLowerCase()
-                 .replace(/[^\w ]+/g, '') // remove hyphens (but not spaces)
-                 .replace(/ +/g, '-'); // remove spaces into a single hyphen
-         jQuery('#slug_name').val(slug);
-      });
-   });
-</script>

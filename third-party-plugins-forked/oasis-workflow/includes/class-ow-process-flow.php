@@ -30,6 +30,8 @@ class OW_Process_Flow {
       add_action( 'wp_ajax_get_submit_step_details', array( $this, 'get_submit_step_details' ) );
       add_action( 'wp_ajax_validate_submit_to_workflow', array( $this, 'validate_submit_to_workflow' ) );
 
+	  add_action( 'wp_ajax_make_and_save_revision', array( $this, 'make_and_save_revision' ) );
+
       add_action( 'wp_ajax_execute_sign_off_decision', array( $this, 'execute_sign_off_decision' ) );
       add_action( 'wp_ajax_get_sign_off_step_details', array( $this, 'get_sign_off_step_details' ) );
       add_action( 'wp_ajax_submit_post_to_step', array( $this, 'submit_post_to_step' ) );
@@ -56,6 +58,8 @@ class OW_Process_Flow {
       add_action( 'redirect_post_location', array( $this, 'redirect_after_signoff' ) );
       add_action( 'owf_submit_to_workflow', array( $this, 'redirect_after_workflow_submit' ), 10, 2 );
     
+	  add_filter('display_post_states', array($this, 'set_status_label'));
+
    }
   
    /**
@@ -193,8 +197,13 @@ class OW_Process_Flow {
          $action_name = sanitize_text_field($_POST['owf_action_name']);
       }
 
-      $post_status = "draft"; // default status, if nothing found
+	  //STORE PRE WORKFLOW POST STATUS - USED IF WORKFLOW IS ABORTED
+	  $current_post_status = get_post_status($post_id);
+	  add_post_meta($post_id, '_rpg_pre_worflow_status', $current_post_status, true);
 
+
+      $post_status = 'draft'; // default status, if nothing found
+	  $status_prefix = '';
 		// get post_status according to first step
 		$ow_workflow_service = new OW_Workflow_Service();
 		$step = $ow_workflow_service->get_step_by_id($step_id);
@@ -204,13 +213,53 @@ class OW_Process_Flow {
 			if ( $wf_info->first_step && count( $wf_info->first_step ) == 1 ) {
 				$first_step = $wf_info->first_step[ 0 ];
 				if ( is_object( $first_step ) && isset( $first_step->post_status ) && ! empty( $first_step->post_status ) ) {
-					$post_status = $first_step->post_status.(($action_name === 'delete')?'-delete':'');
+
+					switch($action_name){
+						case 'delete':
+							$status_prefix = 'del-';
+							break;
+						case 'unpublish':
+							$status_prefix = 'unpub-';
+							break;
+						case 'revise':
+							$status_prefix = 'rev-';
+							break;
+						default:
+							$status_prefix = 'pub-';
+							break;
+					}
+
+					$post_status = $status_prefix.$first_step->post_status;
 				}
 			}
 		}
 
       // No validation errors found, continue with submission to workflow
       wp_send_json_success( array( 'post_status' => $post_status ) );
+   }
+
+   public function make_and_save_revision(){
+		//NONCE CHECK
+		check_ajax_referer('owf_revise_ajax_nonce', 'security');
+
+		$form = $_POST['form'];
+		parse_str($form, $_POST);
+		$data = @array_map('esc_attr', $_POST);
+		$post_id = $data['post_ID'];
+		$new_id = '';
+
+		//CREATE REVISION
+		if ($post_id) {
+			$post = get_post($post_id);
+			if ($post) {
+				$new_id = $this->create_page_revision($post, !$this->get_revision_of($post) || $this->is_original_post($post));
+				wp_send_json_success(array('rev_post_id' => $new_id));
+				wp_redirect(admin_url('post.php?action=edit&post=' . $new_id));
+				exit;
+			}
+		}
+
+		wp_send_json_success(array('rev_post_id' => $new_id));
    }
 
    /**
@@ -448,14 +497,31 @@ class OW_Process_Flow {
       $source_step_id = $history_details->step_id;
       $target_step_id = $step_id;
 
-	  if($action_name === 'delete') {
-		$new_post_status = 'ready-to-bin';
-	  } else {
-		$new_post_status = $this->get_post_status_from_step_transition( $post_id, $source_step_id, $target_step_id );
+	  switch($action_name){
+		case 'delete':
+			$new_post_status = 'del-sign-off';
+			break;
+		case 'unpublish':
+			$new_post_status = 'unpub-sign-off';
+			break;
+		case 'revise':
+			$new_post_status = 'rev-sign-off';
+			break;
+		case 'publish':
+			//CHECK TO SEE IF THIS IS A REVISION
+			$parent_id = $this->get_revision_of($post);
+			if ($parent_id) {
+				$new_post_status = 'rev-sign-off';
+			}else{
+				$new_post_status = $this->get_post_status_from_step_transition( $post_id, $source_step_id, $target_step_id );
+			}
+			break;
+		default:
+			$new_post_status = $this->get_post_status_from_step_transition( $post_id, $source_step_id, $target_step_id );
+			break;
 	  }
 
 	  $submit_post_to_step_results[ "new_post_status" ] = $new_post_status;
-
       wp_send_json_success( $submit_post_to_step_results );
    }
 
@@ -729,14 +795,16 @@ class OW_Process_Flow {
       }
 
       // Sign off and complete the workflow
-       $result_array = $this->change_workflow_status_to_complete_internal( $post_id, $workflow_complete_params );
+      $result_array = $this->change_workflow_status_to_complete_internal( $post_id, $workflow_complete_params );
 
       // when signing off from the inbox page, we do not have to worry about updating/saving the post
       // we simply take the post and complete the workflow.
       // if signing off from post edit page, we use the "save_action" via - workflow_submit_action()
       $original_post_id = get_post_meta( $post_id, '_oasis_original', true );
       if ( empty( $original_post_id ) && $parent_page == "inbox" ) { // we are dealing with original post
-         $this->ow_update_post_status( $post_id, $result_array["new_post_status"] );
+         if($action_name != 'revise') {
+			$this->ow_update_post_status( $post_id, $result_array["new_post_status"] );
+		 }
       } elseif ( ! empty( $original_post_id ) && $parent_page == "inbox" ) { // we are dealing with a revision post
          // hook for revision complete
          do_action( "owf_revision_workflow_complete", $post_id );
@@ -746,15 +814,40 @@ class OW_Process_Flow {
 
       $complete_workflow_results = array();
 
-	   if($action_name === 'delete') {
-		$new_post_status = 'ready-to-bin';
-	  } else {
-		$new_post_status = get_post_status( $post_id );
+	  switch($action_name){
+		case 'delete':
+			$new_post_status = 'del-sign-off';
+			break;
+		case 'unpublish':
+			$new_post_status = 'unpub-sign-off';
+			break;
+		case 'revise':
+			$new_post_status = 'rev-sign-off';
+			break;
+		case 'publish':
+			//CHECK TO SEE IF THIS IS A REVISION
+			$post = get_post($post_id);
+			$parent_id = $this->get_revision_of($post);
+			if ($parent_id) {
+				$new_post_status = 'rev-sign-off';
+			}else{
+				$new_post_status = get_post_status( $post_id );
+			}
+			break;
+		default:
+			$new_post_status = get_post_status( $post_id );
+			break;
 	  }
-      
-      $complete_workflow_results[ "new_post_status" ] = $result_array["new_action_history_id"];
+
+      $complete_workflow_results[ "new_post_status" ] = $new_post_status;
 
       wp_send_json_success( $complete_workflow_results );
+
+	  //IF ACTION IS revise AND PAGE IS EDIT POST REDIRECT BACK TO PAGE LISTING - CANNOT SHOW ORIGINAL PAGE AS NOW DELETED
+	  if($action_name == 'revise' && $parent_page == 'post_edit') {
+	     wp_redirect(admin_url('edit.php?post_type=page'));
+		 exit;
+	  }
    }
 
    /*
@@ -2071,6 +2164,7 @@ class OW_Process_Flow {
 
       $from_step_id = intval( $from_step_id );
       $post_id = intval( $post_id );
+	  $is_revision = false;
       if ( ! empty( $publish_datetime ) ) {
          $publish_datetime = sanitize_text_field( $publish_datetime );
       }
@@ -2133,13 +2227,47 @@ class OW_Process_Flow {
 
 		 //HAS AN $action_name BEEN PASSED IN
 		 if($action_name){
-			if($action_name === 'delete'){
-				if (strpos($step_status, 'publish') !== false){
-					$step_status = 'ready-to-bin';
-				}
-				if($previous_status === 'ready-to-bin'){
-					$step_status = 'trash';
-				}
+
+			switch($action_name){
+				case 'delete':
+					if (strpos($step_status, 'pub') !== false){
+						$step_status = 'del-sign-off';
+					}
+					if($previous_status === 'del-sign-off'){
+						$step_status = 'trash';
+					}
+					break;
+				case 'unpublish':
+					if (strpos($step_status, 'pub') !== false){
+						$step_status = 'unpub-sign-off';
+					}
+					if($previous_status === 'unpub-sign-off'){
+						$step_status = 'draft';
+					}
+					break;
+				case 'revise':
+					if (strpos($step_status, 'pub') !== false){
+						$step_status = 'rev-sign-off';
+					}
+					if($previous_status === 'rev-sign-off'){
+						$step_status = 'publish';
+					}
+					$is_revision = true;
+					break;
+				case 'publish':
+					//CHECK TO SEE IF THIS IS A REVISION
+					$post = get_post($post_id);
+					$parent_id = $this->get_revision_of($post);
+					if ($parent_id) {
+						$step_status = 'rev-sign-off';
+						if($previous_status === 'rev-sign-off'){
+							$step_status = 'publish';
+						}
+						$is_revision = true;
+					}else{
+						$step_status = 'publish';
+					}
+					break;
 			}
 		 }
 
@@ -2157,6 +2285,17 @@ class OW_Process_Flow {
          $post = get_post( $post_id );
 
          wp_transition_post_status( $step_status, $previous_status, $post );
+
+		//FOR REVISIONS NEED TO COPY OVER TO THE ORIGINAL PAGE
+		if($is_revision){
+			$parent_id = $this->get_revision_of($post);
+			if ($parent_id) {
+				$original = get_post($parent_id);
+				if ($original) {
+					$this->publish_revision($post, $original);
+				}
+			}
+		}
 
          if ( $current_page == "inbox" ) {
 
@@ -2178,13 +2317,44 @@ class OW_Process_Flow {
          
 		 //HAS AN $action_name BEEN PASSED IN
 		 if($action_name){
-			if($action_name === 'delete'){
-				if (strpos($step_status, 'publish') !== false){
-					$step_status = 'ready-to-bin';
-				}
-				if($previous_status === 'ready-to-bin'){
-					$step_status = 'trash';
-				}
+			switch($action_name){
+				case 'delete':
+					if (strpos($step_status, 'pub') !== false){
+						$step_status = 'del-sign-off';
+					}
+					if($previous_status === 'del-sign-off'){
+						$step_status = 'trash';
+					}
+					break;
+				case 'unpublish':
+					if (strpos($step_status, 'pub') !== false){
+						$step_status = 'unpub-sign-off';
+					}
+					if($previous_status === 'unpub-sign-off'){
+						$step_status = 'draft';
+					}
+					break;
+				case 'revise':
+					if (strpos($step_status, 'pub') !== false){
+						$step_status = 'rev-sign-off';
+					}
+					if($previous_status === 'rev-sign-off'){
+						$step_status = 'publish';
+					}
+					break;
+				case 'publish':
+					//CHECK TO SEE IF THIS IS A REVISION
+					$post = get_post($post_id);
+					$parent_id = $this->get_revision_of($post);
+					if ($parent_id) {
+						$step_status = 'rev-sign-off';
+						if($previous_status === 'rev-sign-off'){
+							$step_status = 'publish';
+						}
+					}else{
+						$step_status = 'publish';
+					}
+					break;
 			}
 		 }
 
@@ -2408,17 +2578,42 @@ class OW_Process_Flow {
       }
 
 		// Lets update the post status when user do submit post to workflow first time
+		$status_prefix = '';
+		$action_name = $workflow_submit_data['action_name'];
 		$ow_workflow_service = new OW_Workflow_Service();
 		$step = $ow_workflow_service->get_step_by_id( $step_id );
 		if( $step && $workflow = $ow_workflow_service->get_workflow_by_id( $step->workflow_id ) ) {
 			$wf_info = json_decode( $workflow->wf_info );
 			if( $wf_info->first_step && count( $wf_info->first_step ) == 1 ) {
-			$first_step = $wf_info->first_step[0];
-			if( is_object( $first_step ) &&
-				isset( $first_step->post_status ) &&
-				! empty( $first_step->post_status ) ) {
-				$this->ow_update_post_status( $post_id, $first_step->post_status.(($workflow_submit_data['action_name'] === 'delete')?'-delete':''));
-			}
+				$first_step = $wf_info->first_step[0];
+				if( is_object( $first_step ) && isset( $first_step->post_status ) && ! empty( $first_step->post_status ) ) {
+
+					switch($action_name){
+						case 'delete':
+							$status_prefix = 'del-';
+							break;
+						case 'unpublish':
+							$status_prefix = 'unpub-';
+							break;
+						case 'revise':
+							$status_prefix = 'rev-';
+							break;
+						case 'publish':
+							$status_prefix = 'pub-';
+							//CHECK TO SEE IF THIS IS A REVISION
+							$parent_id = $this->get_revision_of($post);
+							if ($parent_id) {
+								$status_prefix = 'rev-';
+							}
+							break;
+						default:
+							$status_prefix = 'pub-';
+							break;
+					}
+
+					$post_status = $status_prefix.$first_step->post_status;
+					$this->ow_update_post_status($post_id, $post_status);
+				}
 			}
 		}
 
@@ -2888,7 +3083,18 @@ class OW_Process_Flow {
          // insert data from the next step
          $new_action_history_id = $this->save_action( $data, $actors, $history_id );
          //------post status change----------
-         $this->copy_step_status_to_post( $post_id, $history_details->step_id, $new_action_history_id, $workflow_signoff_data['current_page'], null, null, $action_name );
+		if($step_decision == 'unable'){
+			//REVERT STATUS BACK TO PRE WORKFLOW STATE - STORED IN post_meta DATA AS _rpg_pre_worflow_status
+			//SET IN FUNCTION validate_submit_to_workflow
+			$pre_workflow_status = get_post_meta($post_id, '_rpg_pre_worflow_status', true);
+
+			if($pre_workflow_status != ''){
+				$post = array('ID' => $post_id, 'post_status' => $pre_workflow_status);
+				wp_update_post($post);
+			}
+		} else {
+			$this->copy_step_status_to_post( $post_id, $history_details->step_id, $new_action_history_id, $workflow_signoff_data['current_page'], null, null, $action_name );
+		}
       }
 
       do_action( 'owf_step_sign_off', $post_id, $new_action_history_id );
@@ -3194,12 +3400,21 @@ class OW_Process_Flow {
       $review_data[ "step_id" ] = $next_step_id;
 
       // we have all the data to generated the next set of tasks
-
       $new_action_history_id = $this->save_action( $review_data, $next_actors, $action->ID );
 
 	  //--------post status change---------------
-      $this->copy_step_status_to_post( $action->post_id, $action->step_id, $new_action_history_id, "edit", null, null, $action_name );
+      if($result == 'unable'){
+		//REVERT STATUS BACK TO PRE WORKFLOW STATE - STORED IN post_meta DATA AS _rpg_pre_worflow_status
+		//SET IN FUNCTION validate_submit_to_workflow
+		$pre_workflow_status = get_post_meta($action->post_id, '_rpg_pre_worflow_status', true);
 
+		if($pre_workflow_status != ''){
+			$post = array('ID' => $action->post_id, 'post_status' => $pre_workflow_status);
+			wp_update_post($post);
+		}
+	  } else {
+		$this->copy_step_status_to_post( $action->post_id, $action->step_id, $new_action_history_id, "edit", null, null, $action_name );
+	  }
       return $new_action_history_id;
    }
 
@@ -3287,6 +3502,16 @@ class OW_Process_Flow {
           "assign_actor_id" => get_current_user_id(), // since we do not have anyone assigned anymore.
           'create_datetime' => current_time( 'mysql' )
       );
+
+	  //REVERT STATUS BACK TO PRE WORKFLOW STATE - STORED IN post_meta DATA AS _rpg_pre_worflow_status
+	  //SET IN FUNCTION validate_submit_to_workflow
+	  $pre_workflow_status = get_post_meta($action->post_id, '_rpg_pre_worflow_status', true);
+
+	  if($pre_workflow_status != ''){
+		$post = array('ID' => $action->post_id, 'post_status' => $pre_workflow_status);
+		wp_update_post($post);
+	  }
+
       $action_table = OW_Utility::instance()->get_action_table_name();
       $new_history_id = OW_Utility::instance()->insert_to_table( $action_history_table, $data );
       $ow_email = new OW_Email( );
@@ -3351,6 +3576,193 @@ class OW_Process_Flow {
       return $step_status;
    }
 
+	private function create_page_revision($post, $is_original=false) {
+		$new_id = $this->copy_page($post, null, $post->ID);
+
+		//STORE FACT NEW PAGE IS A VARIATION OF OLD PAGE
+		update_post_meta($new_id, '_rpg_page_revision_of', $post->ID);
+
+		if ($is_original) {
+			update_post_meta($post->ID, '_rpg_page_original', true);
+			delete_post_meta($new_id, '_rpg_page_original');
+		} else {
+			delete_post_meta($post->ID, '_rpg_page_original');
+		}
+
+		return $new_id;
+	}
+
+	private function copy_page($post, $to=null, $parent_id=null, $status='draft') {
+		if ($post->post_type == 'revision') {
+			return;
+		}
+
+		$author_id = $post->post_author;
+		$post_status = $post->post_status;
+
+		if ($to) {
+			//KEEP ORIGINAL AUTHOR
+			$author_id = $to->post_author;
+		} else {
+			$author = wp_get_current_user();
+			$author_id = $author->ID;
+			$post_status = $status;
+		}
+
+		$data = array(
+			'menu_order' => $post->menu_order,
+			'comment_status' => $post->comment_status,
+			'ping_status' => $post->ping_status,
+			'post_author' => $author_id,
+			'post_content' => $post->post_content,
+			'post_excerpt' => $post->post_excerpt,
+			'post_mime_type' => $post->post_mime_type,
+			'post_parent' => !$parent_id ? $post->post_parent : $parent_id,
+			'post_password' => $post->post_password,
+			'post_status' => $post_status,
+			'post_title' => $post->post_title,
+			'post_type' => $post->post_type,
+			'post_date' => $post->post_date,
+			'post_date_gmt' => get_gmt_from_date($post->post_date)
+		);
+
+
+		if ($to) {
+			$data['ID'] = $to->ID;
+			$new_id = $to->ID;
+
+			//KEEP ORIGINAL DATES - AVOIDS SCHEDULED REVISIONS OVERWRITING THE DATE
+			$data['post_date'] = $to->post_date;
+			$data['post_date_gmt'] = get_gmt_from_date($to->post_date);
+
+			//if (is_acf_post() && is_acf_fields_different($to, $post)) {
+				//FORCE WP TO CREATE A NEW REVISION 
+				//add_filter('wp_save_post_revision_post_has_changed', '__return_true');
+			//}
+
+			$revision_before = $this->get_latest_wp_revision($new_id);
+
+			//UPDATE POST
+			wp_update_post($data);
+
+			$revision_after = $this->get_latest_wp_revision($new_id);
+
+			if ($this->is_wp_revision_different($revision_before, $revision_after) && $revision_after) {
+				$this->copy_post_meta_info($revision_after->ID, $post);  
+			}
+
+		} else {
+			//INSERT NEW POST
+			$new_id = wp_insert_post($data);
+		}
+
+		//COPY TAXONOMY INFO
+		$this->copy_post_taxonomies($new_id, $post);
+		
+		//COPY POST META INFO BACK TO ORIGINAL PAGE
+		$this->copy_post_meta_info($new_id, $post);
+
+		return $new_id;
+	}
+
+	private function copy_post_taxonomies($new_id, $post) {
+		global $wpdb;
+
+		if (isset($wpdb->terms)) {
+			//REMOVE DEFAULT CATEGORY ADDED BY wp_insert_post
+			wp_set_object_terms($new_id, NULL, 'category');
+
+			$taxonomies = get_object_taxonomies($post->post_type);
+
+			foreach ($taxonomies as $taxonomy) {
+				$post_terms = wp_get_object_terms($post->ID, $taxonomy, array('orderby' => 'term_order'));
+				$terms = array();
+
+				for ($i=0; $i<count($post_terms); $i++) {
+					$terms[] = $post_terms[$i]->slug;
+				}
+
+				wp_set_object_terms($new_id, $terms, $taxonomy);
+			}
+		}
+	}
+
+	private function copy_post_meta_info($new_id, $post) {
+		$this->clear_post_meta($new_id);
+
+		$meta_keys = get_post_custom_keys($post->ID);
+
+		foreach ($meta_keys as $meta_key) {
+			$meta_values = get_post_custom_values($meta_key, $post->ID);
+			foreach ($meta_values as $meta_value) {
+				$meta_value = maybe_unserialize($meta_value);
+				add_metadata('post', $new_id, $meta_key, $meta_value);
+			}
+		}
+	}
+
+	private function clear_post_meta($id) {
+		$meta_keys = get_post_custom_keys($id);
+		if (!empty($meta_keys)) {
+			foreach ($meta_keys as $meta_key) {
+				delete_metadata('post', $id, $meta_key);
+			}
+		}
+	}
+
+	private function get_latest_wp_revision($id) {
+		$revisions = wp_get_post_revisions($id);
+		return !empty($revisions) ? current($revisions) : null;
+	}
+
+	private function is_wp_revision_different($a, $b) {
+		return $a && !$b || !$a && $b || $a->ID != $b->ID;
+	}
+
+	private function get_revision_of($post) {
+		if($post){
+			return get_post_meta($post->ID, '_rpg_page_revision_of', true);
+		}
+		return '';
+	}
+
+	private function is_original_post($post) {
+		return get_post_meta($post->ID, '_rpg_page_original', true);
+	}
+
+	private function publish_revision($post, $original){
+		//REMOVE META BEFORE THE COPY
+		delete_post_meta($post->ID, '_rpg_page_revision_of');
+	
+		//COPY THE PAGE
+		$this->copy_page($post, $original, $original->post_parent);
+
+		//DELETE META FROM 'NEW' PAGE
+		delete_post_meta($post->ID, '_rpg_page_original');
+
+		//PERMANENTLY DELETE THE REVISION
+		wp_delete_post($post->ID, true);
+	}
+
+	function set_status_label($states){
+		global $post;
+		if ($this->get_revision_of($post)) {
+			//GET FIRST KEY IN ARRAY
+			$key = $value = NULL;
+			foreach ($states as $key => $value) {
+				break;
+			}
+
+			$label = $this->is_original_post($post) ? '[REVISION BACKUP]' : '[REVISION]';
+			
+			if($key){
+				if (strpos($states[$key], '[REVISION') === false) {
+					$states[$key] = $label.' '.$states[$key];
+				}
+			}
+		}
+		return $states;
+	}
    /**
     * Setup the sign off popup and enqueue the related scripts
     *
@@ -3373,17 +3785,6 @@ class OW_Process_Flow {
             $inbox_service->enqueue_and_localize_script();
          } else if ( current_user_can( 'ow_submit_to_workflow' ) && $chkResult == "submit" &&
                  is_admin() && preg_match_all( '/page=oasiswf(.*)|post-new\.(.*)|post\.(.*)/', $_SERVER[ 'REQUEST_URI' ], $matches ) ) {
-
-            /**
-             * As we are showing "submit to workflow" button only for new post/pages so do not show
-             * If the post is published or scheduled..
-             */
-            if ( isset( $_GET[ 'post' ] ) && isset( $_GET[ 'action' ] ) && 'edit' === $_GET[ "action" ] ) {
-               $post_status = get_post_status( $_GET[ 'post' ] );
-               if ( in_array( $post_status, array( 'publish', 'future' ) ) ) {
-                  return;
-               }
-            }
 
             include( OASISWF_PATH . "includes/pages/subpages/submit-workflow.php" );
             $this->enqueue_and_localize_submit_workflow_script();

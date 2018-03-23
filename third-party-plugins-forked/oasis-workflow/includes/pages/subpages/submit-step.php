@@ -26,10 +26,20 @@ if( $action_history_id ) {
 
    $action_name = '';
    switch (get_post_status($post_id)){
-		case 'ready-to-bin':
-		case 'with-approver-delete':
+		case 'del-with-approver':
+		case 'del-sign-off':
 		case 'trash':
 			$action_name = 'delete';
+			break;
+		case 'rev-with-approver':
+		case 'rev-sign-off':
+		case 'publish':
+		case 'future':
+			$action_name = 'revise';
+			break;
+		case 'unpub-with-approver':
+		case 'unpub-sign-off':
+			$action_name = 'unpublish';
 			break;
 		default:
 			$action_name = 'publish';

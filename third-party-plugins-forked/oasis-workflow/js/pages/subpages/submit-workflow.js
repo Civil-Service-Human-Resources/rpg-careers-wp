@@ -8,29 +8,26 @@
       // If not allowed post/page type then do not show
       if ( jQuery.inArray( current_post_type, allowed_post_types ) != -1 )
       {
+            if(owf_post_status === 'publish'){
+                jQuery( "#publishing-action" ).append("<input type='button' id='workflow_revise_draft' class='button button-primary button-large'" + " value='Create' />");
+            }
 
-         jQuery( "#publishing-action" ).append(
-                 "<input type='button' id='workflow_submit' class='button button-primary button-large'" + " value='" + owf_submit_workflow_vars.submitToWorkflowButton + "' style='margin-left:5px;' />"
-                 );
+            jQuery( "#publishing-action" ).append("<input type='button' id='workflow_submit' class='button button-primary button-large'" + " value='" + owf_submit_workflow_vars.submitToWorkflowButton + "' style='margin-left:5px;float:right;' />");
 
-         jQuery( "#post" ).append(
-                 "<input type='hidden' id='hi_workflow_id' name='hi_workflow_id' />" +
-                 "<input type='hidden' id='hi_step_id' name='hi_step_id' />" +
-                 "<input type='hidden' id='hi_priority_select' name='hi_priority_select' />" +
-                 "<input type='hidden' id='hi_actor_ids' name='hi_actor_ids' />" +
-                 "<input type='hidden' id='hi_due_date' name='hi_due_date' />" +
-                 "<input type='hidden' id='hi_publish_datetime' name='hi_publish_datetime' />" +
-                 "<input type='hidden' id='hi_comment' name='hi_comment' />" +
-                 "<input type='hidden' id='save_action' name='save_action' />" +
-                 "<input type='hidden' id='owf_action_name' name='owf_action_name' value='publish' />"
-                 );
+            jQuery( "#post" ).append(
+                    "<input type='hidden' id='hi_workflow_id' name='hi_workflow_id' />" +
+                    "<input type='hidden' id='hi_step_id' name='hi_step_id' />" +
+                    "<input type='hidden' id='hi_priority_select' name='hi_priority_select' />" +
+                    "<input type='hidden' id='hi_actor_ids' name='hi_actor_ids' />" +
+                    "<input type='hidden' id='hi_due_date' name='hi_due_date' />" +
+                    "<input type='hidden' id='hi_publish_datetime' name='hi_publish_datetime' />" +
+                    "<input type='hidden' id='hi_comment' name='hi_comment' />" +
+                    "<input type='hidden' id='save_action' name='save_action' />" +
+                    "<input type='hidden' id='owf_action_name' name='owf_action_name' value='" + owf_post_status + "' />"
+                    );
       }
    }
-   
-   
    load_setting();
-   
-    
 })();
 
 jQuery( document ).ready( function () {
@@ -47,6 +44,31 @@ jQuery( document ).ready( function () {
    jQuery( "#workflow-select" ).change( function () {
       workflow_select( jQuery( this ).val() );
    } );
+
+    jQuery('#workflow_revise_draft').on('click', function(){
+
+        var make_and_save_revision_data = {
+            action: 'make_and_save_revision',
+            form: jQuery('form#post').serialize(),
+            security: jQuery('#owf_revise_ajax_nonce').val()
+        };
+
+        jQuery.post(ajaxurl, make_and_save_revision_data, function(response) {
+            if (response == -1) {
+                //BAD NONCE
+                return false;
+            }
+
+            if (response.success) {
+                //SHOW THE NEWLY CREATED PAGE REVISION
+                window.location.replace(window.location.origin + '/wp-admin/post.php?action=edit&post=' + response.data.rev_post_id);
+            }else{
+                //SHOW PAGE LISTING
+                window.location.replace(window.location.origin + '/wp-admin/edit.php?post_type=page');
+            }
+
+        });
+    });
 
     jQuery('#workflow_submit').on('click', function(){
 
