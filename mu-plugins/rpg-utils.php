@@ -1160,7 +1160,11 @@ switch ($post_status) {
 							$where = ' AND ';
 						}
 
-						$where .= 'post_author = '. get_current_user_id() .'))';
+						$where .= 'post_author = '. get_current_user_id();
+
+						if(count($teams)>0){
+							$where .= '))';
+						}
 
 						if(isset($query->query['post_status'])){
 							if($query->query['post_status'] === 'trash'){
