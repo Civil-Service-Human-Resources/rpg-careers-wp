@@ -37,6 +37,8 @@ class rpgutils{
 		add_action('init', array($this, 'register_user_taxonomy'));
 		add_action('init', array($this, 'check_cookie_banner_cookie'));
         add_filter('login_redirect', array($this, 'login_redirect'), 10, 3);
+		add_action('admin_bar_menu', array($this, 'remove_menu_nodes'), 999);
+		add_action('current_screen', array($this, 'restrict_admin_pages'));
 
 		//PAGE EDITS
 		add_filter('post_row_actions', array($this, 'amend_quick_links'), 10, 2);
@@ -107,6 +109,35 @@ class rpgutils{
 		remove_action('admin_notices', 'update_nag', 3);
 		remove_menu_page('edit.php');
 		remove_menu_page('edit-comments.php');
+	}
+
+	function remove_menu_nodes() {
+		global $wp_admin_bar;   
+		$wp_admin_bar->remove_node('new-post');
+	}
+
+	function restrict_admin_pages(){
+		
+		//IF USER CAN create_users RETURN
+		if (current_user_can('create_users')) {
+			return;
+		}
+
+		$current_screen_id = get_current_screen()->id;
+
+		//RESTRICTED SCREENS
+		$restricted_screens = array(
+			'users',
+		);
+
+		//CHECK EACH RESTRICTED SCREEN
+		foreach ($restricted_screens as $restricted_screen) {
+			if ($current_screen_id === $restricted_screen) {
+				echo $this->get_die_html('Unable to view page','Sorry you are not allowed to view the requested page.');
+				exit();
+			}
+
+		}
 	}
 
 	function custom_menu_order($menu_ord) {
