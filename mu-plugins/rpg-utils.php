@@ -925,36 +925,15 @@ switch ($post_status) {
 
 	function media_mime_types($mime_types){
 
-		//ADD IN ADDITIONAL MIME TYPES
-		$mime_types['svg'] = 'image/svg+xml';
-  
-		//REMOVE UNWANTED STD MIME TYPES
-		unset($mime_types['ico']);
-		unset($mime_types['pdf']);
-		unset($mime_types['doc']);
-		unset($mime_types['docx']);
-		unset($mime_types['ppt']);
-		unset($mime_types['pptx']);
-		unset($mime_types['pps']);
-		unset($mime_types['ppsx']);
-		unset($mime_types['odt']);
-		unset($mime_types['xls']);
-		unset($mime_types['xlsx']);
-		unset($mime_types['psd']);
-  
-		unset($mime_types['mp3']);
-		unset($mime_types['m4a']);
-		unset($mime_types['ogg']);
-		unset($mime_types['wav']);
+		//CLEAR ALL TYPES
+		$mime_types = array();
 
-		unset($mime_types['m4v']);
-		unset($mime_types['mov']);
-		unset($mime_types['wmv']);
-		unset($mime_types['avi']);
-		unset($mime_types['mpg']);
-		unset($mime_types['ogv']);
-		unset($mime_types['3gp']);
-		unset($mime_types['3g2']);
+		//ADD IN ALLOWED MIME TYPES FOR UPLOADS
+		$mime_types['svg'] = 'image/svg+xml';
+		$mime_types['jpg|jpeg|jpe'] = 'image/jpeg';
+		$mime_types['gif'] = 'image/gif';
+		$mime_types['png'] = 'image/png';
+		$mime_types['mp4|m4v'] = 'video/mp4';
 
 		return $mime_types;
 	}
