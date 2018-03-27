@@ -2459,6 +2459,7 @@ class OW_Process_Flow {
 
       // sanitize post_id
       $post_id = intval( $_POST["post_ID"] );
+	  $action_name = '';
 
       // capability check
       if ( ! OW_Utility::instance()->is_post_editable( $post_id ) ) {
@@ -2487,7 +2488,9 @@ class OW_Process_Flow {
       $publish_date = sanitize_text_field( $_POST[ "hi_publish_datetime" ] );
       $user_provided_publish_date = isset( $publish_date ) ? $publish_date : "";
 
-	  $action_name = sanitize_text_field( $_POST[ "owf_action_name" ] );
+	  if (!empty($_POST['owf_action_name'])) {
+         $action_name = sanitize_text_field($_POST['owf_action_name']);
+      }
 
       // update priority on the post
       update_post_meta( $post_id, "_oasis_task_priority", $priority );
