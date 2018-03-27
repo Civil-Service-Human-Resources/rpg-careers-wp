@@ -27,12 +27,15 @@ function rpgCareers_conditional_styles() {
 
 //FRONT END SCRIPTS + STYLES
 function rpgCareers_frontend_scripts() {
-	// wp_enqueue_style( $handle, $src, $deps, $ver, $media )
 	rpgCareers_conditional_styles();
 	
-	// wp_enqueue_script( $handle, $src, $deps, $ver, $in_footer )
-	//wp_enqueue_script('rpgcareers', get_template_directory_uri() .'/js/blank.js', array('jquery'), null, true);
+	//REMOVE STD JQUERY AS AIMING TO ADD TO END OF BODY NOT THE HEAD
+	wp_deregister_script('jquery');
+	
+	wp_enqueue_script('rpgcareers-jquery', get_template_directory_uri() .'/assets/js/jquery-1.12.4.min.js', null, null, true);
+	wp_enqueue_script('rpgcareers-helper-js', get_template_directory_uri() .'/assets/js/scripts.js', array('rpgcareers-jquery'), null, true);
 }
+
 add_action('wp_enqueue_scripts', 'rpgCareers_frontend_scripts');
 
 //REGISTER MAIN NAV MENU
@@ -42,6 +45,9 @@ register_nav_menus( array(
 
 //REGISTER WIDGETS
 function rpgCareers_widgets_init() {
+	global $wp_widget_factory;  
+    remove_action('wp_head', array($wp_widget_factory->widgets['WP_Widget_Recent_Comments'], 'recent_comments_style'));
+
 	$widget_args_1 = array(
 		'name'          => __('Widgets Sidebar', 'rpgcareers'),
 		'id'            => 'widgets_sidebar',
@@ -136,6 +142,18 @@ function rpgCareers_footer_content() {
 
 add_shortcode('rpg_footer_content', 'rpgCareers_footer_content');
 
+//REMOVE TYPE ATTR FROM SCRIPT TAGS
+function rpgCareers_clean_script_tag($input) {
+
+
+    $input = str_replace("type='text/javascript' ", '', $input);
+    return str_replace("'", '"', $input);
+}
+
+add_filter('script_loader_tag', 'rpgCareers_clean_script_tag');
+
+
+
 //BESPOKE NAV WALKER FOR MENU
 class RPG_Walker_Nav_Menu extends Walker_Nav_Menu {
     public function start_lvl(&$output, $depth = 0, $args = array()) {
@@ -154,11 +172,11 @@ class RPG_Walker_Nav_Menu extends Walker_Nav_Menu {
 
         $active_class = '';
         if(in_array('current-menu-item', $classes)) {
-            $active_class = ' class="active-nav"';
+            $active_class = ' class="masthead__nav-current"';
         } else if(in_array('current-menu-parent', $classes)) {
-            $active_class = ' class="active-nav-parent"';
+            $active_class = ' class="masthead__nav-current"';
         } else if(in_array('current-menu-ancestor', $classes)) {
-            $active_class = ' class="active-nav-ancestor"';
+            $active_class = ' class="masthead__nav-current"';
         }
 
         $url = '';

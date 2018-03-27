@@ -11,32 +11,41 @@
 
 ?>
 <!doctype html>
-<html <?php language_attributes(); ?>>
+<html <?php language_attributes(); ?> class="no-js">
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="robots" content="index,follow">
 	<meta name="google" content="nositelinkssearchbox" />
-	<title>Civil service careers - <?php the_title(); ?></title>
+	<title><?php the_title(); ?> | Civil Service Careers</title>
 	<?php wp_head(); ?>
 	<style id="fKill">body{display:none!important;}</style>
-	<script type="text/javascript">if(self===top){var f=document.getElementById('fKill');f.parentNode.removeChild(f);}else{top.location=self.location;}</script>
+	<script>if(self===top){var f=document.getElementById('fKill');f.parentNode.removeChild(f);}else{top.location=self.location;}</script>
+	<!--[if lt IE 9]>
+	<script src="<?php echo get_stylesheet_directory_uri(); ?>/assets/js/modernizr-custom.js"></script>
+    <script src="<?php echo get_stylesheet_directory_uri(); ?>/assets/js/respond.js"></script>
+    <![endif]-->
 </head>
 <body <?php body_class(); ?>>
 <?php do_action( 'body_open' ); ?>
-<div id="skiplink-container"><div><a href="#content" class="skiplink">Skip to main content</a></div></div>
+<div class="skiplink"><a href="#content">Skip to main content</a></div>
 <div id="global-cookie-message"<?php global $cookie_banner_set; if($cookie_banner_set){ echo ' style="display:block;"';}?>><p>GOV.UK uses cookies to make the site simpler. <a href="<?php echo get_site_url(); ?>/cookies">Find out more about cookies</a></p></div>
-<header role="banner">
-	<nav role="navigation" aria-label="site" class="main-nav">
-	<input type="checkbox" id="menu-toggle" /><label for="menu-toggle" class="label-menu-toggle"></label><label for="menu-toggle" class="label-menu-toggle-off"></label><?php
+<header class="masthead" role="banner">
+	<div class="masthead__brand">
+		<span class="logo logo--horizontal">
+			<span class="logo__text">Civil Service</span>
+		</span>
+		<span class="masthead__brand-text">Careers</span>
+	</div>
+	<nav role="navigation" aria-label="site" class="masthead__nav">
+	<?php
 	  wp_nav_menu(array(
 		'container'			=> false,
-		'items_wrap'		=> '<ul class="main-nav-items">%3$s</ul>',
+		'items_wrap'		=> '<ul class="masthead__menu" id="nav">%3$s</ul>',
 		'theme_location'	=> 'main-nav',
 		'walker' => new RPG_Walker_Nav_Menu(),
 	  ));
 	?></nav>
 </header>
-<div id="main">
-	<main id="content" role="main">
+<main id="content" role="main">
