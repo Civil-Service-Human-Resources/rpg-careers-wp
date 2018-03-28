@@ -2207,6 +2207,8 @@ class OW_Process_Flow {
 
       $previous_status = get_post_field('post_status', $post_id );
       
+	 
+
       if ( $publish_datetime ) { // user intends to publish or schedule the post
          $original_post_id = get_post_meta( $post_id, '_oasis_original', true );
          
@@ -2265,7 +2267,10 @@ class OW_Process_Flow {
 						}
 						$is_revision = true;
 					}else{
-						$step_status = 'publish';
+						$step_status = 'pub-sign_off';
+						if($previous_status === 'pub-sign-off'){
+							$step_status = 'publish';
+						}
 					}
 					break;
 			}
@@ -2314,7 +2319,7 @@ class OW_Process_Flow {
             $title = get_post_field('post_title', $post_id );
             $post_name = sanitize_title($title, $post_id);
          }
-         
+
 		 //HAS AN $action_name BEEN PASSED IN
 		 if($action_name){
 			switch($action_name){
@@ -2352,7 +2357,10 @@ class OW_Process_Flow {
 							$step_status = 'publish';
 						}
 					}else{
-						$step_status = 'publish';
+						$step_status = 'pub-sign_off';
+						if($previous_status === 'pub-sign-off'){
+							$step_status = 'publish';
+						}
 					}
 					break;
 			}
