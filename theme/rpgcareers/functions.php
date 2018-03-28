@@ -175,7 +175,7 @@ class RPG_Walker_Nav_Menu extends Walker_Nav_Menu {
             $active_class = ' class="masthead__nav-current"';
         } else if(in_array('current-menu-parent', $classes)) {
             $active_class = ' class="masthead__nav-current"';
-        } else if(in_array('current-menu-ancestor', $classes)) {
+        } else if(in_array('current-page-ancestor', $classes)) {
             $active_class = ' class="masthead__nav-current"';
         }
 
