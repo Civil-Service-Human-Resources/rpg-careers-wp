@@ -2267,7 +2267,7 @@ class OW_Process_Flow {
 						}
 						$is_revision = true;
 					}else{
-						$step_status = 'pub-sign_off';
+						$step_status = 'pub-sign-off';
 						if($previous_status === 'pub-sign-off'){
 							$step_status = 'publish';
 						}
@@ -2357,7 +2357,7 @@ class OW_Process_Flow {
 							$step_status = 'publish';
 						}
 					}else{
-						$step_status = 'pub-sign_off';
+						$step_status = 'pub-sign-off';
 						if($previous_status === 'pub-sign-off'){
 							$step_status = 'publish';
 						}
