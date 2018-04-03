@@ -40,6 +40,7 @@ class rpgutils{
 		add_action('admin_bar_menu', array($this, 'remove_menu_nodes'), 999);
 		add_action('current_screen', array($this, 'restrict_admin_pages'));
 		add_action('admin_head', array($this, 'remove_wpml_metabox'), 99);
+		add_filter('gettext', array($this, 'change_howdy'), 10, 3);
 
 		//PAGE EDITS
 		add_filter('post_row_actions', array($this, 'amend_quick_links'), 10, 2);
@@ -116,6 +117,16 @@ class rpgutils{
 
 		echo '<style>#post-query-submit,.icl_subsubsub{display:none!important;}</style>';
 
+	}
+
+	function change_howdy($translated, $text, $domain) {
+		if (!is_admin() || 'default' != $domain)
+			return $translated;
+
+		if (false !== strpos($translated, 'Howdy'))
+			return str_replace('Howdy,', '', $translated);
+
+		return $translated;
 	}
 
 	function amend_menus() {
