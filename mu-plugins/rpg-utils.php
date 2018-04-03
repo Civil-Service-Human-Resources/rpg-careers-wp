@@ -39,6 +39,7 @@ class rpgutils{
         add_filter('login_redirect', array($this, 'login_redirect'), 10, 3);
 		add_action('admin_bar_menu', array($this, 'remove_menu_nodes'), 999);
 		add_action('current_screen', array($this, 'restrict_admin_pages'));
+		add_action('admin_head', array($this, 'remove_wpml_metabox'), 99);
 
 		//PAGE EDITS
 		add_filter('post_row_actions', array($this, 'amend_quick_links'), 10, 2);
@@ -103,6 +104,18 @@ class rpgutils{
 
 	function remove_admin_login_header() {
         remove_action('wp_head', '_admin_bar_bump_cb');
+	}
+
+	function remove_wpml_metabox() {
+		global $post;
+		global $pagenow;
+
+		if ($pagenow=='post.php' || $pagenow=='post-new.php'){
+			remove_meta_box('icl_div_config',$post->posttype,'normal');
+		}
+
+		echo '<style>#post-query-submit,.icl_subsubsub{display:none!important;}</style>';
+
 	}
 
 	function amend_menus() {
@@ -203,7 +216,7 @@ class rpgutils{
         //UNCOMMENT THIS TO REMOVE UNWANTED CAPABILITIES - SET THEM IN THE FUNCTION
         //$this->clean_unwanted_caps();
 
-        add_meta_box('submitdiv', 'Publish', array($this, 'custom_submit_meta_box'), 'page', 'side', 'low');
+		add_meta_box('submitdiv', 'Publish', array($this, 'custom_submit_meta_box'), 'page', 'side', 'low');
 
         //***START: KEEP AT BOTTOM OF FUNCTION***
         //NB: KEEP AT BOTTOM OF FUNCTION AS A FEW return STATEMENTS TO BE CAREFUL OF
@@ -1124,6 +1137,7 @@ switch ($post_status) {
     }
 
     function amend_post_links($views){
+
 		unset($views['mine']);
 		unset($views['publish']);
 		unset($views['draft']);
