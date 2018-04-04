@@ -33,6 +33,7 @@ function rpgCareers_frontend_scripts() {
 	wp_deregister_script('jquery');
 	
 	wp_enqueue_script('rpgcareers-jquery', get_template_directory_uri() .'/assets/js/jquery-1.12.4.min.js', null, null, true);
+	wp_enqueue_script('rpgcareers-slick-js', get_template_directory_uri() .'/assets/js/slick.min.js', array('rpgcareers-jquery'), null, true);
 	wp_enqueue_script('rpgcareers-helper-js', get_template_directory_uri() .'/assets/js/scripts.js', array('rpgcareers-jquery'), null, true);
 }
 
