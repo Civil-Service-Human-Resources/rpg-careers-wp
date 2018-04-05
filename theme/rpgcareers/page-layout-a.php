@@ -24,6 +24,18 @@ get_header(); ?>
 	$cont_block_vert_surname = get_field('content_block_vertical_surname');
 	$cont_block_vert_role = get_field('content_block_vertical_role');
 
+	$cont_block_hori_image = get_field('content_block_horizontal_image');
+	$cont_block_hori_quote = get_field('content_block_horizontal_quote');
+	$cont_block_hori_forename = get_field('content_block_horizontal_forename');
+	$cont_block_hori_surname = get_field('content_block_horizontal_surname');
+	$cont_block_hori_role = get_field('content_block_horizontal_role');
+	$cont_block_hori_extra_txt = get_field('content_block_horizontal_extra_text');
+
+	$sub_cont_heading = get_field('sub_content_heading');
+	$sub_cont_intro = get_field('sub_content_intro');
+
+
+
 ?>
 <div class="banner">
 	<style>.banner {background-image: url<?php echo $bill_image_src['url']; ?>);}@media (min-width: 768px) {.banner {background-image: url(<?php echo $bill_image_src['url']; ?>);}}</style>
@@ -61,7 +73,7 @@ get_header(); ?>
                     <div class="aside__img">
                         <img src="<?php echo $cont_block_vert_image['url']; ?>" alt="<?php echo $cont_block_vert_image['alt']; ?>">
                     </div>
-                    <blockquote>
+                    <blockquote class="aside__content">
                         <p><?php echo $cont_block_vert_quote; ?></p>
                         <footer><?php echo $cont_block_vert_forename; ?> <?php echo $cont_block_vert_surname; ?><strong><?php echo $cont_block_vert_role; ?></strong></footer>
                     </blockquote>
@@ -73,9 +85,9 @@ get_header(); ?>
         </div>
     </div>
 </div>
-	<?php if( have_rows('factoid_factoid') ): ?>
+	<?php if(have_rows('factoid_factoid')): ?>
 	<div class="slider">
-	<?php while ( have_rows('factoid_factoid') ) : the_row(); ?>
+	<?php while (have_rows('factoid_factoid')) : the_row(); ?>
 		<div class="slider__item">
             <div class="slider__item-content">
                 <div class="slider__item-icon">
@@ -99,11 +111,50 @@ get_header(); ?>
                 <p><?php the_sub_field('fact'); ?></p>
             </div>
         </div>
-	<?php
-		endwhile;
-	?>
+	<?php endwhile; ?>
 	</div>
 <?php endif; ?>
-
+    <div class="content-two-col content-two-col--two-thirds-left">
+        <div class="content-two-col__inner">
+            <div class="content-two-col__first">
+                <div class="aside aside--img-right aside--dark">
+                    <div class="aside__inner">
+                        <div class="aside__img">
+							<img src="<?php echo $cont_block_hori_image['url']; ?>" alt="<?php echo $cont_block_hori_image['alt']; ?>">
+                        </div>
+                        <blockquote class="aside__content">
+							<p><?php echo $cont_block_hori_quote; ?></p>
+							<footer><?php echo $cont_block_hori_forename; ?> <?php echo $cont_block_hori_surname; ?><strong><?php echo $cont_block_hori_role; ?></strong></footer>
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+            <div class="content-two-col__last">
+				<p><?php echo $cont_block_hori_extra_txt; ?></p>
+            </div>
+        </div>
+    </div>
+	<div class="content-two-col">
+        <div class="section-intro">
+            <h2><?php echo $sub_cont_heading; ?></h2>
+            <p><?php echo $sub_cont_intro; ?></p>
+        </div>
+        <div class="content-two-col__inner">
+			<?php if(have_rows('sub_content_driver')):
+				$sub_row_cnt = 0;
+				while (have_rows('sub_content_driver')) : the_row(); ?>
+				<div class="content-two-col__<?php echo (($sub_row_cnt === 0) ? 'first' : 'last'); ?>">
+					<div class="cta">
+						<img class="cta__img" src="https://placebear.com/900/600" alt="Image alt here">
+						<div class="cta__content">
+							<h3 class="cta__title"><a href="<?php the_sub_field('link'); ?>"><?php the_sub_field('headline'); ?></a></h3>
+							<p><?php the_sub_field('text'); ?></p>
+						</div>
+					</div>
+				</div>
+				<?php $sub_row_cnt++; endwhile; ?>
+			<?php endif; ?>
+        </div>
+    </div>
 <?php
 get_footer();
