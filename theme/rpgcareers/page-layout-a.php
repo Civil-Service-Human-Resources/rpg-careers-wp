@@ -5,89 +5,145 @@
 get_header(); ?>
 
 <?php 
-	$bill_logo_text = get_field('billboard_logo_text');
-	$bill_logo_src = get_field('billboard_logo');
-	$bill_heading = get_field('billboard_heading');
-	$bill_intro = get_field('billboard_intro_text');
-	$bill_image_src = get_field('billboard_image');
+	$post_id = get_the_ID();
+	$image_ids = array();
 
-	$main_cont_heading = get_field('main_content_heading');
-	$main_cont_para_1 = get_field('main_content_paragraph_1');
-	$main_cont_para_2 = get_field('main_content_paragraph_2');
-	$main_cont_para_3 = get_field('main_content_paragraph_3');
-	$main_cont_img_1 = get_field('main_content_image_1');
-	$main_cont_img_2 = get_field('main_content_image_2');
-	
-	$cont_block_vert_image = get_field('content_block_vertical_image');
-	$cont_block_vert_quote = get_field('content_block_vertical_quote');
-	$cont_block_vert_forename = get_field('content_block_vertical_forename');
-	$cont_block_vert_surname = get_field('content_block_vertical_surname');
-	$cont_block_vert_role = get_field('content_block_vertical_role');
+	$main_cont_img_1_alt = '';
+	$main_cont_img_2_alt = '';
+	$cont_block_vert_image_alt = '';
+	$cont_block_hori_image_alt = '';
 
-	$cont_block_hori_image = get_field('content_block_horizontal_image');
-	$cont_block_hori_quote = get_field('content_block_horizontal_quote');
-	$cont_block_hori_forename = get_field('content_block_horizontal_forename');
-	$cont_block_hori_surname = get_field('content_block_horizontal_surname');
-	$cont_block_hori_role = get_field('content_block_horizontal_role');
-	$cont_block_hori_extra_txt = get_field('content_block_horizontal_extra_text');
+	$bill_logo_text = get_post_meta($post_id,'billboard_logo_text',true);
+	$bill_logo_src = intval(get_post_meta($post_id,'billboard_logo',true));
+	$image_ids[] = $bill_logo_src;
+	$bill_heading = get_post_meta($post_id,'billboard_heading',true);
+	$bill_intro = get_post_meta($post_id,'billboard_intro_text',true);
+	$bill_image_src = intval(get_post_meta($post_id,'billboard_image',true));
+	$bill_image_src_resp = '';
+	$image_ids[] = $bill_image_src;
 
-	$sub_cont_heading = get_field('sub_content_heading');
-	$sub_cont_intro = get_field('sub_content_intro');
+	$main_cont_heading = get_post_meta($post_id,'main_content_heading',true);
+	$main_cont_para_1 = get_post_meta($post_id,'main_content_paragraph_1',true);
+	$main_cont_para_2 = get_post_meta($post_id,'main_content_paragraph_2',true);
+	$main_cont_para_3 = get_post_meta($post_id,'main_content_paragraph_3',true);
+	$main_cont_img_1 = intval(get_post_meta($post_id,'main_content_image_1',true));
+	$main_cont_img_2 = intval(get_post_meta($post_id,'main_content_image_2',true));
+	$image_ids[] = $main_cont_img_1;
+	$image_ids[] = $main_cont_img_2;
+
+	$cont_block_vert_image = intval(get_post_meta($post_id,'content_block_vertical_image',true));
+	$cont_block_vert_image_alt = intval(get_post_meta($post_id,'content_block_vertical_image',true));
+	$cont_block_vert_quote = get_post_meta($post_id,'content_block_vertical_quote',true);
+	$cont_block_vert_forename = get_post_meta($post_id,'content_block_vertical_forename',true);
+	$cont_block_vert_surname =get_post_meta($post_id,'content_block_vertical_surname',true);
+	$cont_block_vert_role = get_post_meta($post_id,'content_block_vertical_role',true);
+	$image_ids[] = $cont_block_vert_image;
 
 
+	$cont_block_hori_image = intval(get_post_meta($post_id,'content_block_horizontal_image',true));
+	$cont_block_hori_quote = get_post_meta($post_id,'content_block_horizontal_quote',true);
+	$cont_block_hori_forename = get_post_meta($post_id,'content_block_horizontal_forename',true);
+	$cont_block_hori_surname = get_post_meta($post_id,'content_block_horizontal_surname',true);
+	$cont_block_hori_role = get_post_meta($post_id,'content_block_horizontal_role',true);
+	$cont_block_hori_extra_txt = get_post_meta($post_id,'content_block_horizontal_extra_text',true);
+	$image_ids[] = $cont_block_hori_image;
+
+	$sub_cont_heading = get_post_meta($post_id,'sub_content_heading',true);
+	$sub_cont_intro = get_post_meta($post_id,'sub_content_intro',true);
+
+	//GET ALL POSTS - SAVES DB CALLS VIA wp_get_attachment_image_src
+	$cache = get_posts(array('post_type' => 'attachment', 'numberposts' => -1, 'post__in' => $image_ids));
+
+	//STORE ALT TEXTS
+	foreach ($cache as $item) {
+		if($item->ID === $main_cont_img_1){
+			$main_cont_img_1_alt = $item->post_title;
+		}
+		if($item->ID === $main_cont_img_2){
+			$main_cont_img_2_alt = $item->post_title;
+		}
+		if($item->ID === $cont_block_vert_image){
+			$cont_block_vert_image_alt = $item->post_title;
+		}
+		if($item->ID === $cont_block_hori_image){
+			$cont_block_hori_image_alt = $item->post_title;
+		}
+	}
+
+	//GET IMAGE SRC
+	if ($bill_logo_src) {
+		$bill_logo_src = wp_get_attachment_image_src($bill_logo_src, 'medium');
+	}
+	if ($bill_image_src) {
+		$bill_image_src = wp_get_attachment_image_src($bill_image_src, 'large');
+		$bill_image_src_resp = wp_get_attachment_image_src($bill_image_src, 'medium');
+	}
+	if ($cont_block_vert_image) {
+		$cont_block_vert_image = wp_get_attachment_image_src($cont_block_vert_image, 'medium');
+	}
+	if ($cont_block_hori_image) {
+		$cont_block_hori_image = wp_get_attachment_image_src($cont_block_hori_image, 'medium');
+	}
+	if ($main_cont_img_1) {
+		$main_cont_img_1 = wp_get_attachment_image_src($main_cont_img_1, 'medium');
+	}
+	if ($main_cont_img_2) {
+		$main_cont_img_2 = wp_get_attachment_image_src($main_cont_img_2, 'medium');
+	}
 
 ?>
 <div class="banner">
-	<style>.banner {background-image: url<?php echo $bill_image_src['url']; ?>);}@media (min-width: 768px) {.banner {background-image: url(<?php echo $bill_image_src['url']; ?>);}}</style>
+	<style>.banner {background-image: url(<?php echo $bill_image_src_resp[0]; ?>);}@media (min-width: 768px) {.banner {background-image: url(<?php echo $bill_image_src[0]; ?>);}}</style>
 </div>
 <main id="content" role="main">
 <div class="department-intro">
     <div class="department-intro__inner">
         <div class="department-intro__head">
             <div class="department-intro__head-logo">
-                <span class="logo" style="background-image:url(<?php echo $bill_logo_src['url']; ?>);">
-                <span class="logo__text"><?php echo $bill_logo_text; ?></span>
+                <span class="logo" style="background-image:url(<?php echo $bill_logo_src[0]; ?>);">
+                <span class="logo__text"><?php echo esc_html($bill_logo_text); ?></span>
             </span>
             </div>
-            <h1 class="department-intro__head-title"><?php echo $bill_heading; ?></h1>
+            <h1 class="department-intro__head-title"><?php echo esc_html($bill_heading); ?></h1>
         </div>
 		<div class="department-intro__content">
-			<p class="intro"><?php echo $bill_intro; ?></p>
+			<p class="intro"><?php echo esc_html($bill_intro); ?></p>
 		</div>
     </div>
 </div>
 <div class="content-two-col content-two-col--stacked-left">
     <div class="content-two-col__inner">
         <div class="content-two-col__first">
-            <h2><?php echo $main_cont_heading; ?></h2>
-            <p><?php echo $main_cont_para_1; ?></p>
-			<p><?php echo $main_cont_para_2; ?></p>
+            <h2><?php echo esc_html($main_cont_heading); ?></h2>
+            <p><?php echo esc_html($main_cont_para_1); ?></p>
+			<p><?php echo esc_html($main_cont_para_2); ?></p>
             <?php if($main_cont_img_1) { ?>
-			<div class="image image--spaced"><img src="<?php echo $main_cont_img_1['url']; ?>" alt="<?php echo $main_cont_img_1['alt']; ?>"></div>
+			<div class="image image--spaced"><img src="<?php echo $main_cont_img_1[0]; ?>" alt="<?php echo $main_cont_img_1_alt; ?>"></div>
 			<?php } ?>
-            <p><?php echo $main_cont_para_3; ?></p>
+            <p><?php echo esc_html($main_cont_para_3); ?></p>
         </div>
         <div class="content-two-col__last">
             <div class="aside aside--img-top">
                 <div class="aside__inner">
                     <div class="aside__img">
-                        <img src="<?php echo $cont_block_vert_image['url']; ?>" alt="<?php echo $cont_block_vert_image['alt']; ?>">
+                        <img src="<?php echo $cont_block_vert_image[0]; ?>" alt="<?php echo $cont_block_vert_image_alt; ?>">
                     </div>
                     <blockquote class="aside__content">
-                        <p><?php echo $cont_block_vert_quote; ?></p>
-                        <footer><?php echo $cont_block_vert_forename; ?> <?php echo $cont_block_vert_surname; ?><strong><?php echo $cont_block_vert_role; ?></strong></footer>
+                        <p><?php echo esc_html($cont_block_vert_quote); ?></p>
+                        <footer><?php echo esc_html($cont_block_vert_forename); ?> <?php echo esc_html($cont_block_vert_surname); ?><strong><?php echo esc_html($cont_block_vert_role); ?></strong></footer>
                     </blockquote>
                 </div>
             </div>
 			<?php if($main_cont_img_2) { ?>
-			<div class="image"><img src="<?php echo $main_cont_img_2['url']; ?>" alt="<?php echo $main_cont_img_2['alt']; ?>"></div>
+			<div class="image"><img src="<?php echo $main_cont_img_2[0]; ?>" alt="<?php echo $main_cont_img_2_alt; ?>"></div>
 			<?php } ?>
         </div>
     </div>
 </div>
-	<?php if(have_rows('factoid_factoid')): ?>
+	<?php $factoids = get_post_meta($post_id, 'factoid_factoid', true);
+	if($factoids): ?>
 	<div class="slider">
-	<?php while (have_rows('factoid_factoid')) : the_row(); ?>
+	<?php for ($i=0;$i<$factoids;$i++) { ?>
 		<div class="slider__item">
             <div class="slider__item-content">
                 <div class="slider__item-icon">
@@ -108,10 +164,10 @@ get_header(); ?>
                         </g>
                     </svg>
                 </div>
-                <p><?php the_sub_field('fact'); ?></p>
+                <p><?php echo esc_html(get_post_meta($post_id, 'factoid_factoid_'.$i.'_fact', true)); ?></p>
             </div>
         </div>
-	<?php endwhile; ?>
+	<?php } ?>
 	</div>
 <?php endif; ?>
     <div class="content-two-col content-two-col--two-thirds-left">
@@ -120,39 +176,39 @@ get_header(); ?>
                 <div class="aside aside--img-right aside--dark">
                     <div class="aside__inner">
                         <div class="aside__img">
-							<img src="<?php echo $cont_block_hori_image['url']; ?>" alt="<?php echo $cont_block_hori_image['alt']; ?>">
+							<img src="<?php echo $cont_block_hori_image[0]; ?>" alt="<?php echo $cont_block_hori_image_alt; ?>">
                         </div>
                         <blockquote class="aside__content">
-							<p><?php echo $cont_block_hori_quote; ?></p>
-							<footer><?php echo $cont_block_hori_forename; ?> <?php echo $cont_block_hori_surname; ?><strong><?php echo $cont_block_hori_role; ?></strong></footer>
+							<p><?php echo esc_html($cont_block_hori_quote); ?></p>
+							<footer><?php echo esc_html($cont_block_hori_forename); ?> <?php echo esc_html($cont_block_hori_surname); ?><strong><?php echo esc_html($cont_block_hori_role); ?></strong></footer>
                         </blockquote>
                     </div>
                 </div>
             </div>
             <div class="content-two-col__last">
-				<p><?php echo $cont_block_hori_extra_txt; ?></p>
+				<p><?php echo esc_html($cont_block_hori_extra_txt); ?></p>
             </div>
         </div>
     </div>
 	<div class="content-two-col">
         <div class="section-intro">
-            <h2><?php echo $sub_cont_heading; ?></h2>
-            <p><?php echo $sub_cont_intro; ?></p>
+            <h2><?php echo esc_html($sub_cont_heading); ?></h2>
+            <p><?php echo esc_html($sub_cont_intro); ?></p>
         </div>
         <div class="content-two-col__inner">
-			<?php if(have_rows('sub_content_driver')):
-				$sub_row_cnt = 0;
-				while (have_rows('sub_content_driver')) : the_row(); ?>
-				<div class="content-two-col__<?php echo (($sub_row_cnt === 0) ? 'first' : 'last'); ?>">
+			<?php $drivers = get_post_meta($post_id, 'sub_content_driver', true);
+			if($drivers):
+				for ($j=0;$j<$drivers;$j++) { ?>
+				<div class="content-two-col__<?php echo (($j === 0) ? 'first' : 'last'); ?>">
 					<div class="cta">
-						<img class="cta__img" src="https://placebear.com/900/600" alt="Image alt here">
+						<img class="cta__img" src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'sub_content_driver_'.$j.'_image', true), 'large')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'sub_content_driver_'.$j.'_image', true), '_wp_attachment_image_alt', true); ?>">
 						<div class="cta__content">
-							<h3 class="cta__title"><a href="<?php the_sub_field('link'); ?>"><?php the_sub_field('headline'); ?></a></h3>
-							<p><?php the_sub_field('text'); ?></p>
+							<h3 class="cta__title"><a href="<?php echo esc_html(get_post_meta($post_id, 'sub_content_driver_'.$j.'_link', true)); ?>"><?php echo esc_html(get_post_meta($post_id, 'sub_content_driver_'.$j.'_headline', true)); ?></a></h3>
+							<p><?php echo esc_html(get_post_meta($post_id, 'sub_content_driver_'.$j.'_text', true)); ?></p>
 						</div>
 					</div>
 				</div>
-				<?php $sub_row_cnt++; endwhile; ?>
+				<?php } ?>
 			<?php endif; ?>
         </div>
     </div>

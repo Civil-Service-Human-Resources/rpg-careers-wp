@@ -131,8 +131,8 @@ class rpgsnippets{
 
         //TEST STATUS OF THE SNIPPET - IF PUBLISHED THEN CARRY ON
         if(get_post_status($tagcode)==='publish'){
-            //CALL THE ACF PLUGIN the_field FUNCTION
-            $snippet = the_field('snippet_body', $tagcode);
+            //GET THE SNIPPET BODY FROM post_meta
+            $snippet = get_post_meta($tagcode, 'snippet_body', true);
         }
         
         return $snippet;

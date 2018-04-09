@@ -41,6 +41,7 @@ class rpgutils{
 		add_action('current_screen', array($this, 'restrict_admin_pages'));
 		add_action('admin_head', array($this, 'remove_wpml_metabox'), 99);
 		add_filter('gettext', array($this, 'change_howdy'), 10, 3);
+		add_filter('option_active_plugins', array($this, 'disable_plugins_frontend'));
 
 		//PAGE EDITS
 		add_filter('post_row_actions', array($this, 'amend_quick_links'), 10, 2);
@@ -101,6 +102,9 @@ class rpgutils{
 		//WORKFLOW - FILTER USER LISTINGS
 		add_filter('owf_get_users_in_step', array($this, 'filter_step_user_list'), 10, 3);
 
+		//ACF CUSTOM FIELDS
+		add_filter('acf/settings/save_json', array($this, 'set_acf_json_save_point'));
+		add_filter('acf/settings/load_json', array($this, 'set_acf_json_load_point'));
     }
 
 	function remove_admin_login_header() {
@@ -127,6 +131,29 @@ class rpgutils{
 			return str_replace('Howdy,', '', $translated);
 
 		return $translated;
+	}
+
+	function disable_plugins_frontend($plugins) {
+		if(is_admin())
+			return $plugins;
+	
+		foreach($plugins as $i => $plugin){
+		
+			switch($plugin){
+				case 'acf-tab-merge/acf-tab-merge.php':
+				case 'advanced-custom-fields-pro/acf.php':
+				case 'acfml/wpml-acf.php':
+				case 'ewww-image-optimizer/ewww-image-optimizer.php':
+				case 'members/members.php':
+				case 'oasis-workflow/oasiswf.php':
+				case 'wp-user-groups/wp-user-groups.php':
+				case 'wpml-string-translation/plugin.php':
+				case 'wpml-translation-management/plugin.php':
+					unset($plugins[$i]);
+					break;
+			}
+		}
+		return $plugins;
 	}
 
 	function amend_menus() {
@@ -1408,6 +1435,17 @@ switch ($post_status) {
             'exclusive' => false,
        ));
     }
+
+	function set_acf_json_save_point($path) {
+		$path = plugin_dir_path( __FILE__ );
+		return $path;
+	}
+
+	function set_acf_json_load_point($paths) {
+		unset($paths[0]);
+		$paths[] = plugin_dir_path( __FILE__ );
+		return $paths;
+	}
 
 	function set_default_role($default_role){
 		return 'content_author';
