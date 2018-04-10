@@ -1,10 +1,10 @@
 {
-    "key": "group_5ac4c574a5372",
-    "title": "RPG Content Block Vertical",
+    "key": "group_5acc79471e6f3",
+    "title": "RPG Content Block With CTA + Image",
     "fields": [
         {
-            "key": "field_5ac4c60fac29d",
-            "label": "Content Block Vertical",
+            "key": "field_5acc7989bc6e9",
+            "label": "Content Block with CTA + Image",
             "name": "",
             "type": "tab",
             "instructions": "",
@@ -15,13 +15,13 @@
                 "class": "",
                 "id": ""
             },
-            "placement": "left",
+            "placement": "top",
             "endpoint": 0
         },
         {
-            "key": "field_5ac4d74770506",
+            "key": "field_5acc79aabc6ea",
             "label": "",
-            "name": "content_block_vertical",
+            "name": "content_block_with_cta_+_image",
             "type": "group",
             "instructions": "",
             "required": 0,
@@ -34,7 +34,99 @@
             "layout": "row",
             "sub_fields": [
                 {
-                    "key": "field_5ac4d76b70507",
+                    "key": "field_5acc79c9bc6eb",
+                    "label": "Heading",
+                    "name": "heading",
+                    "type": "text",
+                    "instructions": "(max 70 chars)",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "maxlength": 70
+                },
+                {
+                    "key": "field_5acc79ddbc6ec",
+                    "label": "Paragraph 1",
+                    "name": "paragraph_1",
+                    "type": "textarea",
+                    "instructions": "(max 450 chars)",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "maxlength": 450,
+                    "rows": "",
+                    "new_lines": ""
+                },
+                {
+                    "key": "field_5acc79f8bc6ed",
+                    "label": "Paragraph 2",
+                    "name": "paragraph_2",
+                    "type": "textarea",
+                    "instructions": "OPTIONAL (max 450 chars)",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "maxlength": 450,
+                    "rows": "",
+                    "new_lines": ""
+                },
+                {
+                    "key": "field_5acc7a258fa7f",
+                    "label": "CTA text",
+                    "name": "cta_text",
+                    "type": "text",
+                    "instructions": "(max 25 chars)",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "maxlength": ""
+                },
+                {
+                    "key": "field_5acc7a348fa80",
+                    "label": "CTA target",
+                    "name": "cta_target",
+                    "type": "url",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": ""
+                },
+                {
+                    "key": "field_5acc7a5e962b8",
                     "label": "Image",
                     "name": "image",
                     "type": "image",
@@ -56,82 +148,6 @@
                     "max_height": "",
                     "max_size": "",
                     "mime_types": ""
-                },
-                {
-                    "key": "field_5ac4d77670508",
-                    "label": "Quote",
-                    "name": "quote",
-                    "type": "textarea",
-                    "instructions": "(max 200 chars)",
-                    "required": 1,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "default_value": "",
-                    "placeholder": "",
-                    "maxlength": 200,
-                    "rows": 4,
-                    "new_lines": ""
-                },
-                {
-                    "key": "field_5ac4d7d894b09",
-                    "label": "Forename",
-                    "name": "forename",
-                    "type": "text",
-                    "instructions": "(max 25 chars)",
-                    "required": 1,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "default_value": "",
-                    "placeholder": "",
-                    "prepend": "",
-                    "append": "",
-                    "maxlength": 25
-                },
-                {
-                    "key": "field_5ac4d7ea94b0a",
-                    "label": "Surname",
-                    "name": "surname",
-                    "type": "text",
-                    "instructions": "(max 25 chars)",
-                    "required": 1,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "default_value": "",
-                    "placeholder": "",
-                    "prepend": "",
-                    "append": "",
-                    "maxlength": 24
-                },
-                {
-                    "key": "field_5ac4d7f794b0b",
-                    "label": "Role",
-                    "name": "role",
-                    "type": "text",
-                    "instructions": "(max 50 chars)",
-                    "required": 1,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "default_value": "",
-                    "placeholder": "",
-                    "prepend": "",
-                    "append": "",
-                    "maxlength": 50
                 }
             ]
         }
@@ -141,18 +157,11 @@
             {
                 "param": "post_template",
                 "operator": "==",
-                "value": "page-layout-a.php"
-            }
-        ],
-        [
-            {
-                "param": "post_template",
-                "operator": "==",
                 "value": "page-home.php"
             }
         ]
     ],
-    "menu_order": 2,
+    "menu_order": 3,
     "position": "normal",
     "style": "seamless",
     "label_placement": "top",
@@ -173,6 +182,6 @@
         "send-trackbacks"
     ],
     "active": 1,
-    "description": "Content block vertically stacked",
-    "modified": 1523286445
+    "description": "Content block with CTA button + Image",
+    "modified": 1523350182
 }

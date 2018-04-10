@@ -32,7 +32,7 @@ get_header(); ?>
 	$image_ids[] = $main_cont_img_2;
 
 	$cont_block_vert_image = intval(get_post_meta($post_id,'content_block_vertical_image',true));
-	$cont_block_vert_image_alt = intval(get_post_meta($post_id,'content_block_vertical_image',true));
+	$cont_block_vert_image_alt = get_post_meta($cont_block_vert_image, '_wp_attachment_image_alt', true);
 	$cont_block_vert_quote = get_post_meta($post_id,'content_block_vertical_quote',true);
 	$cont_block_vert_forename = get_post_meta($post_id,'content_block_vertical_forename',true);
 	$cont_block_vert_surname =get_post_meta($post_id,'content_block_vertical_surname',true);
@@ -61,9 +61,6 @@ get_header(); ?>
 		}
 		if($item->ID === $main_cont_img_2){
 			$main_cont_img_2_alt = $item->post_title;
-		}
-		if($item->ID === $cont_block_vert_image){
-			$cont_block_vert_image_alt = $item->post_title;
 		}
 		if($item->ID === $cont_block_hori_image){
 			$cont_block_hori_image_alt = $item->post_title;
@@ -126,7 +123,7 @@ get_header(); ?>
             <div class="aside aside--img-top">
                 <div class="aside__inner">
                     <div class="aside__img">
-                        <img src="<?php echo $cont_block_vert_image[0]; ?>" alt="<?php echo $cont_block_vert_image_alt; ?>">
+                        <img src="<?php echo $cont_block_vert_image[0]; ?>" alt="<?php echo essc_html($cont_block_vert_image_alt); ?>">
                     </div>
                     <blockquote class="aside__content">
                         <p><?php echo esc_html($cont_block_vert_quote); ?></p>
