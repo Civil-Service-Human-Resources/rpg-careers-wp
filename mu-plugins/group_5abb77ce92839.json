@@ -94,6 +94,49 @@
                     "prepend": "",
                     "append": "",
                     "maxlength": 70
+                },
+                {
+                    "key": "field_5accbb890d0c3",
+                    "label": "Intro text",
+                    "name": "intro_text",
+                    "type": "textarea",
+                    "instructions": "(max 350 chars)",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "maxlength": 351,
+                    "rows": "",
+                    "new_lines": ""
+                },
+                {
+                    "key": "field_5accbbcfbcd0d",
+                    "label": "Image",
+                    "name": "image",
+                    "type": "image",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "return_format": "array",
+                    "preview_size": "thumbnail",
+                    "library": "all",
+                    "min_width": "",
+                    "min_height": "",
+                    "min_size": "",
+                    "max_width": "",
+                    "max_height": "",
+                    "max_size": "",
+                    "mime_types": ""
                 }
             ]
         }
@@ -129,5 +172,5 @@
     ],
     "active": 1,
     "description": "Billboard component shown in pages",
-    "modified": 1523263730
+    "modified": 1523366875
 }
