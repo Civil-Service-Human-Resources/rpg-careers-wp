@@ -123,7 +123,7 @@ get_header(); ?>
             <div class="aside aside--img-top">
                 <div class="aside__inner">
                     <div class="aside__img">
-                        <img src="<?php echo $cont_block_vert_image[0]; ?>" alt="<?php echo essc_html($cont_block_vert_image_alt); ?>">
+                        <img src="<?php echo $cont_block_vert_image[0]; ?>" alt="<?php echo esc_html($cont_block_vert_image_alt); ?>">
                     </div>
                     <blockquote class="aside__content">
                         <p><?php echo esc_html($cont_block_vert_quote); ?></p>
