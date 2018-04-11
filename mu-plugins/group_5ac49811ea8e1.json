@@ -163,7 +163,7 @@
     "location": [
         [
             {
-                "param": "post_template",
+                "param": "page_template",
                 "operator": "==",
                 "value": "page-layout-a.php"
             }
@@ -191,5 +191,5 @@
     ],
     "active": 1,
     "description": "Main content component shown in pages",
-    "modified": 1523263803
+    "modified": 1523437466
 }

@@ -105,6 +105,13 @@
                 "operator": "==",
                 "value": "page-home.php"
             }
+        ],
+        [
+            {
+                "param": "page_template",
+                "operator": "==",
+                "value": "page-hub.php"
+            }
         ]
     ],
     "menu_order": 0,
@@ -128,6 +135,6 @@
         "send-trackbacks"
     ],
     "active": 1,
-    "description": "",
-    "modified": 1523285069
+    "description": "Billboard component shown on the home page and hub pages",
+    "modified": 1523373003
 }

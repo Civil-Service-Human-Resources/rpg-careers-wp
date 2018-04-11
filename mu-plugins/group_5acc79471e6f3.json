@@ -107,7 +107,7 @@
                     "placeholder": "",
                     "prepend": "",
                     "append": "",
-                    "maxlength": ""
+                    "maxlength": 25
                 },
                 {
                     "key": "field_5acc7a348fa80",
@@ -155,7 +155,7 @@
     "location": [
         [
             {
-                "param": "post_template",
+                "param": "page_template",
                 "operator": "==",
                 "value": "page-home.php"
             }
@@ -183,5 +183,5 @@
     ],
     "active": 1,
     "description": "Content block with CTA button + Image",
-    "modified": 1523350182
+    "modified": 1523437488
 }

@@ -176,7 +176,7 @@
     "location": [
         [
             {
-                "param": "post_template",
+                "param": "page_template",
                 "operator": "==",
                 "value": "page-layout-a.php"
             }
@@ -190,5 +190,5 @@
     "hide_on_screen": "",
     "active": 1,
     "description": "Sub content component shown in pages",
-    "modified": 1523263838
+    "modified": 1523437532
 }
