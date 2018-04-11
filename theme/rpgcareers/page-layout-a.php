@@ -39,7 +39,6 @@ get_header(); ?>
 	$cont_block_vert_role = get_post_meta($post_id,'content_block_vertical_role',true);
 	$image_ids[] = $cont_block_vert_image;
 
-
 	$cont_block_hori_image = intval(get_post_meta($post_id,'content_block_horizontal_image',true));
 	$cont_block_hori_quote = get_post_meta($post_id,'content_block_horizontal_quote',true);
 	$cont_block_hori_forename = get_post_meta($post_id,'content_block_horizontal_forename',true);

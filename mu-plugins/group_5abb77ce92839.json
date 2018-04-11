@@ -110,7 +110,7 @@
                     },
                     "default_value": "",
                     "placeholder": "",
-                    "maxlength": 351,
+                    "maxlength": 350,
                     "rows": "",
                     "new_lines": ""
                 },
@@ -172,5 +172,5 @@
     ],
     "active": 1,
     "description": "Billboard component shown in pages",
-    "modified": 1523366875
+    "modified": 1523436530
 }

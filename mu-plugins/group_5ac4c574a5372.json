@@ -112,7 +112,7 @@
                     "placeholder": "",
                     "prepend": "",
                     "append": "",
-                    "maxlength": 24
+                    "maxlength": 25
                 },
                 {
                     "key": "field_5ac4d7f794b0b",
@@ -139,16 +139,23 @@
     "location": [
         [
             {
-                "param": "post_template",
+                "param": "page_template",
                 "operator": "==",
                 "value": "page-layout-a.php"
             }
         ],
         [
             {
-                "param": "post_template",
+                "param": "page_template",
                 "operator": "==",
                 "value": "page-home.php"
+            }
+        ],
+        [
+            {
+                "param": "page_template",
+                "operator": "==",
+                "value": "page-hub.php"
             }
         ]
     ],
@@ -174,5 +181,5 @@
     ],
     "active": 1,
     "description": "Content block vertically stacked",
-    "modified": 1523286445
+    "modified": 1523437326
 }

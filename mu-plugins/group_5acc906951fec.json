@@ -101,7 +101,7 @@
     "location": [
         [
             {
-                "param": "post_template",
+                "param": "page_template",
                 "operator": "==",
                 "value": "page-home.php"
             }
@@ -129,5 +129,5 @@
     ],
     "active": 1,
     "description": "Content block with large cover image",
-    "modified": 1523357768
+    "modified": 1523437516
 }

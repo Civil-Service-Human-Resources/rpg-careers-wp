@@ -69,7 +69,7 @@
                             "placeholder": "",
                             "prepend": "",
                             "append": "",
-                            "maxlength": 101
+                            "maxlength": 100
                         }
                     ]
                 }
@@ -79,7 +79,7 @@
     "location": [
         [
             {
-                "param": "post_template",
+                "param": "page_template",
                 "operator": "==",
                 "value": "page-layout-a.php"
             }
@@ -107,5 +107,5 @@
     ],
     "active": 1,
     "description": "Captures facts and displays them on the site",
-    "modified": 1523263822
+    "modified": 1523437498
 }

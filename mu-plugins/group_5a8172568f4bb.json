@@ -7,7 +7,7 @@
             "label": "Snippet body",
             "name": "snippet_body",
             "type": "textarea",
-            "instructions": "",
+            "instructions": "(max 2000 chars)",
             "required": 1,
             "conditional_logic": 0,
             "wrapper": {
@@ -39,5 +39,5 @@
     "hide_on_screen": "",
     "active": 1,
     "description": "HTML snippets which can be used throughout the site",
-    "modified": 1523263796
+    "modified": 1523436563
 }
