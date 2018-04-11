@@ -168,17 +168,27 @@ class rpgutils{
 	}
 
 	function restrict_admin_pages(){
-		
+		$current_screen_id = get_current_screen()->id;
+
+		//FOR ALL USERS CANNOT VIEW POSTS PAGE DIRECT
+		if ($current_screen_id === 'post') {
+			echo $this->get_die_html('Unable to view page','Sorry you are not allowed to view the requested page.');
+			exit();
+		}
+
 		//IF USER CAN create_users RETURN
 		if (current_user_can('create_users')) {
 			return;
 		}
 
-		$current_screen_id = get_current_screen()->id;
-
 		//RESTRICTED SCREENS
 		$restricted_screens = array(
 			'users',
+			'user',
+			'roles',
+			'role-new',
+			'edit-post_tag',
+			'edit-content_team',
 		);
 
 		//CHECK EACH RESTRICTED SCREEN
@@ -1051,7 +1061,7 @@ switch ($post_status) {
 		return $sizes;
 	}
 
-    function login_redirect( $redirect_to, $request, $user ){
+    function login_redirect($redirect_to, $request, $user){
         if(isset($_REQUEST['redirect_to'])){
             return $_REQUEST['redirect_to'];
         }

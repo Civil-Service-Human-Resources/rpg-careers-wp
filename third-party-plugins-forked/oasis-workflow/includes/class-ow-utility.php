@@ -661,18 +661,24 @@ class OW_Utility {
     * @since 4.2
     */
    public function format_datetime_for_db_wp_default( $formatted_date ) {
-
       // incoming formatted date: 08-Août 24, 2016 @ 09:45
       // remove the textual month so that the date looks like: 08 24, 2016 @ 09:45
-      $start = '-';
-      $end  = ' ';
-      $replace_string = '';
-      $formatted_date = preg_replace('#('.preg_quote($start).')(.*?)('.preg_quote($end).')#si', '$1'. $replace_string .'$3', $formatted_date);
-      $formatted_date = str_replace( "-", "", $formatted_date );
-
-      $date = DateTime::createFromFormat( 'm d, Y @ G:i', $formatted_date );
-
-      $date_with_mysql_format = $date->format( 'Y-m-d H:i:s' );
+      
+	  //CHECK FOR ALPHA CHARACTERS IN THE INCOMING DATE
+	  if(preg_match("/[a-z]/i", $formatted_date)){
+			$start = '-';
+			$end  = ' ';
+			$replace_string = '';
+			$formatted_date = preg_replace('#('.preg_quote($start).')(.*?)('.preg_quote($end).')#si', '$1'. $replace_string .'$3', $formatted_date);
+			$formatted_date = str_replace( "-", "", $formatted_date );
+			$date = DateTime::createFromFormat( 'm d, Y @ G:i', $formatted_date );
+			 $date_with_mysql_format = $date->format( 'Y-m-d H:i:s' );
+	  }else{
+			 $date = str_replace('@', '', $formatted_date);
+			 $new_date = new DateTime($date);
+			 $date_with_mysql_format = $new_date->format('Y-m-d H:i:s');
+	  }
+     
       return $date_with_mysql_format;
    }
   
