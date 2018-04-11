@@ -2644,25 +2644,26 @@ class OW_Process_Flow {
       $time = get_the_time( 'G-i', $post_id );
       $time_array = explode( "-", $time );
 
-      echo "<select id='im-mon'>";
-      for ( $i = 1; $i < 13; $i = $i + 1 ) {
-         $monthnum = zeroise( $i, 2 );
-         $monthtext = $wp_locale->get_month_abbrev( $wp_locale->get_month( $i ) );
-         if ( $date_array[ 1 ] * 1 == $i ) {
-            echo "<option value={$i} selected>{$monthnum}-{$monthtext}</option>";
-         } else {
-            echo "<option value={$i}>{$monthnum}-{$monthtext}</option>";
-         }
-      }
-      echo "</select>";
+     
 
       $im_day = esc_attr( $date_array[ 2 ] );
       $im_year = esc_attr( $date_array[ 0 ] );
       $im_hh = esc_attr( $time_array[ 0 ] );
       $im_mn = esc_attr( $time_array[ 1 ] );
 
-      echo "<input type='text' id='im-day' value='{$im_day}' class='immediately margin' size='2' maxlength='2' autocomplete='off'>,
-		<input type='text' id='im-year' value='{$im_year}' class='immediately im-year' size='4' maxlength='4' autocomplete='off'> @
+      echo "<input type='text' id='im-day' value='{$im_day}' class='immediately margin' size='2' maxlength='2' autocomplete='off'>";
+	   echo "<select style='margin-top:-2px;' id='im-mon'>";
+      for ( $i = 1; $i < 13; $i = $i + 1 ) {
+         $monthnum = zeroise( $i, 2 );
+         $monthtext = $wp_locale->get_month_abbrev( $wp_locale->get_month( $i ) );
+         if ( $date_array[ 1 ] * 1 == $i ) {
+            echo "<option value={$i} selected>{$monthtext}</option>";
+         } else {
+            echo "<option value={$i}>{$monthtext}</option>";
+         }
+      }
+      echo "</select>";
+		echo "<input type='text' id='im-year' value='{$im_year}' class='immediately im-year' size='4' maxlength='4' autocomplete='off'> @
 		<input type='text' id='im-hh' value='{$im_hh}' class='immediately' size='2' maxlength='2' autocomplete='off'> :
 		<input type='text' id='im-mn' value='{$im_mn}' class='immediately' size='2' maxlength='2' autocomplete='off'>";
    }

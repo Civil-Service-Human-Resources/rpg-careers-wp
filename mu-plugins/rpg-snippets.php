@@ -115,7 +115,9 @@ class rpgsnippets{
     }
 
     function snippet_quick_links($views) {
-        $views['publish'] = preg_replace('/Published/','Active',$views['publish'],1);
+		if (isset($views['publish']) || array_key_exists('publish', $views)) { 
+			$views['publish'] = preg_replace('/Published/','Active',$views['publish'],1);
+		}
         return $views;
     }
 
