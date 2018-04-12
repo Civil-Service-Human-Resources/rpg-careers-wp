@@ -146,7 +146,7 @@
             {
                 "param": "page_template",
                 "operator": "==",
-                "value": "page-layout-a.php"
+                "value": "default"
             }
         ]
     ],
@@ -172,5 +172,5 @@
     ],
     "active": 1,
     "description": "Billboard component shown in pages",
-    "modified": 1523436530
+    "modified": 1523537728
 }

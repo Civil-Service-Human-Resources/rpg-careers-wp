@@ -42,6 +42,7 @@ class rpgutils{
 		add_action('admin_head', array($this, 'remove_wpml_metabox'), 99);
 		add_filter('gettext', array($this, 'change_howdy'), 10, 3);
 		add_filter('option_active_plugins', array($this, 'disable_plugins_frontend'));
+		add_filter('default_page_template_title', array($this, 'change_default_template_display_name'), 10, 2);
 
 		//PAGE EDITS
 		add_filter('post_row_actions', array($this, 'amend_quick_links'), 10, 2);
@@ -121,6 +122,10 @@ class rpgutils{
 
 		echo '<style>#post-query-submit,.icl_subsubsub{display:none!important;}</style>';
 
+	}
+
+	function change_default_template_display_name() {
+		return __('Page : Layout A', 'RPG_Careers');
 	}
 
 	function change_howdy($translated, $text, $domain) {
@@ -1083,7 +1088,7 @@ switch ($post_status) {
                 wp_enqueue_script('jquery');
             }
        ?>
-<script type="text/javascript">(function(){jQuery(function(){jQuery('#menu_order').attr('style','display:none;');jQuery('#menu_order').next().attr('style','display:none');jQuery('#menu_order').prev().attr('style','display:none');var f=setInterval(function(){if(jQuery('#step_submit').length){jQuery('#step_submit').attr('style','margin-left:5px;');jQuery('#step_submit').prev('a').attr('style','');clearInterval(f);}},100);});})();</script>
+<script type="text/javascript">(function(){window.RPGUtil={groupTabs:function(){var a=jQuery('#postbox-container-2 .acf-postbox:not(.acf-hidden) > .acf-fields > .acf-tab-wrap > .acf-tab-group'),t=jQuery('#postbox-container-2 .acf-postbox:not(.acf-hidden) > .acf-fields > .acf-tab-wrap').parent('.inside');if(a.length>1){var e=a.first();e.find('li:gt(0)').hide();a.not(e).each(function(){var a=jQuery(this);a.find('li').removeClass('active').appendTo(e),a.parent('div.acf-tab-wrap').remove()})}if(t.length>1){var n=t.first();t.not(n).each(function(){var a=jQuery(this);a.children().addClass('hidden-by-tab').appendTo(n),a.parents('.acf-postbox').remove()})}}};jQuery(function(){jQuery('#menu_order').attr('style','display:none;');jQuery('#menu_order').next().attr('style','display:none');jQuery('#menu_order').prev().attr('style','display:none');var f=setInterval(function(){if(jQuery('#step_submit').length){jQuery('#step_submit').attr('style','margin-left:5px;');jQuery('#step_submit').prev('a').attr('style','');clearInterval(f);}},100);});acf.add_action('ready',function($el){RPGUtil.groupTabs();});})();</script>
     <?php
         }
     }

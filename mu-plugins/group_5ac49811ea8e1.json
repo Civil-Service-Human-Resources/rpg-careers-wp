@@ -50,7 +50,7 @@
                     "placeholder": "",
                     "prepend": "",
                     "append": "",
-                    "maxlength": 39
+                    "maxlength": 40
                 },
                 {
                     "key": "field_5ac4d60162da1",
@@ -165,7 +165,7 @@
             {
                 "param": "page_template",
                 "operator": "==",
-                "value": "page-layout-a.php"
+                "value": "default"
             }
         ]
     ],
@@ -191,5 +191,5 @@
     ],
     "active": 1,
     "description": "Main content component shown in pages",
-    "modified": 1523437466
+    "modified": 1523537751
 }
