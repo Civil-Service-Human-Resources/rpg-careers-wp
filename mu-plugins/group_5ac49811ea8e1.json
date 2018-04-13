@@ -38,7 +38,7 @@
                     "label": "Heading",
                     "name": "heading",
                     "type": "text",
-                    "instructions": "(max 40 chars)",
+                    "instructions": "(max 50 chars)",
                     "required": 1,
                     "conditional_logic": 0,
                     "wrapper": {
@@ -50,7 +50,7 @@
                     "placeholder": "",
                     "prepend": "",
                     "append": "",
-                    "maxlength": 40
+                    "maxlength": 50
                 },
                 {
                     "key": "field_5ac4d60162da1",
@@ -156,6 +156,25 @@
                     "max_height": "",
                     "max_size": "",
                     "mime_types": ""
+                },
+                {
+                    "key": "field_5ad0898470360",
+                    "label": "Paragraph 4",
+                    "name": "paragraph_4",
+                    "type": "textarea",
+                    "instructions": "OPTIONAL (max 400 chars)",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "maxlength": 400,
+                    "rows": 4,
+                    "new_lines": ""
                 }
             ]
         }
@@ -166,6 +185,13 @@
                 "param": "page_template",
                 "operator": "==",
                 "value": "default"
+            }
+        ],
+        [
+            {
+                "param": "page_template",
+                "operator": "==",
+                "value": "page-layout-b.php"
             }
         ]
     ],
@@ -191,5 +217,5 @@
     ],
     "active": 1,
     "description": "Main content component shown in pages",
-    "modified": 1523537751
+    "modified": 1523618315
 }
