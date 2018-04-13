@@ -160,7 +160,7 @@
             {
                 "param": "page_template",
                 "operator": "==",
-                "value": "page-layout-a.php"
+                "value": "default"
             }
         ]
     ],
@@ -186,5 +186,5 @@
     ],
     "active": 1,
     "description": "Content block horizontally stacked",
-    "modified": 1523437507
+    "modified": 1523537810
 }
