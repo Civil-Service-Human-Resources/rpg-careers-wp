@@ -72,6 +72,9 @@
 		if($item->ID === $main_cont_img_2){
 			$main_cont_img_2_alt = $item->post_title;
 		}
+		if($item->ID === $cont_block_vert_image){
+			$cont_block_vert_image_alt = $item->post_title;
+		}
 		if($item->ID === $cont_block_hori_image){
 			$cont_block_hori_image_alt = $item->post_title;
 		}

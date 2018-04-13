@@ -1,6 +1,6 @@
 {
     "key": "group_5abb77ce92839",
-    "title": "RPG Page Billboard",
+    "title": "RPG Logo Billboard",
     "fields": [
         {
             "key": "field_5abb810a5e43a",
@@ -171,6 +171,6 @@
         "send-trackbacks"
     ],
     "active": 1,
-    "description": "Billboard component shown in pages",
-    "modified": 1523537728
+    "description": "Billboard component with logo",
+    "modified": 1523614313
 }

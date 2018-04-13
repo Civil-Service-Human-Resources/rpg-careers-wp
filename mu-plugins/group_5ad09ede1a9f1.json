@@ -1,10 +1,10 @@
 {
-    "key": "group_5acb78f13662b",
-    "title": "RPG Billboard",
+    "key": "group_5ad09ede1a9f1",
+    "title": "RPG Content Block With 3 Paras",
     "fields": [
         {
-            "key": "field_5acb78fd87e1a",
-            "label": "Billboard",
+            "key": "field_5ad09f68c84f2",
+            "label": "Content Block With 3 Paras",
             "name": "",
             "type": "tab",
             "instructions": "",
@@ -16,12 +16,12 @@
                 "id": ""
             },
             "placement": "top",
-            "endpoint": 1
+            "endpoint": 0
         },
         {
-            "key": "field_5acb795af2849",
+            "key": "field_5ad09f94a4e7f",
             "label": "",
-            "name": "billboard",
+            "name": "content_block_with_3_paras",
             "type": "group",
             "instructions": "",
             "required": 0,
@@ -34,11 +34,11 @@
             "layout": "row",
             "sub_fields": [
                 {
-                    "key": "field_5acb7982f284a",
+                    "key": "field_5ad09fb6a4e80",
                     "label": "Heading",
                     "name": "heading",
                     "type": "text",
-                    "instructions": "(max 70 chars)",
+                    "instructions": "(max 50 chars)",
                     "required": 1,
                     "conditional_logic": 0,
                     "wrapper": {
@@ -50,14 +50,14 @@
                     "placeholder": "",
                     "prepend": "",
                     "append": "",
-                    "maxlength": 70
+                    "maxlength": 50
                 },
                 {
-                    "key": "field_5acb79ea29832",
-                    "label": "Intro text",
-                    "name": "intro_text",
+                    "key": "field_5ad09fd4a4e81",
+                    "label": "Paragraph 1",
+                    "name": "paragraph_1",
                     "type": "textarea",
-                    "instructions": "(max 350 chars)",
+                    "instructions": "(max 450 chars)",
                     "required": 1,
                     "conditional_logic": 0,
                     "wrapper": {
@@ -67,16 +67,16 @@
                     },
                     "default_value": "",
                     "placeholder": "",
-                    "maxlength": 350,
+                    "maxlength": 450,
                     "rows": "",
                     "new_lines": ""
                 },
                 {
-                    "key": "field_5acb79be29831",
-                    "label": "Image",
-                    "name": "image",
-                    "type": "image",
-                    "instructions": "",
+                    "key": "field_5ad09ff8a4e82",
+                    "label": "Paragraph 2",
+                    "name": "paragraph_2",
+                    "type": "textarea",
+                    "instructions": "(max 450 chars)",
                     "required": 1,
                     "conditional_logic": 0,
                     "wrapper": {
@@ -84,16 +84,30 @@
                         "class": "",
                         "id": ""
                     },
-                    "return_format": "array",
-                    "preview_size": "thumbnail",
-                    "library": "all",
-                    "min_width": "",
-                    "min_height": "",
-                    "min_size": "",
-                    "max_width": "",
-                    "max_height": "",
-                    "max_size": "",
-                    "mime_types": ""
+                    "default_value": "",
+                    "placeholder": "",
+                    "maxlength": 450,
+                    "rows": "",
+                    "new_lines": ""
+                },
+                {
+                    "key": "field_5ad0a185f893c",
+                    "label": "Paragraph 3",
+                    "name": "paragraph_3",
+                    "type": "textarea",
+                    "instructions": "(max 450 chars)",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "maxlength": 450,
+                    "rows": "",
+                    "new_lines": ""
                 }
             ]
         }
@@ -101,27 +115,13 @@
     "location": [
         [
             {
-                "param": "page_template",
+                "param": "post_format",
                 "operator": "==",
-                "value": "page-home.php"
-            }
-        ],
-        [
-            {
-                "param": "page_template",
-                "operator": "==",
-                "value": "page-hub.php"
-            }
-        ],
-        [
-            {
-                "param": "page_template",
-                "operator": "==",
-                "value": "page-layout-b.php"
+                "value": "image"
             }
         ]
     ],
-    "menu_order": 0,
+    "menu_order": 3,
     "position": "normal",
     "style": "seamless",
     "label_placement": "top",
@@ -142,6 +142,6 @@
         "send-trackbacks"
     ],
     "active": 1,
-    "description": "Billboard component shown on the home page and hub pages",
-    "modified": 1523614376
+    "description": "Content block with heading and three paragraphs",
+    "modified": 1523623818
 }
