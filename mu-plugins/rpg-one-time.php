@@ -121,6 +121,8 @@ class rpgonetime{
             'delete_others_pages'			=> true,
             'edit_private_pages'			=> true,
             'edit_published_pages'			=> true,
+			'delete_posts'					=> true,
+			'delete_others_posts'			=> true, 
 			'edit_posts'					=> true,
             'edit_others_posts'				=> true,
             'upload_files'					=> true,
