@@ -11,10 +11,12 @@
 	$main_cont_img_1_alt = '';
 	$main_cont_img_2_alt = '';
 	$cont_block_vert_image_alt = '';
+	$bill_image_src_alt = '';
 
 	$bill_heading = get_post_meta($post_id,'billboard_heading',true);
 	$bill_intro = get_post_meta($post_id,'billboard_intro_text',true);
 	$bill_image_src = intval(get_post_meta($post_id,'billboard_image',true));
+	$bill_image_src_alt = get_post_meta($bill_image_src, '_wp_attachment_image_alt', true);
 	$bill_image_src_resp = '';
 	$image_ids[] = $bill_image_src;
 
@@ -62,6 +64,9 @@
 		}
 		if($item->ID === $cont_block_vert_image){
 			$cont_block_vert_image_alt = $item->post_title;
+		}
+		if($item->ID === $bill_image_src){
+			$bill_image_src_alt = $item->post_title;
 		}
 	}
 
