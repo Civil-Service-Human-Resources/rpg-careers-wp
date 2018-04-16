@@ -18,7 +18,7 @@
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="robots" content="index,follow">
 	<meta name="google" content="nositelinkssearchbox" />
-	<title><?php the_title(); ?> | Civil Service Careers</title>
+	<title><?php echo (is_404() ? 'Page not found' : the_title()); ?> | Civil Service Careers</title>
 	<?php wp_head(); ?>
 	<style id="fKill">body{display:none!important;}</style>
 	<script>if(self===top){var f=document.getElementById('fKill');f.parentNode.removeChild(f);}else{top.location=self.location;}</script>
