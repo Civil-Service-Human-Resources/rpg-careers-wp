@@ -106,6 +106,10 @@ class rpgutils{
 		//ACF CUSTOM FIELDS
 		add_filter('acf/settings/save_json', array($this, 'set_acf_json_save_point'));
 		add_filter('acf/settings/load_json', array($this, 'set_acf_json_load_point'));
+
+		//GTM ACTIONS
+		add_action('gtm_head', array($this, 'render_gtm_head'));
+		add_action('gtm_body', array($this, 'render_gtm_body'));
     }
 
 	function remove_admin_login_header() {
@@ -636,6 +640,26 @@ switch ($post_status) {
         return $code_tag;
     }
 
+	function render_gtm_head(){
+		global $post;
+		$gtm_head = '';
+		if(GTM_ON){
+			$gtm_head = "<script>dataLayer=[{'title':'". $post->post_title ."','author':'". get_the_author_meta('display_name', $post->post_author) ."','logged_in':'true','page_id':" . $post->ID . ",'post_date':'". $post->post_date_gmt ."'}];";
+			$gtm_head .= "(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&amp;l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','!!CONTAINER_ID!!');</script>";
+			$gtm_head = str_replace('!!CONTAINER_ID!!', GTM_CONTAINER_ID, $gtm_head);
+		}
+		echo $gtm_head;
+	}
+
+	function render_gtm_body(){
+		$gtm_body = '';
+		if(GTM_ON){
+			$gtm_body = '<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=!!CONTAINER_ID!!" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>';
+			$gtm_body = str_replace('!!CONTAINER_ID!!', GTM_CONTAINER_ID, $gtm_body);
+		}
+		echo $gtm_body;
+	}
+
 	function filter_media_files($query){
 
 		//ONLY FOR ADMIN PAGES
@@ -892,6 +916,15 @@ switch ($post_status) {
 	}
 
 	function media_save_ajax() {
+
+		if (!isset( $_POST['id']) || !isset($_POST['changes'])) 
+			wp_send_json_error(); 
+ 
+		if (!$id = absint( $_POST['id'])) 
+			wp_send_json_error(); 
+ 
+		check_ajax_referer('update-post_' . $id, 'nonce'); 
+
 		$post_id = $_POST['id'];
 		$err = 'Media not saved - ';
 		$fail = false;
@@ -913,6 +946,18 @@ switch ($post_status) {
 	}
 
 	function media_team_fields_save_ajax() {
+
+		if (!isset( $_POST['id'])) 
+			wp_send_json_error(); 
+ 
+		if (!$id = absint( $_POST['id'])) 
+			wp_send_json_error(); 
+ 
+		if (empty($_POST['attachments']) || empty($_POST['attachments'][ $id ])) 
+			wp_send_json_error(); 
+ 
+		check_ajax_referer('update-post_' . $id, 'nonce'); 
+
 		$post_id = $_POST['id'];
 		$fail = false;
 		$failcount = 0;
@@ -1228,7 +1273,7 @@ switch ($post_status) {
 						if(count($teams)>0){
 							$where = " AND (($wpdb->postmeta.meta_key = 'rpg-team' AND $wpdb->postmeta.meta_value IN (";
 							foreach ($teams as $team) {
-								$where .= $team->term_id.',';
+								$where .= "'".esc_sql($team->term_id)."',";
 							}
 
 							$where = rtrim($where,',');
@@ -1487,7 +1532,7 @@ switch ($post_status) {
 		global $wpdb;
 
 		//GET TEAMS CURRENTLY ASSIGNED TO THE IMAGE
-		$teams_for_image = $wpdb->get_results("SELECT RIGHT(meta_key, LENGTH(meta_key) - 12) as term_id FROM {$wpdb->postmeta} where post_id = " . $post_id . " and meta_key LIKE 'team-access-%' and meta_value = 1;");
+		$teams_for_image = $wpdb->get_results("SELECT RIGHT(meta_key, LENGTH(meta_key) - 12) as term_id FROM {$wpdb->postmeta} where post_id = '" . esc_sql($post_id) . "' and meta_key LIKE 'team-access-%' and meta_value = 1;");
 		
 		//CONVERT term_id TO int - WP DEFAULTS TO STRING
 		$image_teams = array();
