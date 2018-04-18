@@ -19,6 +19,7 @@
 	<meta name="robots" content="index,follow">
 	<meta name="google" content="nositelinkssearchbox" />
 	<title><?php echo (is_404() ? 'Page not found' : the_title()); ?> | Civil Service Careers</title>
+	<?php do_action('gtm_head'); ?>
 	<?php wp_head(); ?>
 	<style id="fKill">body{display:none!important;}</style>
 	<script>if(self===top){var f=document.getElementById('fKill');f.parentNode.removeChild(f);}else{top.location=self.location;}</script>
@@ -28,7 +29,7 @@
     <![endif]-->
 </head>
 <body <?php body_class(); ?>>
-<?php do_action( 'body_open' ); ?>
+<?php do_action('gtm_body'); ?>
 <div class="skiplink"><a href="#content">Skip to main content</a></div>
 <div id="global-cookie-message"<?php global $cookie_banner_set; if($cookie_banner_set){ echo ' style="display:block;"';}?>><p>GOV.UK uses cookies to make the site simpler. <a href="<?php echo get_site_url(); ?>/cookies">Find out more about cookies</a></p></div>
 <header class="masthead" role="banner">
