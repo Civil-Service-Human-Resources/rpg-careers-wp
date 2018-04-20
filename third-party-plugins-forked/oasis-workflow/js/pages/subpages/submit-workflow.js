@@ -72,74 +72,80 @@ jQuery( document ).ready( function () {
 
     jQuery('#workflow_submit').on('click', function(){
 
-      // hook for custom validation before submitting to the workflow
-      if ( typeof owSubmitToWorkflowPre === 'function' ) {
-         var pre_submit_to_workflow_result = owSubmitToWorkflowPre();
-         if ( pre_submit_to_workflow_result == false ) {
+        //CHECK PAGE ACTION - IF delete THEN DO NOT VALIDATE
+        if (jQuery('input[name = "page_action"]:checked').val() === 'delete'){
+            normalWorkFlowSubmit(workflowSubmit);
             return false;
-         }
-      }
-            //BESPOKE VALIDATION
-            var $form = jQuery('form#post');
-            var data = acf.serialize($form);
-			data.action = 'rpg_validate_save_post';
-			data = acf.prepare_for_ajax(data);
+        }
 
-            jQuery('#rpg-teams-access').attr('style','');
-            jQuery('#title').attr('style','');
-            jQuery('div.rpg-error-message').remove();
+        // hook for custom validation before submitting to the workflow
+        if ( typeof owSubmitToWorkflowPre === 'function' ) {
+            var pre_submit_to_workflow_result = owSubmitToWorkflowPre();
+            if ( pre_submit_to_workflow_result == false ) {
+            return false;
+            }
+        }
+        //BESPOKE VALIDATION
+        var $form = jQuery('form#post');
+        var data = acf.serialize($form);
+		data.action = 'rpg_validate_save_post';
+		data = acf.prepare_for_ajax(data);
+
+        jQuery('#rpg-teams-access').attr('style','');
+        jQuery('#title').attr('style','');
+        jQuery('div.rpg-error-message').remove();
             
-            jQuery.ajax({
-				url: acf.get('ajaxurl'),
-				data: data,
-				type: 'post',
-				dataType: 'json',
-				success: function(json){
-					var json = json.data;
-                    var msg = '';
+        jQuery.ajax({
+			url: acf.get('ajaxurl'),
+			data: data,
+			type: 'post',
+			dataType: 'json',
+			success: function(json){
+				var json = json.data;
+                var msg = '';
 
-                    //VALIDATE JSON
-			        if (!json || json.valid || !json.errors) {			
-				        return;
-			        }
+                //VALIDATE JSON
+			    if (!json || json.valid || !json.errors) {			
+				    return;
+			    }
 
-                    //GOT ERRORS
-                    if (json.errors && json.errors.length > 0) {
-				        for (var i in json.errors) {	
-                            var error = json.errors[i];	
-                            msg += error.message + '<br/>';
-                            var $input = $form.find('[name="' + error.input + '"]').first();
+                //GOT ERRORS
+                if (json.errors && json.errors.length > 0) {
+				    for (var i in json.errors) {	
+                        var error = json.errors[i];	
+                        msg += error.message + '<br/>';
+                        var $input = $form.find('[name="' + error.input + '"]').first();
 
-                            if (!$input.exists()) {
-						        $input = $form.find('[name^="' + error.input + '"]').first();
-					        }					
+                        if (!$input.exists()) {
+						    $input = $form.find('[name^="' + error.input + '"]').first();
+					    }					
 		
-                            if (!$input.exists()) {
-                                $input = jQuery('#'+ error.input);
-                            }
-
-					        if (!$input.exists()) {
-						        continue;
-					        }	
-
-                            $input.attr('style','border:2px solid #F55E4F;');
+                        if (!$input.exists()) {
+                            $input = jQuery('#'+ error.input);
                         }
 
-                        // get $message
-			            var $message = $form.children('div.rpg-error-message');
+					    if (!$input.exists()) {
+						    continue;
+					    }	
 
-			            if (!$message.exists()) {
-				            $message = jQuery('<div class="error notice rpg-error-message"><p></p></div>');
-				            $form.prepend($message);
-			            }
-
-			            $message.children('p').html(msg);
+                        $input.attr('style','border:2px solid #F55E4F;');
                     }
-				}
-			});
 
-      // hook for running ACF or other third party plugin validations if needed before submitting to the workflow
-      owThirdPartyValidation.run( workflowSubmit );
+                    // get $message
+			        var $message = $form.children('div.rpg-error-message');
+
+			        if (!$message.exists()) {
+				        $message = jQuery('<div class="error notice rpg-error-message"><p></p></div>');
+				        $form.prepend($message);
+			        }
+
+			        $message.children('p').html(msg);
+                }
+			}
+		});
+
+        // hook for running ACF or other third party plugin validations if needed before submitting to the workflow
+        owThirdPartyValidation.run( workflowSubmit );
     });
 
     jQuery(document).ajaxComplete(function(event, xhr, settings) {

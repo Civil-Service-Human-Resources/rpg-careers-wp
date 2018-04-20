@@ -316,8 +316,6 @@ class rpgutils{
     }
 
     function admin_init(){
-        add_action('save_post', array($this, 'save_post'),10, 3);
-        add_action('admin_notices', array($this, 'handle_admin_error'));
         add_action('load-edit.php', array($this, 'load_edit'));
 		add_filter('get_search_form', create_function('$a', "return null;"));
 
@@ -1209,71 +1207,6 @@ switch ($post_status) {
        ?>
 <script type="text/javascript">(function(){window.RPGUtil={groupTabs:function(){var a=jQuery('#postbox-container-2 .acf-postbox:not(.acf-hidden) > .acf-fields > .acf-tab-wrap > .acf-tab-group'),t=jQuery('#postbox-container-2 .acf-postbox:not(.acf-hidden) > .acf-fields > .acf-tab-wrap').parent('.inside');if(a.length>1){var e=a.first();e.find('li:gt(0)').hide();a.not(e).each(function(){var a=jQuery(this);a.find('li').removeClass('active').appendTo(e),a.parent('div.acf-tab-wrap').remove()})}if(t.length>1){var n=t.first();t.not(n).each(function(){var a=jQuery(this);a.children().addClass('hidden-by-tab').appendTo(n),a.parents('.acf-postbox').remove()})}}};jQuery(function(){jQuery('#menu_order').attr('style','display:none;');jQuery('#menu_order').next().attr('style','display:none');jQuery('#menu_order').prev().attr('style','display:none');var f=setInterval(function(){if(jQuery('#step_submit').length){jQuery('#step_submit').attr('style','margin-left:5px;');jQuery('#step_submit').prev('a').attr('style','');clearInterval(f);}},100);});acf.add_action('ready',function($el){RPGUtil.groupTabs();});})();</script>
     <?php
-        }
-    }
-
-    function save_post($post_id, $post, $update){
-
-        if($post->post_type==='page'){
-
-            $error = false;
-            $match = false;
-
-            //DELETE ALL META DATA FOR TEAMS
-            delete_post_meta($post_id, 'rpg-team');
-
-            //CHECK THAT TEAM HAS BEEN SELECTED
-            foreach($_POST as $key => $value)
-            {
-                if (strstr($key, 'rpg-team')){
-                    $match = true;
-                }
-            }
-
-            if($match){
-                //GET ANY TEAMS THAT HAVE BEEN SELECTED
-                foreach($_POST as $key => $value)
-                {
-                    if (strstr($key, 'rpg-team')){
-                        //NEED TO CHECK CURRENT USER CAN UPDATE THIS PAGE?
-
-                        //STORE IN META DATA
-                        add_post_meta($post_id, 'rpg-team', $value);
-                    }
-                }
-            } else {
-                $error = new WP_Error('missing-team', 'No team selected - page status has been changed to DRAFT');
-            }
-
-            if ($error) {
-
-                //TRIGGER THE ERROR MESSAGE
-                add_filter('redirect_post_location', function($location) use ($error) {
-                    return add_query_arg(array('rpg-team'=>$error->get_error_code(), 'message'=>10), $location);
-                });
-            }
-        }
-    }
-
-    function handle_admin_error(){
-        if (array_key_exists('rpg-team', $_GET)) { 
-            $errors = get_option('rpg-team');
-            $error_msg = '';
-
-            switch($_GET['rpg-team']) {
-                case 'missing-team':
-                    $error_msg = 'No team selected - page status has been changed to DRAFT';
-                    break;
-                default:
-                    $error_msg = 'An error ocurred when saving the page';
-                    break;
-            }
-            
-            //AMEND STATUS OF THE PAGE TO DRAFT - CANNOT BE PUBLISHED WITHOUT A TEAM SELECTED
-            global $post;
-            wp_update_post(array('ID' => $post->ID, 'post_status' => 'draft'));
-
-            echo '<div class="error"><p>' . $error_msg . '</p></div>';
         }
     }
 
