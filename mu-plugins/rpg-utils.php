@@ -106,11 +106,79 @@ class rpgutils{
 		//ACF CUSTOM FIELDS
 		add_filter('acf/settings/save_json', array($this, 'set_acf_json_save_point'));
 		add_filter('acf/settings/load_json', array($this, 'set_acf_json_load_point'));
+		add_action('wp_ajax_rpg_validate_save_post', array($this, 'rpg_validate_save_post'));
 
 		//GTM ACTIONS
 		add_action('gtm_head', array($this, 'render_gtm_head'));
 		add_action('gtm_body', array($this, 'render_gtm_body'));
+		
     }
+
+	function rpg_validate_save_post(){
+		//BESPOKE VALIDATION WHEN SAVE POST REQUEST IS MADE (IN ADDITION TO OOTB ACF VALIDATION)
+
+		//CHECK NONCE - USING acf_nonce
+		$nonce = isset($_POST['nonce']) ? $_POST['nonce'] : null;
+		$errors = array();
+
+		//DIE IF NONCE CHECK FAILS
+		if(!$nonce || !wp_verify_nonce($nonce, 'acf_nonce')){
+			die();
+		}
+
+		$json = array(
+			'valid'		=> 1,
+			'errors'	=> 0
+		);
+
+		//CHECK POST TITLE
+		if(!isset($_POST['post_title']) || trim($_POST['post_title']) == '' ){
+			$errors[] = array(
+			'input'		=> 'post_title',
+			'message'	=> 'Page title is required'
+			);
+		}
+
+		//CHECK TEAMS
+		if(isset($_POST['post_type']) && $_POST['post_type']==='page'){
+			$post_id = $_POST['post_ID'];
+            $match = false;
+
+            //DELETE ALL META DATA FOR TEAMS
+            delete_post_meta($post_id, 'rpg-team');
+
+            //CHECK THAT TEAM HAS BEEN SELECTED
+            foreach($_POST as $key => $value)
+            {
+                if (strstr($key, 'rpg-team')){
+                    $match = true;
+                }
+            }
+
+            if($match){
+                //GET ANY TEAMS THAT HAVE BEEN SELECTED
+                foreach($_POST as $key => $value)
+                {
+                    if (strstr($key, 'rpg-team')){
+                        //STORE IN META DATA
+                        add_post_meta($post_id, 'rpg-team', $value);
+                    }
+                }
+            } else {
+				$errors[] = array(
+					'input'		=> 'rpg-teams-access',
+					'message'	=> 'No team selected'	
+				);
+            }
+        }
+
+		if (!empty($errors)){
+			$json['valid'] = 0;
+			$json['errors'] = $errors;
+		}
+
+		wp_send_json_success($json);
+	}
 
 	function remove_admin_login_header() {
         remove_action('wp_head', '_admin_bar_bump_cb');
@@ -643,8 +711,14 @@ switch ($post_status) {
 	function render_gtm_head(){
 		global $post;
 		$gtm_head = '';
+
+		$title = (is_404() ? 'Page not found' : $post->post_title);
+		$author = (is_404() ? 'NOT_SET' : get_the_author_meta('display_name', $post->post_author));
+		$post_id = (is_404() ? 'NOT_SET' :  $post->ID);
+		$post_date = (is_404() ? 'NOT_SET' : $post->post_date_gmt);
+
 		if(GTM_ON){
-			$gtm_head = "<script>dataLayer=[{'title':'". $post->post_title ."','author':'". get_the_author_meta('display_name', $post->post_author) ."','logged_in':'true','page_id':" . $post->ID . ",'post_date':'". $post->post_date_gmt ."'}];";
+			$gtm_head = "<script>dataLayer=[{'title':'". $title ."','author':'". $author ."','logged_in':'true','page_id':" . $post_id . ",'post_date':'". $post_date ."'}];";
 			$gtm_head .= "(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&amp;l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','!!CONTAINER_ID!!');</script>";
 			$gtm_head = str_replace('!!CONTAINER_ID!!', GTM_CONTAINER_ID, $gtm_head);
 		}
