@@ -145,15 +145,15 @@ add_shortcode('rpg_footer_content', 'rpgCareers_footer_content');
 
 //REMOVE TYPE ATTR FROM SCRIPT TAGS
 function rpgCareers_clean_script_tag($input) {
-
-
     $input = str_replace("type='text/javascript' ", '', $input);
     return str_replace("'", '"', $input);
 }
 
 add_filter('script_loader_tag', 'rpgCareers_clean_script_tag');
 
-
+//WPML - REMOVE META TAG FROM HTML SOURCE
+global $sitepress;
+remove_action('wp_head', array($sitepress, 'meta_generator_tag'));
 
 //BESPOKE NAV WALKER FOR MENU
 class RPG_Walker_Nav_Menu extends Walker_Nav_Menu {

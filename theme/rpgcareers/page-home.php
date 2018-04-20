@@ -39,7 +39,7 @@ get_header(); ?>
 
 	$cont_block_promo_tag = get_post_meta($post_id,'content_block_promo_promo_tag',true);
 	$cont_block_promo_heading = get_post_meta($post_id,'content_block_promo_heading',true);
-	$cont_block_promo_heading_target = get_post_meta($post_id,'content_block_promo_cta_heading_target',true);
+	$cont_block_promo_heading_target = get_post_meta($post_id,'content_block_promo_heading_target',true);
 	$cont_block_promo_para_1 = get_post_meta($post_id,'content_block_promo_paragraph_1',true);
 	$cont_block_promo_para_2 = get_post_meta($post_id,'content_block_promo_paragraph_2',true);
 	$cont_block_promo_image = intval(get_post_meta($post_id,'content_block_promo_image',true));

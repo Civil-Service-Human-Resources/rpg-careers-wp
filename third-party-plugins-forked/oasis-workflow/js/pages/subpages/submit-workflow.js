@@ -79,9 +79,75 @@ jQuery( document ).ready( function () {
             return false;
          }
       }
+            //BESPOKE VALIDATION
+            var $form = jQuery('form#post');
+            var data = acf.serialize($form);
+			data.action = 'rpg_validate_save_post';
+			data = acf.prepare_for_ajax(data);
+
+            jQuery('#rpg-teams-access').attr('style','');
+            jQuery('#title').attr('style','');
+            jQuery('div.rpg-error-message').remove();
+            
+            jQuery.ajax({
+				url: acf.get('ajaxurl'),
+				data: data,
+				type: 'post',
+				dataType: 'json',
+				success: function(json){
+					var json = json.data;
+                    var msg = '';
+
+                    //VALIDATE JSON
+			        if (!json || json.valid || !json.errors) {			
+				        return;
+			        }
+
+                    //GOT ERRORS
+                    if (json.errors && json.errors.length > 0) {
+				        for (var i in json.errors) {	
+                            var error = json.errors[i];	
+                            msg += error.message + '<br/>';
+                            var $input = $form.find('[name="' + error.input + '"]').first();
+
+                            if (!$input.exists()) {
+						        $input = $form.find('[name^="' + error.input + '"]').first();
+					        }					
+		
+                            if (!$input.exists()) {
+                                $input = jQuery('#'+ error.input);
+                            }
+
+					        if (!$input.exists()) {
+						        continue;
+					        }	
+
+                            $input.attr('style','border:2px solid #F55E4F;');
+                        }
+
+                        // get $message
+			            var $message = $form.children('div.rpg-error-message');
+
+			            if (!$message.exists()) {
+				            $message = jQuery('<div class="error notice rpg-error-message"><p></p></div>');
+				            $form.prepend($message);
+			            }
+
+			            $message.children('p').html(msg);
+                    }
+				}
+			});
 
       // hook for running ACF or other third party plugin validations if needed before submitting to the workflow
       owThirdPartyValidation.run( workflowSubmit );
+    });
+
+    jQuery(document).ajaxComplete(function(event, xhr, settings) {
+        if(settings.data.indexOf('&action=acf%2Fvalidate_save_post') !== -1){
+            if (acf.validation.valid) {
+				normalWorkFlowSubmit(workflowSubmit);
+			}
+        }
     });
 
    /* On Change of Workflow Step during Submit to Workflow */
