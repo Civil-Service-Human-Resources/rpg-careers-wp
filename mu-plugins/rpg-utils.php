@@ -316,6 +316,7 @@ class rpgutils{
     }
 
     function admin_init(){
+		add_action('save_post', array($this, 'save_post'),10, 3);
         add_action('load-edit.php', array($this, 'load_edit'));
 		add_filter('get_search_form', create_function('$a', "return null;"));
 
@@ -1210,6 +1211,23 @@ switch ($post_status) {
         }
     }
 
+	function save_post($post_id, $post, $update){
+        if($post->post_type==='page'){
+            $match = false;
+
+            //DELETE ALL META DATA FOR TEAMS
+            delete_post_meta($post_id, 'rpg-team');
+
+			foreach($_POST as $key => $value)
+            {
+				if (strstr($key, 'rpg-team')){
+					//STORE IN META DATA
+                    add_post_meta($post_id, 'rpg-team', $value);
+                }
+            }
+		}
+    }
+
 	function filter_pages($query){
 		global $post_type, $pagenow; 
 
@@ -1381,6 +1399,7 @@ switch ($post_status) {
     function render_meta_box($object = null, $box = null){
         $output = '';
         $checked = '';
+		$status = '';
         $hasteams = false;
 
         //GET THE TEAMS THAT CURRENT USER HAS BEEN GRANTED ACCESS TO
@@ -1402,6 +1421,7 @@ switch ($post_status) {
 
                 case 'post.php':
                     //EXISTING PAGE - ENSURE CHECKBOXES FOR CURRENTLY ASSIGNED TEAMS ARE RENDERED CORRECTLY
+					$status = get_post_status(get_post()->ID);
                     $post_teams = get_post_meta(get_post()->ID, 'rpg-team');
                     if(count($post_teams)>0) $hasteams = true;
                     break;
@@ -1420,7 +1440,7 @@ switch ($post_status) {
                     }
                 }
 
-                $output .= '<li id="rpg-'.$team->slug.'"><label class="selectit"><input value="'.$team->term_id.'" name="rpg-team'.$team->term_id.'" id="in-rpg-'.$team->slug.'" ' .$checked. ' type="checkbox"'. (count($teams)==1 ? ' onclick="this.checked=!this.checked;"': '').'>'.$team->name.'</label></li>';
+                $output .= '<li id="rpg-'.$team->slug.'"><label class="selectit"><input value="'.$team->term_id.'" name="rpg-team'.$team->term_id.'" id="in-rpg-'.$team->slug.'" ' .$checked. ' type="checkbox"'. (count($teams)==1 && $status != 'draft' ? ' onclick="this.checked=!this.checked;"': '').'>'.$team->name.'</label></li>';
             }
 
             $output .= '</ul>';
