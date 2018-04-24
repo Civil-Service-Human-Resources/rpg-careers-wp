@@ -164,6 +164,13 @@
                 "operator": "==",
                 "value": "page-layout-b.php"
             }
+        ],
+        [
+            {
+                "param": "page_template",
+                "operator": "==",
+                "value": "page-hub-listing.php"
+            }
         ]
     ],
     "menu_order": 2,
@@ -188,5 +195,5 @@
     ],
     "active": 1,
     "description": "Content block vertically stacked",
-    "modified": 1524491026
+    "modified": 1524557300
 }

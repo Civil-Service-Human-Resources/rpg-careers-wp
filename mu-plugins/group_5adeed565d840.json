@@ -1,10 +1,10 @@
 {
-    "key": "group_5acdc425dc9b7",
-    "title": "RPG Hub Sub Repeater",
+    "key": "group_5adeed565d840",
+    "title": "RPG Hub List Repeater",
     "fields": [
         {
-            "key": "field_5acdc43243060",
-            "label": "Sub repeater",
+            "key": "field_5adeed66daea1",
+            "label": "List repeater",
             "name": "",
             "type": "tab",
             "instructions": "",
@@ -19,9 +19,9 @@
             "endpoint": 0
         },
         {
-            "key": "field_5acdc481f6789",
+            "key": "field_5adeed95daea2",
             "label": "",
-            "name": "sub_repeater",
+            "name": "list_repeater",
             "type": "group",
             "instructions": "",
             "required": 0,
@@ -34,7 +34,7 @@
             "layout": "row",
             "sub_fields": [
                 {
-                    "key": "field_5acdc49ef678a",
+                    "key": "field_5adeee311d11d",
                     "label": "Items",
                     "name": "items",
                     "type": "repeater",
@@ -48,16 +48,40 @@
                     },
                     "collapsed": "",
                     "min": 1,
-                    "max": 3,
+                    "max": 10,
                     "layout": "row",
                     "button_label": "Add item",
                     "sub_fields": [
                         {
-                            "key": "field_5acdc4b3f678b",
-                            "label": "Heading",
-                            "name": "heading",
+                            "key": "field_5adeeeab1d120",
+                            "label": "Logo",
+                            "name": "logo",
+                            "type": "image",
+                            "instructions": "",
+                            "required": 1,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "return_format": "url",
+                            "preview_size": "thumbnail",
+                            "library": "all",
+                            "min_width": "",
+                            "min_height": "",
+                            "min_size": "",
+                            "max_width": "",
+                            "max_height": "",
+                            "max_size": "",
+                            "mime_types": ""
+                        },
+                        {
+                            "key": "field_5adef0486f439",
+                            "label": "Logo text line 1",
+                            "name": "logo_text_line_1",
                             "type": "text",
-                            "instructions": "(max 150 chars)",
+                            "instructions": "(max 25 chars)",
                             "required": 1,
                             "conditional_logic": 0,
                             "wrapper": {
@@ -69,12 +93,69 @@
                             "placeholder": "",
                             "prepend": "",
                             "append": "",
-                            "maxlength": 150
+                            "maxlength": 25
                         },
                         {
-                            "key": "field_5acdc4c6f678c",
-                            "label": "Heading target",
-                            "name": "heading_target",
+                            "key": "field_5adef0e16f43a",
+                            "label": "Logo text line 2",
+                            "name": "logo_text_line_2",
+                            "type": "text",
+                            "instructions": "OPTIONAL\r\n(max 25 chars)",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "default_value": "",
+                            "placeholder": "",
+                            "prepend": "",
+                            "append": "",
+                            "maxlength": 25
+                        },
+                        {
+                            "key": "field_5adef10e6f43b",
+                            "label": "Logo text line 3",
+                            "name": "logo_text_line_3",
+                            "type": "text",
+                            "instructions": "OPTIONAL\r\n(max 25 chars)",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "default_value": "",
+                            "placeholder": "",
+                            "prepend": "",
+                            "append": "",
+                            "maxlength": 25
+                        },
+                        {
+                            "key": "field_5adeee731d11e",
+                            "label": "Body",
+                            "name": "body",
+                            "type": "textarea",
+                            "instructions": "(max 450 chars)",
+                            "required": 1,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "default_value": "",
+                            "placeholder": "",
+                            "maxlength": 450,
+                            "rows": "",
+                            "new_lines": ""
+                        },
+                        {
+                            "key": "field_5adeeed1f0965",
+                            "label": "Target",
+                            "name": "target",
                             "type": "url",
                             "instructions": "",
                             "required": 1,
@@ -88,31 +169,12 @@
                             "placeholder": ""
                         },
                         {
-                            "key": "field_5acdc4d6f678d",
-                            "label": "Body",
-                            "name": "body",
-                            "type": "textarea",
-                            "instructions": "(max 350 chars)",
-                            "required": 1,
-                            "conditional_logic": 0,
-                            "wrapper": {
-                                "width": "",
-                                "class": "",
-                                "id": ""
-                            },
-                            "default_value": "",
-                            "placeholder": "",
-                            "maxlength": 350,
-                            "rows": "",
-                            "new_lines": ""
-                        },
-                        {
-                            "key": "field_5acdc4f3f678e",
+                            "key": "field_5adeee9f1d11f",
                             "label": "Image",
                             "name": "image",
                             "type": "image",
                             "instructions": "",
-                            "required": 0,
+                            "required": 1,
                             "conditional_logic": 0,
                             "wrapper": {
                                 "width": "",
@@ -140,22 +202,15 @@
             {
                 "param": "page_template",
                 "operator": "==",
-                "value": "page-hub.php"
-            }
-        ],
-        [
-            {
-                "param": "page_template",
-                "operator": "==",
-                "value": "page-layout-b.php"
+                "value": "page-hub-listing.php"
             }
         ]
     ],
-    "menu_order": 3,
+    "menu_order": 1,
     "position": "normal",
-    "style": "default",
+    "style": "seamless",
     "label_placement": "top",
-    "instruction_placement": "label",
+    "instruction_placement": "field",
     "hide_on_screen": [
         "the_content",
         "excerpt",
@@ -172,6 +227,6 @@
         "send-trackbacks"
     ],
     "active": 1,
-    "description": "Repeater component shown on hub pages in the sub content area",
-    "modified": 1523628807
+    "description": "Repeater component shown on hub pages in the main content area",
+    "modified": 1524565802
 }
