@@ -38,7 +38,7 @@
                     "label": "Heading",
                     "name": "heading",
                     "type": "text",
-                    "instructions": "(max 40 chars)",
+                    "instructions": "(max 50 chars)",
                     "required": 1,
                     "conditional_logic": 0,
                     "wrapper": {
@@ -50,7 +50,7 @@
                     "placeholder": "",
                     "prepend": "",
                     "append": "",
-                    "maxlength": 40
+                    "maxlength": 50
                 },
                 {
                     "key": "field_5ac61855357b7",
@@ -190,5 +190,5 @@
     "hide_on_screen": "",
     "active": 1,
     "description": "Sub content component shown in pages",
-    "modified": 1523537845
+    "modified": 1523629830
 }
