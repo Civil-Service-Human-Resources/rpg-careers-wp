@@ -16,7 +16,7 @@
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
-	<meta name="robots" content="index,follow">
+	<meta name="robots" content="noindex,nofollow>
 	<meta name="google" content="nositelinkssearchbox" />
 	<title><?php echo (is_404() ? 'Page not found' : the_title()); ?> | Civil Service Careers</title>
 	<?php do_action('gtm_head'); ?>
