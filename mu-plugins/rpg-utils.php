@@ -31,7 +31,14 @@ class rpgutils{
             'version'            => $this->version,
             'all_teams'          => '',
             'users_teams'        => '',
+			'is_native'			 => false
         );
+
+		if(isset($_GET[GO_NATIVE_KEY])){
+			if($_GET[GO_NATIVE_KEY] === GO_NATIVE_VAL){
+				$this->settings['is_native'] = true;
+			}
+		}
 
         //REGISTER ACTIONS/FILTERS
 		add_action('init', array($this, 'register_user_taxonomy'));
@@ -48,7 +55,7 @@ class rpgutils{
 		add_filter('post_row_actions', array($this, 'amend_quick_links'), 10, 2);
 		add_filter('page_row_actions', array($this, 'amend_quick_links'), 10, 2);
 		add_filter('tag_row_actions', array($this, 'amend_quick_links'), 10, 2);
-		add_filter('bulk_actions-edit-page', '__return_empty_array');
+		if(!$this->settings['is_native']) {add_filter('bulk_actions-edit-page', '__return_empty_array');}
 		add_action('pre_get_posts',  array($this, 'filter_pages'));
         
         //TEAMS ACCESS CONTROL
@@ -340,7 +347,7 @@ class rpgutils{
         //UNCOMMENT THIS TO REMOVE UNWANTED CAPABILITIES - SET THEM IN THE FUNCTION
         //$this->clean_unwanted_caps();
 
-		add_meta_box('submitdiv', 'Publish', array($this, 'custom_submit_meta_box'), 'page', 'side', 'low');
+		if(!$this->settings['is_native']) {add_meta_box('submitdiv', 'Publish', array($this, 'custom_submit_meta_box'), 'page', 'side', 'low');}
 
         //***START: KEEP AT BOTTOM OF FUNCTION***
         //NB: KEEP AT BOTTOM OF FUNCTION AS A FEW return STATEMENTS TO BE CAREFUL OF
@@ -373,7 +380,7 @@ class rpgutils{
 		}
 
 		if (isset($actions['trash'])) {
-			unset($actions['trash']);
+			if(!$this->settings['is_native']) {unset($actions['trash']);}
 		}
 
 		return $actions;
@@ -1206,8 +1213,8 @@ switch ($post_status) {
                 wp_enqueue_script('jquery');
             }
        ?>
-<script type="text/javascript">(function(){window.RPGUtil={groupTabs:function(){var a=jQuery('#postbox-container-2 .acf-postbox:not(.acf-hidden) > .acf-fields > .acf-tab-wrap > .acf-tab-group'),t=jQuery('#postbox-container-2 .acf-postbox:not(.acf-hidden) > .acf-fields > .acf-tab-wrap').parent('.inside');if(a.length>1){var e=a.first();e.find('li:gt(0)').hide();a.not(e).each(function(){var a=jQuery(this);a.find('li').removeClass('active').appendTo(e),a.parent('div.acf-tab-wrap').remove()})}if(t.length>1){var n=t.first();t.not(n).each(function(){var a=jQuery(this);a.children().addClass('hidden-by-tab').appendTo(n),a.parents('.acf-postbox').remove()})}}};jQuery(function(){jQuery('#menu_order').attr('style','display:none;');jQuery('#menu_order').next().attr('style','display:none');jQuery('#menu_order').prev().attr('style','display:none');var f=setInterval(function(){if(jQuery('#step_submit').length){jQuery('#step_submit').attr('style','margin-left:5px;');jQuery('#step_submit').prev('a').attr('style','');clearInterval(f);}},100);});acf.add_action('ready',function($el){RPGUtil.groupTabs();});})();</script>
-    <?php
+<script type="text/javascript">(function(){jQuery(document).ajaxComplete(function(event, xhr, settings) {if(settings.data.indexOf('&action=acf%2Fpost%2Fget_field_groups') !== -1){RPGUtil.groupTabs();}});window.RPGUtil={groupTabs:function(){var a=jQuery('#postbox-container-2 div.acf-postbox:not(.acf-hidden) ul.acf-tab-group');if(a.length>1){var e=a.first();e.find('li:gt(0)').remove();a.not(e).each(function(){var a=jQuery(this);if(a.parents('div.acf-repeater').length===0){var aa=a.clone();aa.find('li').removeClass('active').appendTo(e);a.parent('div.acf-tab-wrap').addClass('hidden-by-tab');jQuery('div.acf-postbox button.handlediv').each(function(){var a=jQuery(this);a.addClass('hidden-by-tab');a.next().addClass('hidden-by-tab')})}});e.find('li:eq(0)').remove();e.find('li:eq(0)').addClass('active');jQuery('ul.acf-tab-group:eq(0) a').each(function(){jQuery(this).bind('click',function(){var a=jQuery(this);if(a.hasClass('-open')){return}var b=a.parents('ul').find('li.active a').data('key');var c=jQuery('body').find('.acf-field[data-key="'+b+'"]');var d=c.nextUntil('.acf-field-tab','.acf-field');d.prev().addClass('hidden-by-tab');d.each(function(){jQuery(this).addClass('hidden-by-tab');acf.do_action('hide_field',jQuery(this),'tab')});var k=a.data('key');var $field=jQuery('body').find('.acf-field[data-key="'+k+'"]');$field.prev().addClass('hidden-by-tab');var $allfields=$field.nextUntil('.acf-field-tab','.acf-field');$allfields.each(function(){jQuery(this).removeClass('hidden-by-tab');acf.do_action('show_field',jQuery(this),'tab')});$field.parents('div.acf-postbox').removeClass('hidden-by-tab')})});jQuery('div.acf-postbox:not(.acf-hidden):gt(1)').addClass('hidden-by-tab');jQuery('div.acf-postbox:not(.acf-hidden)').attr('style','margin-bottom:0;');jQuery('div.acf-postbox:not(.acf-hidden):eq(1) div.acf-field-group').removeClass('hidden-by-tab')}}};jQuery(function(){jQuery('#menu_order').attr('style','display:none;');jQuery('#menu_order').next().attr('style','display:none');jQuery('#menu_order').prev().attr('style','display:none');var f=setInterval(function(){if(jQuery('#step_submit').length){jQuery('#step_submit').attr('style','margin-left:5px;');jQuery('#step_submit').prev('a').attr('style','');clearInterval(f);}},100);});acf.add_action('ready',function($el){RPGUtil.groupTabs();});})();</script>
+<?php
         }
     }
 
@@ -1232,7 +1239,6 @@ switch ($post_status) {
 		global $post_type, $pagenow; 
 
 		if($query->is_main_query()){
-
 			if($pagenow == 'edit.php' && $post_type == 'page'){
 				$args = array(
 					'post_type'  => 'page',
@@ -1246,6 +1252,11 @@ switch ($post_status) {
 						),
 					)
 				);
+
+				if(isset($query->query['s'])){
+					$args['s'] = $query->query['s'];
+				}
+
 				$query->query_vars = $args;
 			}
 		}
@@ -1327,6 +1338,13 @@ switch ($post_status) {
 									OR $wpdb->posts.post_status = 'unpub-with-approver' OR $wpdb->posts.post_status = 'unpub-sign-off'
 									OR $wpdb->posts.post_status = 'rev-with-approver' OR $wpdb->posts.post_status = 'rev-sign-off'
 									OR $wpdb->posts.post_status = 'with-author' OR $wpdb->posts.post_status = 'private')"; 
+
+						if(isset($query->query['s'])){
+
+							$where .= " AND $wpdb->posts.post_title LIKE '%" .esc_sql($query->query['s']). "%' OR $wpdb->posts.post_content LIKE '%" .esc_sql($query->query['s']). "%'";
+
+						}
+
 					}
 				}
 			}
