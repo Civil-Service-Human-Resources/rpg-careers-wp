@@ -182,6 +182,7 @@ class rpgutils{
 		if (!empty($errors)){
 			$json['valid'] = 0;
 			$json['errors'] = $errors;
+			wp_send_json_error($json);
 		}
 
 		wp_send_json_success($json);
@@ -224,10 +225,8 @@ class rpgutils{
 		foreach($plugins as $i => $plugin){
 		
 			switch($plugin){
-				case 'acf-tab-merge/acf-tab-merge.php':
 				case 'advanced-custom-fields-pro/acf.php':
 				case 'acfml/wpml-acf.php':
-				case 'ewww-image-optimizer/ewww-image-optimizer.php':
 				case 'members/members.php':
 				case 'oasis-workflow/oasiswf.php':
 				case 'wp-user-groups/wp-user-groups.php':
@@ -326,6 +325,7 @@ class rpgutils{
 		add_action('save_post', array($this, 'save_post'),10, 3);
         add_action('load-edit.php', array($this, 'load_edit'));
 		add_filter('get_search_form', create_function('$a', "return null;"));
+		add_filter('wp_editor_settings', array($this, 'set_wp_editor_settings'), 10, 2 );
 
         //GET ALL CURRENT TEAMS AND STORE THEM - SAVES LOOKUPS LATER ON IN CODE
         $teams = array();
@@ -366,6 +366,15 @@ class rpgutils{
         //***END: KEEP AT BOTTOM OF FUNCTION***
     }
     
+	function set_wp_editor_settings($settings, $editor_id){
+		if ($editor_id === 'content' && get_current_screen()->post_type === 'page') {
+			$settings['tinymce']		= false;
+			$settings['quicktags']		= false;
+			$settings['media_buttons']	= false;
+		}
+		return $settings;
+	}
+
 	function amend_quick_links($actions, $post) {
 
 		if (isset($actions['inline hide-if-no-js'])) {
@@ -550,6 +559,7 @@ switch ($post_status) {
 		<?php endif; ?>
         <span class="spinner"></span>
         <input name="original_publish" type="hidden" id="original_publish" value="Publish">
+		<input name="acf_dummy" type="hidden" id="acf_dummy" value="acf_dummy">
         <input type="submit" name="publish" id="publish" class="button button-primary button-large" value="Publish" style="display: none;">
 		<input <?php if ( 'private' == $post_status || 'publish' == $post_status || 'future' == $post_status || 'pending' == $post_status ) { ?>style="display:none"<?php } ?> type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save Draft'); ?>" class="button button-primary button-large" />
         </div>
@@ -1213,7 +1223,7 @@ switch ($post_status) {
                 wp_enqueue_script('jquery');
             }
        ?>
-<script type="text/javascript">(function(){jQuery(document).ajaxComplete(function(event, xhr, settings) {if(settings.data.indexOf('&action=acf%2Fpost%2Fget_field_groups') !== -1){RPGUtil.groupTabs();}});window.RPGUtil={groupTabs:function(){var a=jQuery('#postbox-container-2 div.acf-postbox:not(.acf-hidden) ul.acf-tab-group');if(a.length>1){var e=a.first();e.find('li:gt(0)').remove();a.not(e).each(function(){var a=jQuery(this);if(a.parents('div.acf-repeater').length===0){var aa=a.clone();aa.find('li').removeClass('active').appendTo(e);a.parent('div.acf-tab-wrap').addClass('hidden-by-tab');jQuery('div.acf-postbox button.handlediv').each(function(){var a=jQuery(this);a.addClass('hidden-by-tab');a.next().addClass('hidden-by-tab')})}});e.find('li:eq(0)').remove();e.find('li:eq(0)').addClass('active');jQuery('ul.acf-tab-group:eq(0) a').each(function(){jQuery(this).bind('click',function(){var a=jQuery(this);if(a.hasClass('-open')){return}var b=a.parents('ul').find('li.active a').data('key');var c=jQuery('body').find('.acf-field[data-key="'+b+'"]');var d=c.nextUntil('.acf-field-tab','.acf-field');d.prev().addClass('hidden-by-tab');d.each(function(){jQuery(this).addClass('hidden-by-tab');acf.do_action('hide_field',jQuery(this),'tab')});var k=a.data('key');var $field=jQuery('body').find('.acf-field[data-key="'+k+'"]');$field.prev().addClass('hidden-by-tab');var $allfields=$field.nextUntil('.acf-field-tab','.acf-field');$allfields.each(function(){jQuery(this).removeClass('hidden-by-tab');acf.do_action('show_field',jQuery(this),'tab')});$field.parents('div.acf-postbox').removeClass('hidden-by-tab')})});jQuery('div.acf-postbox:not(.acf-hidden):gt(1)').addClass('hidden-by-tab');jQuery('div.acf-postbox:not(.acf-hidden)').attr('style','margin-bottom:0;');jQuery('div.acf-postbox:not(.acf-hidden):eq(1) div.acf-field-group').removeClass('hidden-by-tab')}}};jQuery(function(){jQuery('#menu_order').attr('style','display:none;');jQuery('#menu_order').next().attr('style','display:none');jQuery('#menu_order').prev().attr('style','display:none');var f=setInterval(function(){if(jQuery('#step_submit').length){jQuery('#step_submit').attr('style','margin-left:5px;');jQuery('#step_submit').prev('a').attr('style','');clearInterval(f);}},100);});acf.add_action('ready',function($el){RPGUtil.groupTabs();});})();</script>
+<script type="text/javascript">(function(){jQuery(document).ajaxComplete(function(event,xhr,settings){if(settings.data){if(settings.data.indexOf('&action=acf%2Fpost%2Fget_field_groups') !== -1){RPGUtil.groupTabs();}}});window.RPGUtil={valid:true,groupTabs:function(){var a=jQuery('#postbox-container-2 div.acf-postbox:not(.acf-hidden) ul.acf-tab-group');if(a.length>1){var e=a.first();e.find('li:gt(0)').remove();a.not(e).each(function(){var a=jQuery(this);if(a.parents('div.acf-repeater').length===0){var aa=a.clone();aa.find('li').removeClass('active').appendTo(e);a.parent('div.acf-tab-wrap').addClass('hidden-by-tab');jQuery('div.acf-postbox button.handlediv').each(function(){var a=jQuery(this);a.addClass('hidden-by-tab');a.next().addClass('hidden-by-tab')})}});e.find('li:eq(0)').remove();e.find('li:eq(0)').addClass('active');jQuery('ul.acf-tab-group:eq(0) a').each(function(){jQuery(this).bind('click',function(){var a=jQuery(this);if(a.hasClass('-open')){return}var b=a.parents('ul').find('li.active a').data('key');var c=jQuery('body').find('.acf-field[data-key="'+b+'"]');var d=c.nextUntil('.acf-field-tab','.acf-field');d.prev().addClass('hidden-by-tab');d.each(function(){jQuery(this).addClass('hidden-by-tab');acf.do_action('hide_field',jQuery(this),'tab')});var k=a.data('key');var $field=jQuery('body').find('.acf-field[data-key="'+k+'"]');$field.prev().addClass('hidden-by-tab');var $allfields=$field.nextUntil('.acf-field-tab','.acf-field');$allfields.each(function(){jQuery(this).removeClass('hidden-by-tab');acf.do_action('show_field',jQuery(this),'tab')});$field.parents('div.acf-postbox').removeClass('hidden-by-tab')})});jQuery('div.acf-postbox:not(.acf-hidden):gt(1)').addClass('hidden-by-tab');jQuery('div.acf-postbox:not(.acf-hidden)').attr('style','margin-bottom:0;');jQuery('div.acf-postbox:not(.acf-hidden):eq(1) div.acf-field-group').removeClass('hidden-by-tab')}}};jQuery(function(){jQuery('#menu_order').attr('style','display:none;');jQuery('#menu_order').next().attr('style','display:none');jQuery('#menu_order').prev().attr('style','display:none');var f=setInterval(function(){if(jQuery('#step_submit').length){jQuery('#step_submit').attr('style','margin-left:5px;');jQuery('#step_submit').prev('a').attr('style','');clearInterval(f);}},100);});acf.add_action('ready',function($el){RPGUtil.groupTabs();});})();</script>
 <?php
         }
     }
@@ -1301,7 +1311,6 @@ switch ($post_status) {
 			if($query->is_main_query()){
 				if ($pagenow == 'edit.php' && $post_type == 'page') {
 					if($this->restrict_access()){
-
 						//GET TEAMS CURRENT USER IS MEMBER OF
 						$teams = $this->get_setting('users_teams');
 
@@ -1323,27 +1332,29 @@ switch ($post_status) {
 						if(count($teams)>0){
 							$where .= '))';
 						}
+					}else{
+						//CLEAR DOWN $where
+						$where = '';
+					}
 
-						if(isset($query->query['post_status'])){
-							if($query->query['post_status'] === 'trash'){
-								$where .= " AND $wpdb->posts.post_type = 'page' AND $wpdb->posts.post_status = 'trash'";
-								return $where;
-							}
-						} 
-
-						$where .= " AND $wpdb->posts.post_type = 'page' AND ($wpdb->posts.post_status = 'publish' OR $wpdb->posts.post_status = 'acf-disabled' OR $wpdb->posts.post_status = 'future' 
-									OR $wpdb->posts.post_status = 'draft' OR $wpdb->posts.post_status = 'pending' 
-									OR $wpdb->posts.post_status = 'pub-with-approver' OR $wpdb->posts.post_status = 'pub-sign-off'
-									OR $wpdb->posts.post_status = 'del-with-approver' OR $wpdb->posts.post_status = 'del-sign-off'
-									OR $wpdb->posts.post_status = 'unpub-with-approver' OR $wpdb->posts.post_status = 'unpub-sign-off'
-									OR $wpdb->posts.post_status = 'rev-with-approver' OR $wpdb->posts.post_status = 'rev-sign-off'
-									OR $wpdb->posts.post_status = 'with-author' OR $wpdb->posts.post_status = 'private')"; 
-
-						if(isset($query->query['s'])){
-
-							$where .= " AND $wpdb->posts.post_title LIKE '%" .esc_sql($query->query['s']). "%' OR $wpdb->posts.post_content LIKE '%" .esc_sql($query->query['s']). "%'";
-
+					if(isset($query->query['post_status'])){
+						if($query->query['post_status'] === 'trash'){
+							$where .= " AND $wpdb->posts.post_type = 'page' AND $wpdb->posts.post_status = 'trash'";
+							return $where;
 						}
+					} 
+
+					$where .= " AND $wpdb->posts.post_type = 'page' AND ($wpdb->posts.post_status = 'publish' OR $wpdb->posts.post_status = 'acf-disabled' OR $wpdb->posts.post_status = 'future' 
+								OR $wpdb->posts.post_status = 'draft' OR $wpdb->posts.post_status = 'pending' 
+								OR $wpdb->posts.post_status = 'pub-with-approver' OR $wpdb->posts.post_status = 'pub-sign-off'
+								OR $wpdb->posts.post_status = 'del-with-approver' OR $wpdb->posts.post_status = 'del-sign-off'
+								OR $wpdb->posts.post_status = 'unpub-with-approver' OR $wpdb->posts.post_status = 'unpub-sign-off'
+								OR $wpdb->posts.post_status = 'rev-with-approver' OR $wpdb->posts.post_status = 'rev-sign-off'
+								OR $wpdb->posts.post_status = 'with-author' OR $wpdb->posts.post_status = 'private')"; 
+
+					if(isset($query->query['s'])){
+
+						$where .= " AND $wpdb->posts.post_title LIKE '%" .esc_sql($query->query['s']). "%' OR $wpdb->posts.post_content LIKE '%" .esc_sql($query->query['s']). "%'";
 
 					}
 				}

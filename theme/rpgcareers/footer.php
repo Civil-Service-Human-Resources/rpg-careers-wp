@@ -12,7 +12,7 @@
 ?>
 </main>
 <span class="mobile-overlay"></span>
-<footer class="footer" role="contentinfo"><div class="footer__inner"><?php echo do_shortcode("[rpg_snippet tagcode='138']"); ?></div></footer>
+<footer class="footer" role="contentinfo"><div class="footer__inner"><?php echo do_shortcode("[rpg_snippet tagcode='53']"); ?></div></footer>
 <!--[if gt IE 8]><!-->
 <script src="<?php echo get_stylesheet_directory_uri(); ?>/assets/js/modernizr-custom.js"></script>
 <!--<![endif]-->

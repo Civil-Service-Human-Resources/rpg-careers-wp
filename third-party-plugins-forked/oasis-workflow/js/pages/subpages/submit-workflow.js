@@ -85,7 +85,12 @@ jQuery( document ).ready( function () {
             return false;
             }
         }
+
+        RPGUtil.validrunacf = false;
+        RPGUtil.validrunrpg = false;
+
         //BESPOKE VALIDATION
+        RPGUtil.valid = false;
         var $form = jQuery('form#post');
         var data = acf.serialize($form);
 		data.action = 'rpg_validate_save_post';
@@ -105,11 +110,13 @@ jQuery( document ).ready( function () {
                 var msg = '';
 
                 //VALIDATE JSON
-			    if (!json || json.valid || !json.errors) {			
+			    if (!json || json.valid || !json.errors) {	
+                    RPGUtil.valid = true;
 				    return;
 			    }
 
                 //GOT ERRORS
+                RPGUtil.valid = false;
                 if (json.errors && json.errors.length > 0) {
 				    for (var i in json.errors) {	
                         var error = json.errors[i];	
@@ -143,16 +150,37 @@ jQuery( document ).ready( function () {
                 }
 			}
 		});
+       
+        //RUN ACF VALIDATION
+        var $form = jQuery('#post');
+        acf.do_action('submit', $form);
+        
+        acf.validation.$trigger = jQuery('#acf_dummy');
+        acf.validation.fetch($form);
 
-        // hook for running ACF or other third party plugin validations if needed before submitting to the workflow
-        owThirdPartyValidation.run( workflowSubmit );
     });
-
+    
     jQuery(document).ajaxComplete(function(event, xhr, settings) {
-        if(settings.data.indexOf('&action=acf%2Fvalidate_save_post') !== -1){
-            if (acf.validation.valid) {
-				normalWorkFlowSubmit(workflowSubmit);
-			}
+        if(settings.data){
+            if(settings.data.indexOf('&action=acf%2Fvalidate_save_post') !== -1){
+                RPGUtil.validrunacf = true;
+                if (acf.validation.valid && RPGUtil.valid) {
+				    normalWorkFlowSubmit(workflowSubmit);
+			    }
+            }
+            if(settings.data.indexOf('&action=rpg_validate_save_post') !== -1){
+                RPGUtil.validrunrpg = true;
+                if (acf.validation.valid && RPGUtil.valid) {
+				    normalWorkFlowSubmit(workflowSubmit);
+			    }
+            }
+        }
+
+        if(RPGUtil.validrunrpg && RPGUtil.validrunacf){
+            if(!acf.validation.valid || !RPGUtil.valid){
+                jQuery('#workflow_submit').removeAttr('disabled').removeClass('disabled button-disabled button-primary-disabled');
+				jQuery('#publishing-action .spinner').removeClass('is-active');	
+            }
         }
     });
 
@@ -312,6 +340,7 @@ jQuery( document ).ready( function () {
             }
 
             jQuery("#save_action").val("submit_post_to_workflow");
+            jQuery("#save-post").removeClass('disabled button-disabled button-primary-disabled');
             jQuery("#save-post").click();
          }
       } );
