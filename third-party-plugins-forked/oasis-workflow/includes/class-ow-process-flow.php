@@ -2047,7 +2047,6 @@ class OW_Process_Flow {
          $current_tasks = 0;
       }
 
-
       // we need to check the post status, even though we have a similar check in the filter.
       // this allows us to move forward in the code if the filter is defined and not applicable to our case.
       if ( ! empty( $post_id ) ) {
@@ -2067,6 +2066,11 @@ class OW_Process_Flow {
       if ( 0 === $current_tasks ) {
          return 'submit';
       }
+
+	  //STATUS IS DRAFT AND CURRENT TASKS > 0 : SET TO SUBMIT
+	  if($current_tasks > 0 && $post_status = 'draft'){
+		  return 'submit';
+	  }
 
       // check if the current user is the task assignee
       // if so, return the history id, if not return false
