@@ -47,7 +47,10 @@ if(typeof wp.media !='undefined'){
 			        }
 
 			        return wp.media.ajax(options).done(function(){
-                        document.getElementById('attachments['+this.id+'][team-save-msg]').innerText = '';
+                        var d = document.getElementById('attachments['+this.id+'][team-save-msg]');
+                        if(d){
+                            d.innerText = '';
+                        }
                     }).fail(function(){
                         var resp = arguments[0];
                         var keys = Object.keys(resp);
