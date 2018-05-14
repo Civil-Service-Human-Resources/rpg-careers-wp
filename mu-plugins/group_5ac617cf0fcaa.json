@@ -119,7 +119,7 @@
                             "label": "Headline",
                             "name": "headline",
                             "type": "text",
-                            "instructions": "(max 40 chars)",
+                            "instructions": "(max 75 chars)",
                             "required": 1,
                             "conditional_logic": 0,
                             "wrapper": {
@@ -131,7 +131,7 @@
                             "placeholder": "",
                             "prepend": "",
                             "append": "",
-                            "maxlength": 40
+                            "maxlength": 75
                         },
                         {
                             "key": "field_5ac61ca4cd4b8",
@@ -154,7 +154,7 @@
                             "label": "Text",
                             "name": "text",
                             "type": "textarea",
-                            "instructions": "(max 150 chars)",
+                            "instructions": "(max 175 chars)",
                             "required": 1,
                             "conditional_logic": 0,
                             "wrapper": {
@@ -164,7 +164,7 @@
                             },
                             "default_value": "",
                             "placeholder": "",
-                            "maxlength": 150,
+                            "maxlength": 175,
                             "rows": 0,
                             "new_lines": ""
                         }
