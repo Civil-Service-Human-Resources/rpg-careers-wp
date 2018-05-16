@@ -326,6 +326,7 @@ class rpgutils{
         add_action('load-edit.php', array($this, 'load_edit'));
 		add_filter('get_search_form', create_function('$a', "return null;"));
 		add_filter('wp_editor_settings', array($this, 'set_wp_editor_settings'), 10, 2 );
+		add_filter( 'acf/fields/wysiwyg/toolbars', array($this, 'rpg_editor_toolbars'));
 
         //GET ALL CURRENT TEAMS AND STORE THEM - SAVES LOOKUPS LATER ON IN CODE
         $teams = array();
@@ -375,6 +376,33 @@ class rpgutils{
 		return $settings;
 	}
 
+	function rpg_editor_toolbars($toolbars){
+		if(($key = array_search('blockquote', $toolbars['Basic'][1])) !== false) {
+			unset($toolbars['Basic'][1][$key]);	
+		}
+
+		if(($key = array_search('strikethrough', $toolbars['Basic'][1])) !== false) {
+			unset($toolbars['Basic'][1][$key]);
+		}
+
+		if(($key = array_search('alignleft', $toolbars['Basic'][1])) !== false) {
+			unset($toolbars['Basic'][1][$key]);
+		}
+
+		if(($key = array_search('aligncenter', $toolbars['Basic'][1])) !== false) {
+			unset($toolbars['Basic'][1][$key]);
+		}
+
+		if(($key = array_search('alignright', $toolbars['Basic'][1])) !== false) {
+			unset($toolbars['Basic'][1][$key]);
+		}
+
+		array_unshift($toolbars['Basic'][1], 'formatselect');
+		unset($toolbars['Full']);
+
+		return $toolbars;
+	}
+		
 	function amend_quick_links($actions, $post) {
 
 		if (isset($actions['inline hide-if-no-js'])) {
