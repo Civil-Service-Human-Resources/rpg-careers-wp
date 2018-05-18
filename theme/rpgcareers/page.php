@@ -196,7 +196,7 @@
                 </div>
             </div>
             <div class="content-two-col__last">
-				<p><?php echo esc_html($cont_block_hori_extra_txt); ?></p>
+				<p><?php echo $cont_block_hori_extra_txt; ?></p>
             </div>
         </div>
     </div>
