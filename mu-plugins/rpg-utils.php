@@ -44,6 +44,9 @@ class rpgutils{
 		add_action('init', array($this, 'register_user_taxonomy'));
 		add_action('init', array($this, 'check_cookie_banner_cookie'));
         add_filter('login_redirect', array($this, 'login_redirect'), 10, 3);
+		add_action('login_init', array($this, 'add_autocomplete_login_init'));
+		add_action('login_form', array($this, 'add_autocomplete_login_form'));
+		
 		add_action('admin_bar_menu', array($this, 'remove_menu_nodes'), 999);
 		add_action('current_screen', array($this, 'restrict_admin_pages'));
 		add_action('admin_head', array($this, 'remove_wpml_metabox'), 99);
@@ -1235,6 +1238,20 @@ switch ($post_status) {
         }
         return admin_url();
     }
+
+	function add_autocomplete_login_init(){
+		ob_start();
+	}
+
+	function add_autocomplete_login_form(){
+		$content = ob_get_contents();
+		ob_end_clean();
+		
+		$content = str_replace('id="user_login"', 'id="user_login" autocomplete="off"', $content);
+		$content = str_replace('id="user_pass"', 'id="user_pass" autocomplete="off"', $content);
+
+		echo $content;
+	}
 
     function amend_profile_fields_disable_js(){
     ?>
