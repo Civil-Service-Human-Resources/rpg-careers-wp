@@ -71,25 +71,25 @@
                     "rows": "",
                     "new_lines": ""
                 },
-                {
-                    "key": "field_5ad09ff8a4e82",
-                    "label": "Paragraph 2",
-                    "name": "paragraph_2",
-                    "type": "textarea",
-                    "instructions": "(max 450 chars)",
-                    "required": 1,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "default_value": "",
-                    "placeholder": "",
-                    "maxlength": 450,
-                    "rows": "",
-                    "new_lines": ""
+              {
+                "key": "field_5ad09ff8a4e82",
+                "label": "Paragraph 2",
+                "name": "paragraph_2",
+                "type": "wysiwyg",
+                "instructions": "",
+                "required": 1,
+                "conditional_logic": 0,
+                "wrapper": {
+                  "width": "",
+                  "class": "",
+                  "id": ""
                 },
+                "default_value": "",
+                "tabs": "visual",
+                "toolbar": "basic",
+                "media_upload": 0,
+                "delay": 1
+              },
                 {
                     "key": "field_5ad0a185f893c",
                     "label": "Paragraph 3",

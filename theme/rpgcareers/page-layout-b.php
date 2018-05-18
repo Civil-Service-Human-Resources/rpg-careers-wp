@@ -120,7 +120,7 @@
         <div class="content-two-col__last">
             <p><?php echo esc_html($main_cont_para_3); ?></p>
 			<?php if($main_cont_para_4) { ?>
-			<p><?php echo esc_html($main_cont_para_4); ?></p>
+			<p><?php echo $main_cont_para_4; ?></p>
 			<?php } ?>
         </div>
     </div>
@@ -132,7 +132,7 @@
                 <div class="content-two-col__first">
 					<h2><?php echo esc_html($cont_block_simple_heading[0]); ?></h2>
 					<p><?php echo esc_html($cont_block_simple_para_1[0]); ?></p>
-					<p><?php echo esc_html($cont_block_simple_para_2[0]); ?></p>
+					<p><?php echo $cont_block_simple_para_2[0]; ?></p>
 					<p><?php echo esc_html($cont_block_simple_para_3[0]); ?></p>
                 </div>
                 <div class="content-two-col__last">
@@ -158,7 +158,7 @@
 		<?php if (isset($cont_block_simple_heading[1]) || array_key_exists('1', $cont_block_simple_heading)): ?>
 		<h2><?php echo esc_html($cont_block_simple_heading[1]); ?></h2>
 		<p><?php echo esc_html($cont_block_simple_para_1[1]); ?></p>
-		<p><?php echo esc_html($cont_block_simple_para_2[1]); ?></p>
+		<p><?php echo $cont_block_simple_para_2[1]; ?></p>
 		<p><?php echo esc_html($cont_block_simple_para_3[1]); ?></p>
 		<?php endif; ?>
 		</div>
