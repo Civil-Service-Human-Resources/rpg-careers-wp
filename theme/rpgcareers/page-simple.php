@@ -7,7 +7,7 @@
 <?php 
 	$post_id = get_the_ID();
 	$page_heading = get_post_meta($post_id,'heading',true);
-	$page_content = get_post_meta($post_id,'content',true);
+	$page_content = wpautop(get_post_meta($post_id,'content',true));
 ?>
 <div class="hero-text">
     <div class="hero-text__inner">
