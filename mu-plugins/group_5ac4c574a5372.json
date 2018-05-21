@@ -62,7 +62,7 @@
                     "label": "Quote",
                     "name": "quote",
                     "type": "textarea",
-                    "instructions": "(max 200 chars)",
+                    "instructions": "(max 300 chars)",
                     "required": 1,
                     "conditional_logic": 0,
                     "wrapper": {
@@ -72,7 +72,7 @@
                     },
                     "default_value": "",
                     "placeholder": "",
-                    "maxlength": 200,
+                    "maxlength": 300,
                     "rows": 4,
                     "new_lines": ""
                 },

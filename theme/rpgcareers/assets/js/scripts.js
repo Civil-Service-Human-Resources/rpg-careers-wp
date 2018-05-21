@@ -59,7 +59,7 @@ $(document).ready(function () {
 
     function checkIfNavToggle() {
 
-        var mediaQuery = window.matchMedia('(min-width: 990px').matches;
+        var mediaQuery = window.matchMedia('(min-width: 990px)').matches;
 
         if(!mediaQuery && !navInitialized) {
             initializeMobileNav();
