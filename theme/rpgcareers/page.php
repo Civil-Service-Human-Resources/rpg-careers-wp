@@ -82,23 +82,23 @@
 
 	//GET IMAGE SRC
 	if ($bill_logo_src) {
-		$bill_logo_src = wp_get_attachment_image_src($bill_logo_src, 'medium');
+		$bill_logo_src = wp_get_attachment_image_src($bill_logo_src, 'full');
 	}
 	if ($bill_image_src) {
-		$bill_image_src = wp_get_attachment_image_src($bill_image_src, 'large');
-		$bill_image_src_resp = wp_get_attachment_image_src($bill_image_src, 'medium');
+		$bill_image_src = wp_get_attachment_image_src($bill_image_src, 'full');
+		$bill_image_src_resp = wp_get_attachment_image_src($bill_image_src, 'thumbnail');
 	}
 	if ($cont_block_vert_image) {
-		$cont_block_vert_image = wp_get_attachment_image_src($cont_block_vert_image, 'medium');
+		$cont_block_vert_image = wp_get_attachment_image_src($cont_block_vert_image, 'thumbnail');
 	}
 	if ($cont_block_hori_image) {
-		$cont_block_hori_image = wp_get_attachment_image_src($cont_block_hori_image, 'medium');
+		$cont_block_hori_image = wp_get_attachment_image_src($cont_block_hori_image, 'thumbnail');
 	}
 	if ($main_cont_img_1) {
-		$main_cont_img_1 = wp_get_attachment_image_src($main_cont_img_1, 'medium');
+		$main_cont_img_1 = wp_get_attachment_image_src($main_cont_img_1, 'large');
 	}
 	if ($main_cont_img_2) {
-		$main_cont_img_2 = wp_get_attachment_image_src($main_cont_img_2, 'medium');
+		$main_cont_img_2 = wp_get_attachment_image_src($main_cont_img_2, 'large');
 	}
 
 ?>
