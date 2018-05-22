@@ -100,15 +100,15 @@ class rpgutils{
 		add_filter('wp_calculate_image_sizes', array($this, 'adjust_image_sizes_attr'), 10 , 2);
 
 		//FORCE IMAGE SIZES - UNABLE TO UPDATE VIA ADMIN SCREENS
-		add_filter('pre_update_option_thumbnail_size_w', function(){ return 180; });
-		add_filter('pre_update_option_thumbnail_size_h', function(){ return 180; });
+		add_filter('pre_update_option_thumbnail_size_w', function(){ return 320; });
+		add_filter('pre_update_option_thumbnail_size_h', function(){ return 241; });
 		add_filter('pre_update_option_thumbnail_crop', function(){ return 0; });
-		add_filter('pre_update_option_medium_size_w', function(){ return 320; });
-		add_filter('pre_update_option_medium_size_h', function(){ return 240; });
-		add_filter('pre_update_option_medium_large_size_w', function(){ return 480; });
-		add_filter('pre_update_option_medium_large_size_h', function(){ return 360; });
-		add_filter('pre_update_option_large_size_w', function(){ return 800; });
-		add_filter('pre_update_option_large_size_h', function(){ return 600; });
+		add_filter('pre_update_option_medium_size_w', function(){ return 338; });
+		add_filter('pre_update_option_medium_size_h', function(){ return 254; });
+		add_filter('pre_update_option_medium_large_size_w', function(){ return 405; });
+		add_filter('pre_update_option_medium_large_size_h', function(){ return 304; });
+		add_filter('pre_update_option_large_size_w', function(){ return 540; });
+		add_filter('pre_update_option_large_size_h', function(){ return 405; });
 
 		//WORKFLOW - FILTER USER LISTINGS
 		add_filter('owf_get_users_in_step', array($this, 'filter_step_user_list'), 10, 3);
