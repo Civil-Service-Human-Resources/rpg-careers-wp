@@ -167,25 +167,34 @@ class RPG_Walker_Nav_Menu extends Walker_Nav_Menu {
 
     public function start_el(&$output, $item, $depth = 0, $args = array(), $id = 0) {
         $classes = array();
-        if(!empty( $item->classes)) {
+        if(!empty($item->classes)) {
             $classes = (array) $item->classes;
         }
 
         $active_class = '';
+		$aria_tag = '';
         if(in_array('current-menu-item', $classes)) {
             $active_class = ' class="masthead__nav-current"';
+			$aria_tag = ' aria-current="page"';
         } else if(in_array('current-menu-parent', $classes)) {
             $active_class = ' class="masthead__nav-current"';
+			$aria_tag = ' aria-current="page"';
         } else if(in_array('current-page-ancestor', $classes)) {
             $active_class = ' class="masthead__nav-current"';
+			$aria_tag = ' aria-current="page"';
         }
 
         $url = '';
-        if(!empty( $item->url)) {
+        if(!empty($item->url)) {
             $url = $item->url;
         }
 
-        $output .= '<li'. $active_class . '><a href="' . $url . '">' . $item->title . '</a></li>';
+		$title_attr = '';
+		if(!empty($item->description)) {
+            $title_attr = ' title="'. esc_attr($item->description) . '"';
+        }
+
+        $output .= '<li'. $active_class . '><a href="' . $url . '"'. $aria_tag . $title_attr .'>' . $item->title . '</a>';
     }
 
     public function end_el(&$output, $item, $depth = 0, $args = array()) {
