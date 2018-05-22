@@ -29,12 +29,12 @@ function rpgCareers_conditional_styles() {
 function rpgCareers_frontend_scripts() {
 	rpgCareers_conditional_styles();
 	
-	//REMOVE STD JQUERY AS AIMING TO ADD TO END OF BODY NOT THE HEAD
+	//REMOVE STD JQUERY AS NOT NEEDED
 	wp_deregister_script('jquery');
 	
-	wp_enqueue_script('rpgcareers-jquery', get_template_directory_uri() .'/assets/js/jquery-1.12.4.min.js', null, null, true);
-	wp_enqueue_script('rpgcareers-slick-js', get_template_directory_uri() .'/assets/js/slick.min.js', array('rpgcareers-jquery'), null, true);
-	wp_enqueue_script('rpgcareers-helper-js', get_template_directory_uri() .'/assets/js/scripts.js', array('rpgcareers-jquery'), null, true);
+	wp_enqueue_script('rpgcareers-picture-fill-js', get_template_directory_uri() .'/assets/js/picturefill.min.js', null, null, true);
+	wp_enqueue_script('rpgcareers-sllider-js', get_template_directory_uri() .'/assets/js/tiny-slider.js', null, null, true);
+	wp_enqueue_script('rpgcareers-helper-js', get_template_directory_uri() .'/assets/js/scripts.js', null, null, true);
 }
 
 add_action('wp_enqueue_scripts', 'rpgCareers_frontend_scripts');

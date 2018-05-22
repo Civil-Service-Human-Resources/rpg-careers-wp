@@ -42,7 +42,8 @@
 	<script>if(self===top){var f=document.getElementById('fKill');f.parentNode.removeChild(f);}else{top.location=self.location;}</script>
 	<!--[if lt IE 9]>
 	<script src="<?php echo get_stylesheet_directory_uri(); ?>/assets/js/modernizr-custom.js"></script>
-    <script src="<?php echo get_stylesheet_directory_uri(); ?>/assets/js/respond.js"></script>
+    <script src="<?php echo get_stylesheet_directory_uri(); ?>/assets/js/respond.min.js"></script>
+	<script src="<?php echo get_stylesheet_directory_uri(); ?>/assets/js/respond.matchmedia.addListener.min.js"></script>
     <![endif]-->
 </head>
 <body <?php body_class(); ?>>
