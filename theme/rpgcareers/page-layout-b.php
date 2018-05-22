@@ -72,17 +72,17 @@
 
 	//GET IMAGE SRC
 	if ($bill_image_src) {
-		$bill_image_src = wp_get_attachment_image_src($bill_image_src, 'large');
-		$bill_image_src_resp = wp_get_attachment_image_src($bill_image_src, 'medium');
+		$bill_image_src = wp_get_attachment_image_src($bill_image_src, 'full');
+		$bill_image_src_resp = wp_get_attachment_image_src($bill_image_src, 'thumbnail');
 	}
 	if ($main_cont_img_1) {
-		$main_cont_img_1 = wp_get_attachment_image_src($main_cont_img_1, 'medium');
+		$main_cont_img_1 = wp_get_attachment_image_src($main_cont_img_1, 'large');
 	}
 	if ($main_cont_img_2) {
-		$main_cont_img_2 = wp_get_attachment_image_src($main_cont_img_2, 'medium');
+		$main_cont_img_2 = wp_get_attachment_image_src($main_cont_img_2, 'large');
 	}
 	if ($cont_block_vert_image) {
-		$cont_block_vert_image = wp_get_attachment_image_src($cont_block_vert_image, 'medium');
+		$cont_block_vert_image = wp_get_attachment_image_src($cont_block_vert_image, 'thumbnail');
 	}
 
 ?>
@@ -195,7 +195,7 @@
 			}
 		?>
 		<div class="cta">
-			<img class="cta__img" src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_image', true), 'large')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_image', true), '_wp_attachment_image_alt', true); ?>">
+			<img class="cta__img" src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_image', true), 'medium')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_image', true), '_wp_attachment_image_alt', true); ?>">
 			<div class="cta__content">
 				<h3 class="cta__title"><a href="<?php echo esc_html(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_heading_target', true)); ?>"><?php echo esc_html(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_heading', true)); ?></a></h3>
 				<p><?php echo esc_html(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_body', true)); ?></p>

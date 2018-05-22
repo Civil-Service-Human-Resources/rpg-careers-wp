@@ -26,10 +26,10 @@ get_header(); ?>
 	$cache = get_posts(array('post_type' => 'attachment', 'numberposts' => -1, 'post__in' => $image_ids));
 
 	if ($bill_image_src) {
-		$bill_image_src = wp_get_attachment_image_src($bill_image_src, 'large');
+		$bill_image_src = wp_get_attachment_image_src($bill_image_src, 'full');
 	}
 	if ($cont_block_vert_image) {
-		$cont_block_vert_image = wp_get_attachment_image_src($cont_block_vert_image, 'medium');
+		$cont_block_vert_image = wp_get_attachment_image_src($cont_block_vert_image, 'thumbnail');
 	}
 ?>
  <div class="hero-text">
@@ -51,7 +51,7 @@ get_header(); ?>
 			for ($i=0;$i<$main_items;$i++) { ?>
                 <div class="text-image-list__item">
                     <div class="text-image-list__img">
-						<img src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'main_repeater_items_'.$i.'_image', true), 'large')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'main_repeater_items_'.$i.'_image', true), '_wp_attachment_image_alt', true); ?>">
+						<img src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'main_repeater_items_'.$i.'_image', true), 'thumbnail')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'main_repeater_items_'.$i.'_image', true), '_wp_attachment_image_alt', true); ?>">
                     </div>
                     <div class="text-image-list__content">
                         <h2 class="h3"><a href="<?php echo esc_html(get_post_meta($post_id, 'main_repeater_items_'.$i.'_heading_target', true)); ?>"><?php echo esc_html(get_post_meta($post_id, 'main_repeater_items_'.$i.'_heading', true)); ?></a></h2>
@@ -78,7 +78,7 @@ get_header(); ?>
 		if($sub_items):
 			for ($j=0;$j<$sub_items;$j++) { ?>
 			<div class="cta">
-				<img class="cta__img" src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_image', true), 'large')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_image', true), '_wp_attachment_image_alt', true); ?>">
+				<img class="cta__img" src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_image', true), 'medium')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_image', true), '_wp_attachment_image_alt', true); ?>">
 				<div class="cta__content">
 					<h3 class="cta__title"><a href="<?php echo esc_html(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_heading_target', true)); ?>"><?php echo esc_html(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_heading', true)); ?></a></h3>
 					<p><?php echo esc_html(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_body', true)); ?></p>
