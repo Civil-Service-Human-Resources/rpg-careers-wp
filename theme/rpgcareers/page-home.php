@@ -61,20 +61,20 @@ get_header(); ?>
 	$cache = get_posts(array('post_type' => 'attachment', 'numberposts' => -1, 'post__in' => $image_ids));
 
 	if ($bill_image_src) {
-		$bill_image_src = wp_get_attachment_image_src($bill_image_src, 'large');
-		$bill_image_src_resp = wp_get_attachment_image_src($bill_image_src, 'medium');
+		$bill_image_src = wp_get_attachment_image_src($bill_image_src, 'full');
+		$bill_image_src_resp = wp_get_attachment_image_src($bill_image_src, 'medium_large');
 	}
 	if ($cont_block_vert_image) {
-		$cont_block_vert_image = wp_get_attachment_image_src($cont_block_vert_image, 'medium');
+		$cont_block_vert_image = wp_get_attachment_image_src($cont_block_vert_image, 'medium_large');
 	}
 	if ($cont_block_cta_img_image) {
-		$cont_block_cta_img_image = wp_get_attachment_image_src($cont_block_cta_img_image, 'medium');
+		$cont_block_cta_img_image = wp_get_attachment_image_src($cont_block_cta_img_image, 'large');
 	}
 	if ($cont_block_promo_image) {
-		$cont_block_promo_image = wp_get_attachment_image_src($cont_block_promo_image, 'medium');
+		$cont_block_promo_image = wp_get_attachment_image_src($cont_block_promo_image, 'large');
 	}
 	if ($cont_block_image_image) {
-		$cont_block_image_image = wp_get_attachment_image_src($cont_block_image_image, 'large');
+		$cont_block_image_image = wp_get_attachment_image_src($cont_block_image_image, 'full');
 	}
 ?>
 <div class="hero">
