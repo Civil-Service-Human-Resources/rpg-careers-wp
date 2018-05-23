@@ -11,7 +11,7 @@
 
 ?>
 <!doctype html>
-<html <?php language_attributes(); ?> class="no-js">
+<html <?php language_attributes(); ?>>
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -41,7 +41,6 @@
 	<style id="fKill">body{display:none!important;}</style>
 	<script>if(self===top){var f=document.getElementById('fKill');f.parentNode.removeChild(f);}else{top.location=self.location;}</script>
 	<!--[if lt IE 9]>
-	<script src="<?php echo get_stylesheet_directory_uri(); ?>/assets/js/modernizr-custom.js"></script>
     <script src="<?php echo get_stylesheet_directory_uri(); ?>/assets/js/respond.min.js"></script>
 	<script src="<?php echo get_stylesheet_directory_uri(); ?>/assets/js/respond.matchmedia.addListener.min.js"></script>
     <![endif]-->
@@ -67,3 +66,4 @@
 	  ));
 	?></nav>
 </header>
+<?php echo do_shortcode("[rpg_snippet tagcode='489']"); ?>
