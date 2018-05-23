@@ -95,7 +95,7 @@ get_header(); ?>
 			<?php if ($cont_block_cta_para_2) {?>
 				<p><?php echo esc_html($cont_block_cta_para_2); ?></p>
 			<?php } ?>
-            <p><a href="<?php echo esc_html($cont_block_cta_target); ?>" class="button button--smaller"><?php echo esc_html($cont_block_cta_text); ?></a></p>
+            <p><a href="<?php echo esc_html($cont_block_cta_target); ?>" class="readmore-link"><?php echo esc_html($cont_block_cta_text); ?></a></p>
         </div>
         <div class="content-two-col__last">
             <div class="aside aside--img-top aside--tertiary">
@@ -120,7 +120,7 @@ get_header(); ?>
 			<?php if ($cont_block_cta_img_para_2) {?>
 				<p><?php echo esc_html($cont_block_cta_img_para_2); ?></p>
 			<?php } ?>
-			<p><a href="<?php echo esc_html($cont_block_cta_img_target); ?>" class="button button--smaller"><?php echo esc_html($cont_block_cta_img_text); ?></a></p>
+			<p><a href="<?php echo esc_html($cont_block_cta_img_target); ?>" class="readmore-link"><?php echo esc_html($cont_block_cta_img_text); ?></a></p>
         </div>
         <div class="content-two-col__last">
             <div class="image">

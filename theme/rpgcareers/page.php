@@ -210,7 +210,7 @@
 			if($drivers):
 				for ($j=0;$j<$drivers;$j++) { ?>
 				<div class="content-two-col__<?php echo (($j === 0) ? 'first' : 'last'); ?>">
-					<div class="cta">
+					<div class="cta cta--blog">
 						<img class="cta__img" src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'sub_content_driver_'.$j.'_image', true), 'large')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'sub_content_driver_'.$j.'_image', true), '_wp_attachment_image_alt', true); ?>">
 						<div class="cta__content">
 							<h3 class="cta__title"><a href="<?php echo esc_html(get_post_meta($post_id, 'sub_content_driver_'.$j.'_link', true)); ?>"><?php echo esc_html(get_post_meta($post_id, 'sub_content_driver_'.$j.'_headline', true)); ?></a></h3>
