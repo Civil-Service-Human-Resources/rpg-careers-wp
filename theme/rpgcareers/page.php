@@ -85,8 +85,9 @@
 		$bill_logo_src = wp_get_attachment_image_src($bill_logo_src, 'full');
 	}
 	if ($bill_image_src) {
+		$bill_image_src_resp = $bill_image_src;
 		$bill_image_src = wp_get_attachment_image_src($bill_image_src, 'full');
-		$bill_image_src_resp = wp_get_attachment_image_src($bill_image_src, 'thumbnail');
+		$bill_image_src_resp = wp_get_attachment_image_src($bill_image_src_resp, 'thumbnail');
 	}
 	if ($cont_block_vert_image) {
 		$cont_block_vert_image = wp_get_attachment_image_src($cont_block_vert_image, 'thumbnail');

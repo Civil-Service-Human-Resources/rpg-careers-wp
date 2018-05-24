@@ -78,8 +78,8 @@ get_header(); ?>
 	}
 ?>
 <div class="hero">
-    <div class="hero__inner">
-        <div class="hero__img" style="background-image: url(<?php echo $bill_image_src[0]; ?>)"></div>
+    <div class="hero__inner" style="background-image: url(<?php echo $bill_image_src[0]; ?>)">
+        <span class="hero__img" style="background-image: url(<?php echo $bill_image_src[0]; ?>)"></span>
         <div class="hero__content">
             <h1 class="oversized has-line"><?php echo esc_html($bill_heading); ?></h1>
             <p class="intro"><?php echo esc_html($bill_intro); ?></p>
@@ -130,8 +130,7 @@ get_header(); ?>
     </div>
 </div>
 <div class="hero hero--where-to-find">
-    <div class="hero__inner">
-        <div class="hero__img" style="background-image: url(<?php echo $cont_block_image_image[0]; ?>)"></div>
+    <div class="hero__inner" style="background-image: url(<?php echo $cont_block_image_image[0]; ?>)">
         <div class="hero__content">
             <h2><?php echo esc_html($cont_block_image_heading); ?></h2>
             <p><?php echo esc_html($cont_block_image_body); ?></p>
