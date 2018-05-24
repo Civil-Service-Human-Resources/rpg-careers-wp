@@ -43,6 +43,8 @@
 	<!--[if lt IE 9]>
     <script src="<?php echo get_stylesheet_directory_uri(); ?>/assets/js/respond.min.js"></script>
 	<script src="<?php echo get_stylesheet_directory_uri(); ?>/assets/js/respond.matchmedia.addListener.min.js"></script>
+	<script src="<?php echo get_stylesheet_directory_uri(); ?>/assets/js/matchmedia.js"></script>
+    <script src="<?php echo get_stylesheet_directory_uri(); ?>/assets/js/flexibility.js"></script>
     <![endif]-->
 </head>
 <body <?php body_class(); ?>>

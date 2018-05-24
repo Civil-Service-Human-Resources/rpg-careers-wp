@@ -17,7 +17,6 @@
 	$bill_intro = get_post_meta($post_id,'billboard_intro_text',true);
 	$bill_image_src = intval(get_post_meta($post_id,'billboard_image',true));
 	$bill_image_src_alt = get_post_meta($bill_image_src, '_wp_attachment_image_alt', true);
-	$bill_image_src_resp = '';
 	$image_ids[] = $bill_image_src;
 
 	$main_cont_heading = get_post_meta($post_id,'main_content_heading',true);
@@ -73,7 +72,6 @@
 	//GET IMAGE SRC
 	if ($bill_image_src) {
 		$bill_image_src = wp_get_attachment_image_src($bill_image_src, 'full');
-		$bill_image_src_resp = wp_get_attachment_image_src($bill_image_src, 'thumbnail');
 	}
 	if ($main_cont_img_1) {
 		$main_cont_img_1 = wp_get_attachment_image_src($main_cont_img_1, 'large');
