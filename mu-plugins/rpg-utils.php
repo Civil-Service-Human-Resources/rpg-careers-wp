@@ -18,7 +18,7 @@ if(!class_exists('rpgutils')):
 
 class rpgutils{
 
-    var $version = '1.0.0';
+    var $version = '1.0.1';
     var $settings = array();
     
     function __construct(){
@@ -121,7 +121,9 @@ class rpgutils{
 		//GTM ACTIONS
 		add_action('gtm_head', array($this, 'render_gtm_head'));
 		add_action('gtm_body', array($this, 'render_gtm_body'));
-		
+
+		//SET CACHING HEADERS FOR FRONT END PAGES
+		add_filter('wp_headers', array($this, 'set_cache_headers'));
     }
 
 	function rpg_validate_save_post(){
@@ -1683,6 +1685,13 @@ switch ($post_status) {
 		$users_and_process_info['users'] = $new_assignees;
  
 		return $users_and_process_info;
+	}
+
+	function set_cache_headers($headers){
+		if (!is_admin()){
+			$headers = array_merge($headers, wp_get_nocache_headers());
+		}
+		return $headers;
 	}
 
     function restrict_access(){
