@@ -65,11 +65,9 @@ function wp_set_terms_for_user( $user_id, $taxonomy, $terms = array(), $bulk = f
 			: null;
 	}
 
-	// Delete all user terms
+	//IF TERMS ARE EMPTY RETURN AS USER CANNOT BE SAVED WITHOUT A TEAM ASSIGNED
 	if ( is_null( $terms ) || empty( $terms ) ) {
-		wp_delete_object_term_relationships( $user_id, $taxonomy );
-
-	// Set the terms
+		return false;
 	} else {
 		$_terms = array_map( 'sanitize_key', $terms );
 

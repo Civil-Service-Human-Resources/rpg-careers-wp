@@ -54,6 +54,7 @@ class rpgonetime{
         $contentAuthorCaps = array(
             'read'							=> true,
             'edit_pages'					=> true,
+			'edit_others_pages'				=> true,
 			'edit_posts'					=> true,
             'edit_others_posts'				=> true,
 			'upload_files'					=> true,

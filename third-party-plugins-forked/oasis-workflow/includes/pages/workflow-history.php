@@ -129,14 +129,14 @@ $row_added_count = 0;
                                     }
                                   }
 								  $row_added_count++;
-								  echo "<td>&mdash;</td>";
+								  echo "<td>".(strlen($row->team)==0?'&mdash;' :$row->team)."</td>";
                                   echo "<td>{$actor}</td>";
                                   echo "<td>{$workflow_service->get_step_name( $row )}<br/><span style='font-size:9px;'>{$workflow_name}</span></td>";
                                   echo "<td>" . OW_Utility::instance()->format_date_for_display( $row->create_datetime, "-", "datetime" ) . "</td>";
                                   $signoff_date = $review_row->update_datetime;
                                   echo "<td>" . OW_Utility::instance()->format_date_for_display( $signoff_date, "-", "datetime" ) . "</td>";
                                   // If editors' review status is "no_action" (Not acted upon) then set user status as "No action taken"
-								  $review_status = "&mdash";
+								  $review_status = "&mdash;";
                                   if ( $review_row->review_status == "no_action" || $review_row->review_status == "abort_no_action" ) {
                                      $review_status = __( "No Action Taken", "oasisworkflow" );
                                   } else {
@@ -146,7 +146,10 @@ $row_added_count = 0;
                                         $review_status = $ow_process_flow->get_review_sign_off_status( $row, $review_row );
                                      }
                                   }
-                                  echo "<td>$review_status</td>";
+
+								  if($review_status=='') $review_status = "&mdash;";
+
+                                  echo "<td>".$review_status."</td>";
                                   echo "<td class='comments column-comments'>
 												<div class='post-com-count-wrapper'>
 													<strong>

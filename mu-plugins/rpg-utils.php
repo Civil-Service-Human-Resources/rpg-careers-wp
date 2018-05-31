@@ -594,7 +594,7 @@ switch ($post_status) {
         <input name="original_publish" type="hidden" id="original_publish" value="Publish">
 		<input name="acf_dummy" type="hidden" id="acf_dummy" value="acf_dummy">
         <input type="submit" name="publish" id="publish" class="button button-primary button-large" value="Publish" style="display: none;">
-		<input <?php if ( 'private' == $post_status || 'publish' == $post_status || 'future' == $post_status || 'pending' == $post_status ) { ?>style="display:none"<?php } ?> type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save Draft'); ?>" class="button button-primary button-large" />
+		<input <?php if ( 'private' == $post_status || 'publish' == $post_status || 'future' == $post_status || 'pending' == $post_status || 'trash' == $post_status) { ?>style="display:none"<?php } ?> type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save Draft'); ?>" class="button button-primary button-large" />
         </div>
         <div class="clear"></div>
 	</div>
@@ -605,7 +605,7 @@ switch ($post_status) {
 				var j = document.getElementById('submitdiv');
 				var e = document.querySelectorAll('input[name=page_action]'), f = document.querySelector('input[name=page_action]:checked');
 				var g = document.getElementById('save-post'), h = document.getElementById('workflow_submit'), i, l, m, n;
-				var o = document.getElementById('workflow_revise_draft');
+				var o = document.getElementById('workflow_revise_draft'), p = document.getElementById('post-preview'), q = document.getElementById('exit_link');
 
 				j.setAttribute('style','opacity:0.3;');
 
@@ -625,6 +625,23 @@ switch ($post_status) {
 					case 'publish':
 						if(h===null){
 							i = setInterval(getElement, 500);
+						}
+						break;
+					case 'unpub-with-approver':
+					case 'unpub-sign-off':
+						g.setAttribute('style','display:none;');
+						p.setAttribute('style','display:none;');
+						if(h!==null){
+							h.setAttribute('style','display:none;');
+						}else{
+							i = setInterval(getElementH, 500);
+						}
+						break;
+					case 'trash':
+						if(h!==null){
+							h.setAttribute('style','display:none;');
+						}else{
+							i = setInterval(getElementF, 500);
 						}
 						break;
 					default:
@@ -743,6 +760,36 @@ switch ($post_status) {
 						i = setInterval(getElementD, 500);
 					}
 				}
+
+				function getElementF(){
+					h = document.getElementById('workflow_submit');
+					
+					if(h!==null){
+						h.setAttribute('style','display:none;');
+						j.setAttribute('style','opacity:1;');
+						clearInterval(i);
+					}
+				}
+
+				function getElementG(){
+					q = document.getElementById('exit_link');
+					if(q!==null){
+						clearInterval(i);
+						q.setAttribute('style','');
+					}
+				}
+
+				function getElementH(){
+					h = document.getElementById('workflow_submit');
+					
+					if(h!==null){
+						h.setAttribute('style','display:none;');
+						j.setAttribute('style','opacity:1;');
+						clearInterval(i);
+						i = setInterval(getElementG, 500);
+					}
+				}
+
 			})();
 		</script>
 <?php

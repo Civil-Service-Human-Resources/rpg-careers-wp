@@ -38,7 +38,7 @@
               "label": "Heading",
               "name": "heading",
               "type": "text",
-              "instructions": "(max 50 chars)",
+              "instructions": "(max 65 chars)",
               "required": 1,
               "conditional_logic": 0,
               "wrapper": {
@@ -50,7 +50,7 @@
               "placeholder": "",
               "prepend": "",
               "append": "",
-              "maxlength": 50
+              "maxlength": 65
             },
             {
               "key": "field_5ac4d60162da1",

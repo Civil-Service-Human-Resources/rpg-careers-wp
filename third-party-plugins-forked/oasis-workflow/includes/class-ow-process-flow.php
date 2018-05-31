@@ -1181,13 +1181,14 @@ class OW_Process_Flow {
    }
 
    /**
-    * get all the users who have atleast one post in their inbox
+    * get all the users who have at least one post in their inbox
     * @return mixed user list
     *
     * @since 2.0
     */
    public function get_assigned_users() {
       global $wpdb;
+	  $roles_where = false;
 
       $sql = "SELECT distinct USERS.ID, USERS.display_name FROM
 		(SELECT U1.ID, U1.display_name FROM {$wpdb->users} AS U1
@@ -1196,17 +1197,44 @@ class OW_Process_Flow {
 		UNION
 		SELECT U2.ID, U2.display_name FROM {$wpdb->users} AS U2
 		LEFT JOIN " . OW_Utility::instance()->get_action_table_name() . " AS A ON U2.ID = A.actor_id
-		WHERE A.review_status = 'assignment') USERS
-		left JOIN (SELECT t.term_id, t.name as team, tr.object_id FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id INNER JOIN wp_term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id WHERE tt.taxonomy = 'content_team') AS D ON USERS.ID = D.object_id";
-		
-		if(!OW_Utility::instance()->see_all_teams()){
-			$sql .= " where D.term_id IN ( SELECT D.term_id FROM wp_users AS USERS
-					left JOIN (SELECT t.term_id, t.name as team, tr.object_id FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id INNER JOIN wp_term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id WHERE tt.taxonomy = 'content_team') 
-					AS D ON USERS.ID = D.object_id
-					where USERS.ID = ". wp_get_current_user()->ID . ")";
+		WHERE A.review_status = 'assignment') USERS";
+
+		$sql .=  " LEFT JOIN (SELECT t.term_id, t.name as team, tr.object_id FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id INNER JOIN wp_term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id WHERE tt.taxonomy = 'content_team') AS D ON USERS.ID = D.object_id";
+
+		//ONLY FILTER ON ROLE IF CURRENT USER IS NOT AN ADMIN ROLE
+		if(!current_user_can('manage_options')){
+
+			//GET ROLES FOR CURRENT USER
+			$user = wp_get_current_user();
+			$roles = $user->roles;
+			$loop_count = 0;
+			$roles_where = true;
+
+			$sql .= " LEFT JOIN wp_usermeta as bb ON USERS.ID = bb.user_id WHERE bb.meta_key = 'wp_capabilities' AND ";
+
+			foreach ($roles as $role) {
+
+				if($loop_count > 0){ $sql .= " OR "; }
+				$sql .= "bb.meta_value LIKE '%" . $role . "%'";
+				$loop_count ++;
+			}
 		}
 
-		$sql .= " group by USERS.ID ORDER BY USERS.DISPLAY_NAME";
+		if(!OW_Utility::instance()->see_all_teams()){
+			
+			if(!$roles_where) {
+				$sql .= " WHERE ";
+			} else {
+				$sql .= " AND ";
+			}
+
+			$sql .= "D.term_id IN (SELECT D.term_id FROM wp_users AS USERS
+					LEFT JOIN (SELECT t.term_id, t.name as team, tr.object_id FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id INNER JOIN wp_term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id WHERE tt.taxonomy = 'content_team') 
+					AS D ON USERS.ID = D.object_id
+					WHERE USERS.ID = ". wp_get_current_user()->ID . ")";
+		}
+
+	  $sql .= " GROUP BY USERS.ID ORDER BY USERS.DISPLAY_NAME";
 
       $result = $wpdb->get_results( $sql );
       return $result;
