@@ -55,6 +55,7 @@ class rpgonetime{
             'read'							=> true,
             'edit_pages'					=> true,
 			'edit_others_pages'				=> true,
+			'edit_published_pages'			=> true,
 			'edit_posts'					=> true,
             'edit_others_posts'				=> true,
 			'upload_files'					=> true,
@@ -173,18 +174,18 @@ class rpgonetime{
 
 	function set_image_sizes(){
 		//SET DEFAULT IMAGE SIZES
-		update_option('thumbnail_size_w', 180);
-		update_option('thumbnail_size_h', 180);	
+		update_option('thumbnail_size_w', 320);
+		update_option('thumbnail_size_h', 241);	
 		update_option('thumbnail_crop', 0);
 		
-		update_option('medium_size_w', 320);
-		update_option('medium_size_h', 240);
+		update_option('medium_size_w', 338);
+		update_option('medium_size_h', 254);
 		
-		update_option('medium_large_size_w', 480);
-		update_option('medium_large_size_h', 360);
+		update_option('medium_large_size_w', 405);
+		update_option('medium_large_size_h', 304);
 		
-		update_option('large_size_w', 800);
-		update_option('large_size_h', 600);
+		update_option('large_size_w', 540);
+		update_option('large_size_h', 405);
 
 		update_option('image_default_align', 'center');
 		update_option('image_default_size', 'large');
