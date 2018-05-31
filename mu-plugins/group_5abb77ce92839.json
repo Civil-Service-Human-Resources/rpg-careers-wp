@@ -38,7 +38,7 @@
                     "label": "Logo text",
                     "name": "logo_text",
                     "type": "text",
-                    "instructions": "(max 50 chars)",
+                    "instructions": "(max 60 chars)",
                     "required": 1,
                     "conditional_logic": 0,
                     "wrapper": {
@@ -50,7 +50,7 @@
                     "placeholder": "",
                     "prepend": "",
                     "append": "",
-                    "maxlength": 50
+                    "maxlength": 60
                 },
                 {
                     "key": "field_5ac4d10ed8314",
@@ -81,7 +81,7 @@
                     "label": "Heading",
                     "name": "heading",
                     "type": "text",
-                    "instructions": "(max 70 chars)",
+                    "instructions": "(max 75 chars)",
                     "required": 1,
                     "conditional_logic": 0,
                     "wrapper": {
@@ -93,7 +93,7 @@
                     "placeholder": "",
                     "prepend": "",
                     "append": "",
-                    "maxlength": 70
+                    "maxlength": 75
                 },
                 {
                     "key": "field_5accbb890d0c3",

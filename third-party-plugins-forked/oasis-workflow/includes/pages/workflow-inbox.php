@@ -6,9 +6,6 @@ $selected_user = (isset( $_GET['user'] ) && sanitize_text_field( $_GET["user"] )
 $page_number = (isset( $_GET['paged'] ) && sanitize_text_field( $_GET["paged"] )) ? intval( sanitize_text_field( $_GET["paged"] ) ) : 1;
 $die = false;
 
-
-
-
 //ARE ABLE TO SEE USERS INBOX?  NEED TO CHECK THAT REQUESTED USER IS IN THE SAME TEAM
 if(!OW_Utility::instance()->is_in_team(wp_get_current_user()->ID, $selected_user)){
 	$die = true;
@@ -50,7 +47,7 @@ $header = $ow_inbox_service->get_table_header();
                <div class="alignleft actions">
 					<?php
                     $assigned_users = $ow_process_flow->get_assigned_users();
-                   if( $assigned_users ) { ?>
+                   if($assigned_users && count($assigned_users) > 1) { ?>
 				   <select id="inbox_filter">
                        <option value=<?php echo get_current_user_id(); ?> selected="selected"><?php echo __( "View inbox of ", "oasisworkflow" ) ?></option>
                        <?php
