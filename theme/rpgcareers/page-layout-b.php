@@ -80,7 +80,7 @@
 		$main_cont_img_2 = wp_get_attachment_image_src($main_cont_img_2, 'large');
 	}
 	if ($cont_block_vert_image) {
-		$cont_block_vert_image = wp_get_attachment_image_src($cont_block_vert_image, 'thumbnail');
+		$cont_block_vert_image = wp_get_attachment_image_src($cont_block_vert_image, 'medium_large');
 	}
 
 ?>

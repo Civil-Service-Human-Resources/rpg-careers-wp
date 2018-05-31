@@ -29,7 +29,7 @@ get_header(); ?>
 		$bill_image_src = wp_get_attachment_image_src($bill_image_src, 'full');
 	}
 	if ($cont_block_vert_image) {
-		$cont_block_vert_image = wp_get_attachment_image_src($cont_block_vert_image, 'thumbnail');
+		$cont_block_vert_image = wp_get_attachment_image_src($cont_block_vert_image, 'medium_large');
 	}
 ?>
  <div class="hero-text">
@@ -51,7 +51,7 @@ get_header(); ?>
 				for ($i=0;$i<$list_items;$i++) { ?>
 					<div class="text-image-list__item">
 						<div class="text-image-list__img">
-							<img src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'list_repeater_items_'.$i.'_image', true), 'thumbnail')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'list_repeater_items_'.$i.'_image', true), '_wp_attachment_image_alt', true); ?>">
+							<img src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'list_repeater_items_'.$i.'_image', true), 'medium_large')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'list_repeater_items_'.$i.'_image', true), '_wp_attachment_image_alt', true); ?>">
 						</div>
 						<div class="text-image-list__logo">
 							<span class="logo logo--small" style="background-image:url(<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'list_repeater_items_'.$i.'_logo', true), 'full')[0]; ?>);">
