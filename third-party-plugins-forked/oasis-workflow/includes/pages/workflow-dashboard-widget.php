@@ -38,7 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) {
        echo "</span>";
     } else {
        echo "<span>";
-       echo __( 'Hurray! No assignments.', 'oasisworkflow' );
+       echo __( 'No assignments.', 'oasisworkflow' );
        echo "</span>";
     }
     ?>
