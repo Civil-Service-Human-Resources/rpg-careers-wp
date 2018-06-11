@@ -331,7 +331,8 @@ class rpgutils{
         add_action('load-edit.php', array($this, 'load_edit'));
 		add_filter('get_search_form', create_function('$a', "return null;"));
 		add_filter('wp_editor_settings', array($this, 'set_wp_editor_settings'), 10, 2 );
-		add_filter( 'acf/fields/wysiwyg/toolbars', array($this, 'rpg_editor_toolbars'));
+		add_filter('acf/fields/wysiwyg/toolbars', array($this, 'rpg_editor_toolbars'));
+		add_filter('admin_footer_text', array($this, 'bespoke_wp_admin_footer'));
 
         //GET ALL CURRENT TEAMS AND STORE THEM - SAVES LOOKUPS LATER ON IN CODE
         $teams = array();
@@ -354,6 +355,20 @@ class rpgutils{
         //$this->clean_unwanted_caps();
 
 		if(!$this->settings['is_native']) {add_meta_box('submitdiv', 'Publish', array($this, 'custom_submit_meta_box'), 'page', 'side', 'low');}
+
+		//TWEAK DASHBOARD WIDGETS
+		remove_action('welcome_panel', 'wp_welcome_panel');
+		remove_meta_box('dashboard_incoming_links', 'dashboard', 'normal');
+		remove_meta_box('dashboard_plugins', 'dashboard', 'normal');
+		remove_meta_box('dashboard_primary', 'dashboard', 'normal');
+		remove_meta_box('dashboard_secondary', 'dashboard', 'normal');
+		remove_meta_box('dashboard_quick_press', 'dashboard', 'side');
+		remove_meta_box('dashboard_recent_drafts', 'dashboard', 'side');
+		remove_meta_box('dashboard_recent_comments', 'dashboard', 'normal');
+		remove_meta_box('dashboard_right_now', 'dashboard', 'normal');
+		remove_meta_box('dashboard_activity', 'dashboard', 'normal');
+		remove_meta_box('task_dashboard', 'dashboard', 'normal');
+		add_action('admin_footer', array($this,'tweak_dashboard_js'));
 
         //***START: KEEP AT BOTTOM OF FUNCTION***
         //NB: KEEP AT BOTTOM OF FUNCTION AS A FEW return STATEMENTS TO BE CAREFUL OF
@@ -379,6 +394,10 @@ class rpgutils{
 			$settings['media_buttons']	= false;
 		}
 		return $settings;
+	}
+
+	function bespoke_wp_admin_footer(){
+		echo '<span>Built by <a href="https://www.valtech.co.uk/" target="_blank">Valtech</a></span><span style="margin-left:25px;"><a href="' . get_admin_url(null,'index.php?page=rpg-admin-page.php') . '">Career Site Authors Privacy Notice</a></span>';
 	}
 
 	function rpg_editor_toolbars($toolbars){
@@ -1296,6 +1315,7 @@ switch ($post_status) {
 		$content = ob_get_contents();
 		ob_end_clean();
 		
+		$content = str_replace('id="loginform"', 'id="loginform" autocomplete="off"', $content);
 		$content = str_replace('id="user_login"', 'id="user_login" autocomplete="off"', $content);
 		$content = str_replace('id="user_pass"', 'id="user_pass" autocomplete="off"', $content);
 
@@ -1305,6 +1325,16 @@ switch ($post_status) {
     function amend_profile_fields_disable_js(){
     ?>
 <script type="text/javascript">jQuery(document).ready(function($){var a=jQuery("h3:contains('Relationships')").next('.form-table').find('tr').has('td'); b=a.find('input[type="checkbox"]'),c=a.find('a');if(b){b.each(function(){$(this).attr('disabled','disabled');});}if(c){c.each(function(){$(this).attr('style','display:none');});}});</script>
+    <?php
+    }
+
+	function tweak_dashboard_js(){
+		global $pagenow;
+		if($pagenow==='post-new.php' || $pagenow==='post.php'){
+			return;
+		}
+    ?>
+<script type="text/javascript">jQuery(document).ready(function($){jQuery('div.postbox-container').remove();});</script>
     <?php
     }
 
