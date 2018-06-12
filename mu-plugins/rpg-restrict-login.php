@@ -27,7 +27,7 @@ class rpgrestrictlogin{
         $this->settings = array(
             'name'               => __('RPG Restrict Login', 'rpgrestrictlogin'),
             'version'            => $this->version,
-			'failed_login_limit' => LOGIN_LIMIT,
+			'failed_login_limit' => USER_LOGIN_LIMIT,
 			'lockout_duration'   => LOCKOUT_DURATION,
 			'transient_name'	 => 'rpg_restrict_login',
         );
