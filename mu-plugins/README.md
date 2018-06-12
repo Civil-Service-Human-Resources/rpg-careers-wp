@@ -25,5 +25,9 @@ Plugin that handles failed logins to the WordPress admin pages - when limit reac
 
 Plugin that provides the ability for non-authenticated users to view draft pages without the need to login to the WordPress admin pages
 
+## RPG Careers WP Admin Page Plugin
+
+Allows a custom page to be created - appears under the dashboard menu in the WordPress admin screens. Planned to be used for Content Author Privacy policy notice.
+
 ## Notes
 php files are deployed to mu-plugins folder under wp-content.  Becomes a must use plugin which cannot be altered in anyway in the WP backend.

@@ -37,7 +37,11 @@ class rpgnonauthpreview{
     }
 
 	function admin_init(){
-		add_filter('preview_post_link', function ($link, \WP_Post $post){return 'page' === $post->post_type ? add_query_arg(['rpg_nap_nonce' => $this->rpg_create_nonce('rpg_nap_nonce-' . $post->ID)], $link) : $link;}, 10, 2);
+		add_filter('preview_post_link', array($this, 'get_preview_link'), 10, 2);
+	}
+
+	function get_preview_link($link, $post){
+		return 'page' === $post->post_type ? add_query_arg(['rpg_nap_nonce' => $this->rpg_create_nonce('rpg_nap_nonce-' . $post->ID)], $link) : $link;
 	}
 
 	function rpg_show_preview($query){
