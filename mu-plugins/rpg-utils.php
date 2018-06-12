@@ -1330,12 +1330,11 @@ switch ($post_status) {
 
 	function tweak_dashboard_js(){
 		global $pagenow;
-		if($pagenow==='post-new.php' || $pagenow==='post.php'){
-			return;
-		}
+		if($pagenow==='index.php'){
     ?>
 <script type="text/javascript">jQuery(document).ready(function($){jQuery('div.postbox-container').remove();});</script>
     <?php
+	}
     }
 
     function bespoke_js_script(){
