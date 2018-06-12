@@ -63,7 +63,7 @@ class rpgadminpage{
 
 		//SET DEFAULT PAGE CONTENT	
 		if ($opt_html_val==''){
-			$opt_html_val = '<div><h1>*** Sample RPG Admin Page ***</h1><p><strong>Note:</strong>To add bespoke html code to this page visit @quot;RPG Admin Page@quot; under Settings admin menu.</p></div>';
+			$opt_html_val = '<div><h1>*** Sample RPG Admin Page ***</h1><p><strong>Note:</strong> To add bespoke html code to this page visit <em>"RPG Admin Page"</em> found under the Settings admin menu.</p></div>';
 		}
 	
 		echo str_replace('\\', '', $opt_html_val);
