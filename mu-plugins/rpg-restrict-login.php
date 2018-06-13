@@ -29,7 +29,7 @@ class rpgrestrictlogin{
             'version'            => $this->version,
 			'failed_login_limit' => USER_LOGIN_LIMIT,
 			'lockout_duration'   => LOCKOUT_DURATION,
-			'transient_name'	 => 'rpg_restrict_login',
+			'transient_name'	 => 'rpg_restrict_login_',
         );
 
 		add_filter('authenticate', array( $this, 'check_attempted_login' ), 30, 3);
@@ -37,31 +37,39 @@ class rpgrestrictlogin{
     }
 
 	public function check_attempted_login($user, $username, $password) {
-        if (get_transient($this->settings['transient_name'])) {
-            $datas = get_transient($this->settings['transient_name']);
+		$current_user = get_user_by('login', $username);
+		
+		if($current_user){
+			$trans_name = $this->settings['transient_name'].$current_user->ID;
 
-            if ($datas['tried'] >= $this->settings['failed_login_limit']) {
-                //PLAYBACK ERROR MESSAGE
-                return new WP_Error('too_many_tried', sprintf( __( '<strong>ERROR</strong>: You have reached the maximum number of attempts and have been locked out.')));
-            }
-        }
+			if (get_transient($trans_name)) {
+				$datas = get_transient($trans_name);
 
+				if ($datas['tried'] >= $this->settings['failed_login_limit']) {
+					//PLAYBACK ERROR MESSAGE
+					return new WP_Error('too_many_tried', sprintf( __( '<strong>ERROR</strong>: You have reached the maximum number of attempts and have been locked out.')));
+				}
+			}
+		}
         return $user;
     }
 
 	public function login_failed($username) {
-        if (get_transient($this->settings['transient_name'])) {
-            $datas = get_transient($this->settings['transient_name']);
-            $datas['tried']++;
+		$current_user = get_user_by('login', $username);
 
-            if ($datas['tried'] <= $this->settings['failed_login_limit']){
-                set_transient($this->settings['transient_name'], $datas , $this->settings['lockout_duration']);
+		if($current_user){
+			$trans_name = $this->settings['transient_name'].$current_user->ID;
+			if (get_transient($trans_name)) {
+				$datas = get_transient($trans_name);
+				$datas['tried']++;
+
+				if ($datas['tried'] <= $this->settings['failed_login_limit']){
+					set_transient($trans_name, $datas, $this->settings['lockout_duration']);
+				}
+			} else {
+				$datas = array('tried' => 1);
+				set_transient($trans_name, $datas, $this->settings['lockout_duration']);
 			}
-		} else {
-				$datas = array(
-					'tried'     => 1
-				);
-				set_transient($this->settings['transient_name'], $datas , $this->settings['lockout_duration']);
 		}
 	}
 }
