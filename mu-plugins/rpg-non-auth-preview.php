@@ -41,7 +41,11 @@ class rpgnonauthpreview{
 	}
 
 	function get_preview_link($link, $post){
-		return 'page' === $post->post_type ? add_query_arg(['rpg_nap_nonce' => $this->rpg_create_nonce('rpg_nap_nonce-' . $post->ID)], $link) : $link;
+		if('page' === $post->post_type){
+			$link = add_query_arg(['rpg_nap_nonce' => $this->rpg_create_nonce('rpg_nap_nonce-' . $post->ID)], $link);
+		}
+
+		return $link;
 	}
 
 	function rpg_show_preview($query){
