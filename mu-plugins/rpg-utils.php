@@ -320,7 +320,7 @@ class rpgutils{
 		if(is_admin()){
 			if(!wp_doing_ajax()){
 				foreach($wpdb->queries as $q) {
-					echo  '<div style="margin-left:200px;margin-bottom:50px;">'.$q[0] . '<span style="font-size:8px;margin-left:15px;">['.$q[1].' s]</span></div>';
+					echo  '<div style="margin-left:200px;margin-bottom:50px;">'.$q[0] . '<span style="font-size:8px;margin-left:15px;">['.$q[1].' s]</span><br/><em style="color:blue;display:block;padding:5px 0 0 25px;">'.$q[2].'</em></div>';
 				}
 			}
 		}
@@ -1354,6 +1354,14 @@ switch ($post_status) {
 	function save_post($post_id, $post, $update){
         if($post->post_type==='page'){
             $match = false;
+
+			//ENSURE ORIGINAL POST HAS CORRECT CONTENT AUTHOR SET I.E. MATCHES CURRENT USER
+			if($post->post_parent == 0){
+				remove_action('save_post', array($this, 'save_post'),10, 3);
+				$data = array('ID' => $post_id, 'post_author' => get_current_user_id());
+				wp_update_post($data);
+				add_action('save_post', array($this, 'save_post'),10, 3);
+			}
 
             //DELETE ALL META DATA FOR TEAMS
             delete_post_meta($post_id, 'rpg-team');
