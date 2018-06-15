@@ -201,17 +201,17 @@
             </div>
         </div>
     </div>
-	<div class="content-two-col">
+	<div class="cta-boxes">
         <div class="section-intro">
             <h2><?php echo esc_html($sub_cont_heading); ?></h2>
             <p><?php echo esc_html($sub_cont_intro); ?></p>
         </div>
-        <div class="content-two-col__inner">
+        <div class="cta-boxes__inner">
 			<?php $drivers = get_post_meta($post_id, 'sub_content_driver', true);
 			if($drivers):
 				for ($j=0;$j<$drivers;$j++) { ?>
-				<div class="content-two-col__<?php echo (($j === 0) ? 'first' : 'last'); ?>">
-					<div class="cta cta--blog">
+				<div class="cta-boxes__item">
+					<div class="cta">
 						<img class="cta__img" src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'sub_content_driver_'.$j.'_image', true), 'large')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'sub_content_driver_'.$j.'_image', true), '_wp_attachment_image_alt', true); ?>">
 						<div class="cta__content">
 							<h3 class="cta__title"><a href="<?php echo esc_html(get_post_meta($post_id, 'sub_content_driver_'.$j.'_link', true)); ?>"><?php echo esc_html(get_post_meta($post_id, 'sub_content_driver_'.$j.'_headline', true)); ?></a></h3>
