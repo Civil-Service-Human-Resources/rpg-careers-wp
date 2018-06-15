@@ -175,30 +175,18 @@
         </div>
     </div>
 </div>
-<div class="content-three-col">
-	<div class="content-three-col__inner">
+<div class="cta-boxes">
+	<div class="cta-boxes__inner">
 	<?php $sub_items = get_post_meta($post_id, 'sub_repeater_items', true);
-	if($sub_items):
-		for ($j=0;$j<$sub_items;$j++) { 
-			switch($j){
-				case 0:
-					echo '<div class="content-three-col__first">';
-					break;
-				case 1:
-					echo '<div class="content-three-col__middle">';
-					break;
-				default:
-					echo '<div class="content-three-col__last">';
-					break;
-			}
-		?>
-		<div class="cta cta--blog">
-			<img class="cta__img" src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_image', true), 'medium')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_image', true), '_wp_attachment_image_alt', true); ?>">
-			<div class="cta__content">
-				<h3 class="cta__title"><a href="<?php echo esc_html(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_heading_target', true)); ?>"><?php echo esc_html(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_heading', true)); ?></a></h3>
-				<p><?php echo esc_html(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_body', true)); ?></p>
+	if($sub_items): ?>
+		<div class="cta-boxes__item">
+			<div class="cta">
+				<img class="cta__img" src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_image', true), 'medium')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_image', true), '_wp_attachment_image_alt', true); ?>">
+				<div class="cta__content">
+					<h3 class="cta__title"><a href="<?php echo esc_html(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_heading_target', true)); ?>"><?php echo esc_html(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_heading', true)); ?></a></h3>
+					<p><?php echo esc_html(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_body', true)); ?></p>
+				</div>
 			</div>
-		</div>
 		</div>
 	<?php } ?>
 	<?php endif; ?>
