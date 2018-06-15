@@ -104,19 +104,19 @@ class rpgnonauthpreview{
 	}
 
 	function nonce_tick() {
-		$nonce_life = apply_filters('rpg_nonce_life', 60 * 60 * 48); //48 hours
+		$nonce_life = PREVIEW_LINK_DURATION;
 		return ceil(time() / ($nonce_life / 2));
 	}
 
 	function rpg_verify_nonce($nonce, $action = -1) {
 		$i = $this->nonce_tick();
 
-		//NONCE GENERATED 0-12 HOURS AGO
+		//NONCE GENERATED BETWEEN START AND MID POINT OF NONCE LIFE
 		if (substr(wp_hash($i . $action, 'nonce'), -12, 10) == $nonce) {
 			return true;
 		}
 
-		//NONCE GENERATED 12-24 HOURS AGO
+		//NONCE GENERATED MID POINT AND END OF NONCE LIFE
 		if (substr(wp_hash(($i - 1) . $action, 'nonce'), -12, 10) == $nonce) {
 			return true;
 		}
