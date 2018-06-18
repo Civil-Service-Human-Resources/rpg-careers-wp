@@ -178,7 +178,8 @@
 <div class="cta-boxes">
 	<div class="cta-boxes__inner">
 	<?php $sub_items = get_post_meta($post_id, 'sub_repeater_items', true);
-	if($sub_items): ?>
+	if($sub_items): 
+		for ($j=0;$j<$sub_items;$j++) { ?>
 		<div class="cta-boxes__item">
 			<div class="cta">
 				<img class="cta__img" src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_image', true), 'medium')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'sub_repeater_items_'.$j.'_image', true), '_wp_attachment_image_alt', true); ?>">
@@ -188,6 +189,7 @@
 				</div>
 			</div>
 		</div>
+	<?php } ?>
 	<?php endif; ?>
 	</div>
 </div>
