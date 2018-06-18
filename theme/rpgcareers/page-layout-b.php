@@ -188,7 +188,6 @@
 				</div>
 			</div>
 		</div>
-	<?php } ?>
 	<?php endif; ?>
 	</div>
 </div>
