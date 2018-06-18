@@ -32,8 +32,9 @@ class rpgrestrictlogin{
 			'transient_name'	 => 'rpg_restrict_login_',
         );
 
-		add_filter('authenticate', array( $this, 'check_attempted_login' ), 30, 3);
-        add_action('wp_login_failed', array( $this, 'login_failed' ), 10, 1);
+		add_filter('authenticate', array($this, 'check_attempted_login'), 30, 3);
+		add_action('wp_login_failed', array($this, 'login_failed'), 10, 1);
+		add_action('wp_login', array($this, 'login_success'), 10, 2);
     }
 
 	public function check_attempted_login($user, $username, $password) {
@@ -71,6 +72,12 @@ class rpgrestrictlogin{
 				set_transient($trans_name, $datas, $this->settings['lockout_duration']);
 			}
 		}
+	}
+
+	public function login_success($user_login, $user) {
+		$trans_name = $this->settings['transient_name'].$user->ID;
+		//REMOVE TRANSIENT AS SUCCESSFULLY LOGGED IN
+		delete_transient($trans_name);
 	}
 }
 
