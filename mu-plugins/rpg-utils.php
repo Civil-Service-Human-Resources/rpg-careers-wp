@@ -370,15 +370,21 @@ class rpgutils{
 		remove_meta_box('task_dashboard', 'dashboard', 'normal');
 		add_action('admin_footer', array($this,'tweak_dashboard_js'));
 
+		remove_action('register_new_user', 'wp_send_new_user_notifications');
+		remove_action('edit_user_created_user', 'wp_send_new_user_notifications', 10, 2);
+
         //***START: KEEP AT BOTTOM OF FUNCTION***
         //NB: KEEP AT BOTTOM OF FUNCTION AS A FEW return STATEMENTS TO BE CAREFUL OF
         global $pagenow;
-        if ($pagenow!=='profile.php' && $pagenow!=='user-edit.php') {
+        if ($pagenow!=='profile.php' && $pagenow!=='user-edit.php' && $pagenow!=='user-new.php') {
             return;
         }
  
         //IF CURRENT USER CAN CREATE USERS THEN DO NOT AMEND THE SCREEN
         if (current_user_can('create_users')) {
+			if($pagenow=='user-new.php'){
+				add_action('admin_footer', array($this,'amend_user_new_fields_js'));
+			}
             return;
         }
  
@@ -1326,7 +1332,13 @@ switch ($post_status) {
     ?>
 <script type="text/javascript">jQuery(document).ready(function($){var a=jQuery("h3:contains('Relationships')").next('.form-table').find('tr').has('td'); b=a.find('input[type="checkbox"]'),c=a.find('a');if(b){b.each(function(){$(this).attr('disabled','disabled');});}if(c){c.each(function(){$(this).attr('style','display:none');});}});</script>
     <?php
-    }
+	}
+	
+	function amend_user_new_fields_js(){
+	?>
+<script type="text/javascript">jQuery(document).ready(function($){jQuery('#send_user_notification').parents('tr').remove();});</script>
+	<?php
+	}
 
 	function tweak_dashboard_js(){
 		global $pagenow;

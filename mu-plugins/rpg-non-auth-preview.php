@@ -77,8 +77,10 @@ class rpgnonauthpreview{
 			exit;
 		}
 
-		if (!$post_status_obj->name == 'draft')
-			return $posts;
+		if ($post_status_obj != null) {
+			if (!$post_status_obj->name == 'draft')
+				return $posts;
+		}
 
 		if (!$this->rpg_verify_nonce($_GET['rpg_nap_nonce'], 'rpg_nap_nonce-'. $posts[0]->ID)) {
 			return $posts;
