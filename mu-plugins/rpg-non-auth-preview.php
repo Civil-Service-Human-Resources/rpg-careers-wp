@@ -80,6 +80,13 @@ class rpgnonauthpreview{
 		if ($post_status_obj != null) {
 			if (!$post_status_obj->name == 'draft')
 				return $posts;
+		}else{
+			//NO OBJECT - RETURN A 404
+			global $wp_query;
+  			$wp_query->set_404();
+  			status_header(404);
+  			get_template_part(404); 
+  			exit();
 		}
 
 		if (!$this->rpg_verify_nonce($_GET['rpg_nap_nonce'], 'rpg_nap_nonce-'. $posts[0]->ID)) {
