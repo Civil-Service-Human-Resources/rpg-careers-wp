@@ -56,17 +56,19 @@ class rpgnonauthpreview{
 			}
 			remove_filter('pre_get_posts', array($this,'rpg_show_preview'));
 			add_filter('posts_results', array($this,'rpg_show_draft'), 10, 2);
-		}
 
-		return $query;
+			//JUST PAGES NOT POSTS
+			$query->set('post_type', 'page');
+		}
 	}
 
 	function rpg_show_draft($posts, &$query){
 
 		remove_filter('posts_results', array($this,'rpg_show_draft' ), 10);
 
-		if (sizeof($posts) != 1)
+		if (sizeof($posts) != 1){
 			return $posts;
+		}
 
 		$post_status = get_post_status($posts[0]);
 		$post_status_obj = get_post_status_object($post_status);
@@ -78,17 +80,21 @@ class rpgnonauthpreview{
 		}
 
 		if ($post_status_obj != null) {
-			if (!$post_status_obj->name == 'draft')
-				return $posts;
+			if ($post_status_obj->name != 'draft') {
+				//VERIFY NONCE
+				if (!$this->rpg_verify_nonce($_GET['rpg_nap_nonce'], 'rpg_nap_nonce-'. $posts[0]->ID)) {
+					$this->throw404();
+				}else{
+					//SHOW THE PAGE
+					return $posts;
+				}
+			}
 		}else{
 			//NO OBJECT - RETURN A 404
-			global $wp_query;
-  			$wp_query->set_404();
-  			status_header(404);
-  			get_template_part(404); 
-  			exit();
+			$this->throw404();
 		}
 
+		//IT IS A DRAFT - VERIFY NONCE
 		if (!$this->rpg_verify_nonce($_GET['rpg_nap_nonce'], 'rpg_nap_nonce-'. $posts[0]->ID)) {
 			return $posts;
 		}
@@ -115,6 +121,14 @@ class rpgnonauthpreview{
 	function nonce_tick() {
 		$nonce_life = PREVIEW_LINK_DURATION;
 		return ceil(time() / ($nonce_life / 2));
+	}
+
+	function throw404(){
+		global $wp_query;
+		$wp_query->set_404();
+		status_header(404);
+		get_template_part(404); 
+		exit();
 	}
 
 	function rpg_verify_nonce($nonce, $action = -1) {

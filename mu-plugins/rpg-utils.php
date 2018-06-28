@@ -43,6 +43,7 @@ class rpgutils{
         //REGISTER ACTIONS/FILTERS
 		add_action('init', array($this, 'register_user_taxonomy'));
 		add_action('init', array($this, 'check_cookie_banner_cookie'));
+		add_action('init', array($this, 'register_post_statuses'));
         add_filter('login_redirect', array($this, 'login_redirect'), 10, 3);
 		add_action('login_init', array($this, 'add_autocomplete_login_init'));
 		add_action('login_form', array($this, 'add_autocomplete_login_form'));
@@ -1693,7 +1694,49 @@ switch ($post_status) {
             'plural'   => __('Teams', 'rpgutils'),
             'exclusive' => false,
        ));
-    }
+	}
+	
+	function register_post_statuses() {
+		register_post_status('pub-with-approver', array(
+            'public'                => true,
+            'exclude_from_search'   => true,
+        ));
+
+        register_post_status('pub-sign-off', array(
+            'public'                => true,
+            'exclude_from_search'   => true,
+        ));
+
+        register_post_status('del-with-approver', array(
+            'public'                => true,
+            'exclude_from_search'   => true,
+        ));
+
+        register_post_status('del-sign-off', array(
+            'public'                => true,
+            'exclude_from_search'   => true,
+        ));
+
+        register_post_status('rev-with-approver', array(
+            'public'                => true,
+            'exclude_from_search'   => true,
+        ));
+
+        register_post_status('rev-sign-off', array(
+            'public'                => true,
+            'exclude_from_search'   => true,
+        ));
+
+        register_post_status('unpub-with-approver', array(
+            'public'                => true,
+            'exclude_from_search'   => true,
+        ));
+
+        register_post_status('unpub-sign-off', array(
+            'public'                => true,
+            'exclude_from_search'   => true,
+        ));
+	}
 
 	function set_acf_json_save_point($path) {
 		$path = plugin_dir_path( __FILE__ );

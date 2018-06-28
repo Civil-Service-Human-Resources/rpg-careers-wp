@@ -28,7 +28,7 @@ class rpgonetime{
 		$this->add_roles();
 		$this->remove_hooks();
 		$this->set_date_time_format();
-		$this->set_image_sizes();
+        $this->set_image_sizes();
 		add_action('shutdown', array($this, 'unlink'), PHP_INT_MAX);
 	}
 
@@ -186,8 +186,7 @@ class rpgonetime{
 
 		update_option('image_default_align', 'center');
 		update_option('image_default_size', 'large');
-	}
-
+    }
 }
 
 function rpgonetime() {
