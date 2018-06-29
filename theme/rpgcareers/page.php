@@ -197,7 +197,7 @@
                 </div>
             </div>
             <div class="content-two-col__last">
-				<p><?php echo $cont_block_hori_extra_txt; ?></p>
+				<?php echo wpautop($cont_block_hori_extra_txt); ?>
             </div>
         </div>
     </div>
