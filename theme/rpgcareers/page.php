@@ -102,6 +102,13 @@
 		$main_cont_img_2 = wp_get_attachment_image_src($main_cont_img_2, 'large');
 	}
 
+	//THEMING
+	$post_theme = get_post_meta($post_id,'rpg-theme',true);
+
+	if($post_theme !==''){
+		$theme_colour = get_term_meta($post_theme, 'content_team_theme_colour', true);
+	}
+
 ?>
 <div class="banner">
 	<style>.banner {background-image: url(<?php echo $bill_image_src_resp[0]; ?>);}@media (min-width: 768px) {.banner {background-image: url(<?php echo $bill_image_src[0]; ?>);}}</style>
