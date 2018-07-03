@@ -1376,14 +1376,20 @@ switch ($post_status) {
 				add_action('save_post', array($this, 'save_post'),10, 3);
 			}
 
-            //DELETE ALL META DATA FOR TEAMS
-            delete_post_meta($post_id, 'rpg-team');
+            //DELETE ALL META DATA FOR TEAMS + THEME
+			delete_post_meta($post_id, 'rpg-team');
+			delete_post_meta($post_id, 'rpg-theme');
 
 			foreach($_POST as $key => $value)
             {
 				if (strstr($key, 'rpg-team')){
 					//STORE IN META DATA
                     add_post_meta($post_id, 'rpg-team', $value);
+				}
+				
+				if (strstr($key, 'rpg-theme')){
+					//STORE IN META DATA
+                    add_post_meta($post_id, 'rpg-theme', $value);
                 }
             }
 		}
@@ -1558,13 +1564,23 @@ switch ($post_status) {
                 }
             }
             add_meta_box(
-                    'rpg-teams-access',
-                    __('Teams'),
-                    array($this, 'render_meta_box'),
-                    null,
-                    'side',
-                    'high'
-                );
+				'rpg-teams-access',
+				__('Teams'),
+				array($this, 'render_meta_box'),
+				null,
+				'side',
+				'high'
+            );
+			
+			add_meta_box(
+				'rpg-team-theme',
+				__('Theme'),
+				array($this, 'render_theme_meta_box'),
+				null,
+				'side',
+				'high'
+			);
+
 
         }
     }
@@ -1623,6 +1639,38 @@ switch ($post_status) {
 
         echo $output;
         $this->bespoke_js_script();
+    }
+
+	function render_theme_meta_box($object = null, $box = null){
+		$output = '';
+		$selected = '';
+
+		$themes = get_terms(array(
+			'taxonomy' => 'content_team',
+			'hide_empty' => false,
+		));
+
+		if(!empty($themes) && !is_wp_error($themes)){
+			$post_theme = get_post_meta(get_post()->ID, 'rpg-theme');
+
+			$output = '<select name="rpg-theme">';
+			$output .= '<option value="">(no theming)</option>';
+			foreach($themes as $theme){
+				$show_theme = get_term_meta($theme->term_id, 'content_team_back_end_only', true);
+				if($show_theme === ''){
+
+					$selected = '';
+                    if(in_array($theme->term_id, $post_theme)){
+                        $selected = ' selected';
+                    }
+
+					$output .= '<option value="'. $theme->term_id . '"' . $selected . '>'. $theme->name .'</option>';
+				}
+			}
+			$output .= '</select>';
+		}
+
+        echo $output;
     }
 
     function custom_column($column_name, $post_id) {

@@ -148,6 +148,128 @@ class WP_User_Taxonomy {
 		// Cleanup stuff
 		add_action( 'delete_user',   array( $this, 'delete_term_relationships' ) );
 		add_filter( 'sanitize_user', array( $this, 'disable_username'          ) );
+
+		//EXTENDING WITH NEW TERMS
+		add_action("{$this->taxonomy}_add_form_fields", array($this, 'rpg_add_new_fields'), 10, 2);
+		add_action("{$this->taxonomy}_add_form", array($this, 'rpg_tidy_form'), 10, 2);
+		add_action("created_{$this->taxonomy}", array($this, 'rpg_save_meta'), 10, 2);
+		add_action("{$this->taxonomy}_edit_form_fields", array($this, 'rpg_edit_fields'), 10, 2);
+		add_action("{$this->taxonomy}_edit_form", array($this, 'rpg_tidy_form'), 10, 2);
+		add_action("edited_{$this->taxonomy}", array($this, 'rpg_save_updated_meta'), 10, 2);
+		add_filter("manage_edit-{$this->taxonomy}_columns", array($this, 'rpg_amend_columns'));
+		add_filter("manage_{$this->taxonomy}_custom_column", array($this, 'rpg_amend_column_content'), 10, 3);
+
+		add_action( 'admin_print_scripts-term.php', array( $this, 'rpg_enqueue_scripts' ) );
+		add_action( 'admin_print_scripts-edit-tags.php', array( $this, 'rpg_enqueue_scripts' ) );
+
+	}
+
+	function rpg_enqueue_scripts(){
+		$url = wp_user_groups_get_plugin_url();	
+		$ver = wp_user_groups_get_asset_version();
+
+		wp_enqueue_media();
+		wp_enqueue_script('wp_user_groups', $url. 'assets/user-groups.js', array('jquery'), $ver, true);
+	}
+
+	function rpg_add_new_fields($taxonomy){
+		echo '<div class="form-field form-required term-display-name-wrap"><label for="tag-display-name">Pretty</label><input name="tag-display-name" id="tag-display-name" value="" size="40" aria-required="true" type="text" maxlength="150"></div>';
+		echo '<div class="form-field form-required term-theme-colour-wrap"><label for="tag-theme-colour">Theme colour</label><input name="tag-theme-colour" id="tag-theme-colour" value="" size="10" aria-required="true" type="text" maxlength="7" style="width:15%;"></div>';
+		echo '<div class="form-field term-back-end-wrap"><label for="tag-back-end">Back end only?</label><input name="tag-back-end" id="tag-back-end" value="1" type="checkbox"></div>';
+		echo '<div class="form-field form-required term-logo-wrap"><label for="tag-logo">Logo</label><div id="tag-logo" style="margin:20px; border:1px solid #ddd; height:100px;width:100px;"></div><input type="hidden" name="tag-logo-id" id="tag-logo-id" /></div>';
+		echo '<a id="tag-choose-logo" class="button">Choose logo</a><a id="tag-remove-logo" class="button hidden">Remove logo</a><br/><br/>';
+	}
+
+	function rpg_tidy_form($taxonomy){
+		?><style>.term-description-wrap,.form-field p{display:none;}</style><?php
+	}
+
+	function rpg_save_meta($term_id, $tt_id){
+		if(isset($_POST['tag-display-name']) && '' !== $_POST['tag-display-name']){
+			$group = sanitize_text_field($_POST['tag-display-name']);
+			add_term_meta($term_id, $this->taxonomy.'_display_name', $group, true);
+		}
+
+		if(isset($_POST['tag-theme-colour']) && '' !== $_POST['tag-theme-colour']){
+			$group = sanitize_text_field($_POST['tag-theme-colour']);
+			add_term_meta($term_id, $this->taxonomy.'_theme_colour', $group, true);
+		}
+
+		if(isset($_POST['tag-back-end']) && '' !== $_POST['tag-back-end']){
+			$group = sanitize_text_field($_POST['tag-back-end']);
+			add_term_meta($term_id, $this->taxonomy.'_back_end_only', $group, true);
+		}
+
+		if(isset($_POST['tag-logo-id']) && '' !== $_POST['tag-logo-id']){
+			$group = sanitize_text_field($_POST['tag-logo-id']);
+			add_term_meta($term_id, $this->taxonomy.'_logo_id', $group, true);
+		}
+	}
+
+	function rpg_edit_fields($term, $taxonomy){
+	
+		$display_name = get_term_meta($term->term_id, $this->taxonomy.'_display_name', true);
+		$theme_colour = get_term_meta($term->term_id, $this->taxonomy.'_theme_colour', true);
+		$back_end_only = get_term_meta($term->term_id, $this->taxonomy.'_back_end_only', true);
+		$back_end_only_checked = '';
+
+		if($back_end_only == '1'){
+			$back_end_only_checked = ' checked';
+		}
+		
+		$logo_id = get_term_meta($term->term_id, $this->taxonomy.'_logo_id', true);
+		$logo_src = wp_get_attachment_image_src($logo_id);
+
+		echo '<tr class="form-field form-required term-display-name-wrap"><th scope="row"><label for="tag-display-name">Pretty</label></th><td><input name="tag-display-name" id="tag-display-name" value="'. $display_name .'" size="40" aria-required="true" type="text" maxlength="150"></td></tr>';
+		echo '<tr class="form-field form-required term-theme-colour-wrap"><th scope="row"><label for="tag-theme-colour">Theme colour</label></th><td><input name="tag-theme-colour" id="tag-theme-colour" value="'. $theme_colour .'" size="10" aria-required="true" type="text" maxlength="7" style="width:15%;"></td></tr>';
+		echo '<tr class="form-field term-back-end-only-wrap"><th scope="row"><label for="tag-back-end">Back end only?</label></th><td><input name="tag-back-end" id="tag-back-end" value="1" type="checkbox"'. $back_end_only_checked .'></td></tr>';
+		echo '<tr class="form-field form-required term-logo-wrap"><th scope="row"><label for="tag-logo">Logo</label></th><td><div id="tag-logo" style="border:1px solid #ddd; height:100px;width:100px;"><img src="'. $logo_src[0] .'" alt="" style="max-width:100%;"/></div><input type="hidden" aria-required="true" name="tag-logo-id" id="tag-logo-id" value="'. $logo_id .'" /><br/><a id="tag-choose-logo" class="button">Choose logo</a><a id="tag-remove-logo" class="button hidden">Remove logo</a></td></tr>';
+	}
+
+	function rpg_save_updated_meta($term_id, $tt_id){
+		if(isset($_POST['tag-display-name']) && '' !== $_POST['tag-display-name']){
+			$group = sanitize_text_field($_POST['tag-display-name']);
+			update_term_meta($term_id,  $this->taxonomy.'_display_name', $group);
+		}
+
+		if(isset($_POST['tag-theme-colour']) && '' !== $_POST['tag-theme-colour']){
+			$group = sanitize_text_field($_POST['tag-theme-colour']);
+			update_term_meta($term_id,  $this->taxonomy.'_theme_colour', $group);
+		}
+
+		if(isset($_POST['tag-back-end']) && '' !== $_POST['tag-back-end']){
+			$group = sanitize_text_field($_POST['tag-back-end']);
+			update_term_meta($term_id, $this->taxonomy.'_back_end_only', $group);
+		}else{
+			delete_term_meta($term_id, $this->taxonomy.'_back_end_only');
+		}
+
+		if(isset($_POST['tag-logo-id']) && '' !== $_POST['tag-logo-id']){
+			$group = sanitize_text_field($_POST['tag-logo-id']);
+			update_term_meta($term_id, $this->taxonomy.'_logo_id', $group);
+		}
+	}
+
+	function rpg_amend_columns($columns){
+		unset($columns['description']);
+		$columns['display_name'] = "Pretty";
+		return $columns;
+	}
+	
+	function rpg_amend_column_content($content, $column_name, $term_id){
+		if( $column_name !== 'display_name'){
+			return $content;
+		}
+
+		$term_id = absint($term_id);
+		$display_name = get_term_meta($term_id, $this->taxonomy.'_display_name', true);
+
+		if(!empty($display_name)){
+			$content .= esc_attr($display_name);
+		}else{
+			$content .= '-';
+		}
+		return $content;
 	}
 
 	/**
