@@ -54,7 +54,15 @@
                 "operator": "==",
                 "value": "page-layout-b.php"
             }
+        ],
+        [
+            {
+                "param": "page_template",
+                "operator": "==",
+                "value": "page-layout-c.php"
+            }
         ]
+
     ],
     "menu_order": 0,
     "position": "normal",

@@ -1,0 +1,272 @@
+{
+    "key": "group_5acc74183376z",
+    "title": "RPG Content Block With CTAs",
+    "fields": [
+        {
+            "key": "field_5acc743d07e0z",
+            "label": "Content Block with CTAs",
+            "name": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_5acc747a6352z",
+            "label": "",
+            "name": "content_block_with_cta_1",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "row",
+            "sub_fields": [
+                {
+                    "key": "field_5acc74966352z",
+                    "label": "Heading",
+                    "name": "heading",
+                    "type": "text",
+                    "instructions": "(max 70 chars)",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "maxlength": 70
+                },
+                {
+                    "key": "field_5acc74a56352z",
+                    "label": "Paragraph 1",
+                    "name": "paragraph_1",
+                    "type": "textarea",
+                    "instructions": "(max 350 chars)",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "maxlength": 350,
+                    "rows": "",
+                    "new_lines": ""
+                },
+                {
+                    "key": "field_5acc77a7d984z",
+                    "label": "Paragraph 2",
+                    "name": "paragraph_2",
+                    "type": "textarea",
+                    "instructions": "(max 350 chars)",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "maxlength": 350,
+                    "rows": "",
+                    "new_lines": ""
+                },
+                {
+                    "key": "field_5acc74bf6352z",
+                    "label": "CTA text",
+                    "name": "cta_text",
+                    "type": "text",
+                    "instructions": "(max 150 chars)",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "maxlength": 150
+                },
+                {
+                    "key": "field_5acc74e66352z",
+                    "label": "CTA target",
+                    "name": "cta_target",
+                    "type": "url",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": ""
+                }
+            ]
+        },
+        {
+            "key": "field_5acc747a6352x",
+            "label": "",
+            "name": "content_block_with_cta_2",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "row",
+            "sub_fields": [
+                {
+                    "key": "field_5acc74966352x",
+                    "label": "Heading",
+                    "name": "heading",
+                    "type": "text",
+                    "instructions": "(max 70 chars)",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "maxlength": 70
+                },
+                {
+                    "key": "field_5acc74a56352x",
+                    "label": "Paragraph 1",
+                    "name": "paragraph_1",
+                    "type": "textarea",
+                    "instructions": "(max 350 chars)",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "maxlength": 350,
+                    "rows": "",
+                    "new_lines": ""
+                },
+                {
+                    "key": "field_5acc77a7d984x",
+                    "label": "Paragraph 2",
+                    "name": "paragraph_2",
+                    "type": "textarea",
+                    "instructions": "(max 350 chars)",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "maxlength": 350,
+                    "rows": "",
+                    "new_lines": ""
+                },
+                {
+                    "key": "field_5acc74bf6352x",
+                    "label": "CTA text",
+                    "name": "cta_text",
+                    "type": "text",
+                    "instructions": "(max 150 chars)",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "maxlength": 150
+                },
+                {
+                    "key": "field_5acc74e66352x",
+                    "label": "CTA target",
+                    "name": "cta_target",
+                    "type": "url",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": ""
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "page_template",
+                "operator": "==",
+                "value": "page-layout-c.php"
+            }
+        ]
+    ],
+    "menu_order": 3,
+    "position": "normal",
+    "style": "seamless",
+    "label_placement": "top",
+    "instruction_placement": "field",
+    "hide_on_screen": [
+        "the_content",
+        "excerpt",
+        "custom_fields",
+        "discussion",
+        "comments",
+        "revisions",
+        "slug",
+        "author",
+        "format",
+        "featured_image",
+        "categories",
+        "tags",
+        "send-trackbacks"
+    ],
+    "active": 1,
+    "description": "Content block with CTAs",
+    "modified": 1531301093
+}
