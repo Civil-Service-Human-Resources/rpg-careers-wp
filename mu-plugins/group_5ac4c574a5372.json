@@ -134,6 +134,113 @@
                     "maxlength": 150
                 }
             ]
+        },
+        {
+            "key": "field_5b44adc219b8x",
+            "label": "",
+            "name": "extra_group",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "row",
+            "sub_fields": [
+                {
+                    "key": "field_5b44ae1bfce2x",
+                    "label": "Extra",
+                    "name": "extra",
+                    "type": "group",
+                    "instructions": "OPTIONAL",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "layout": "row",
+                    "sub_fields": [
+                        {
+                            "key": "field_5b44ae6b4348x",
+                            "label": "Heading",
+                            "name": "heading",
+                            "type": "text",
+                            "instructions": "(max 80 chars)",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "default_value": "",
+                            "placeholder": "",
+                            "prepend": "",
+                            "append": "",
+                            "maxlength": 80
+                        },
+                        {
+                            "key": "field_5b44ae2afce2x",
+                            "label": "Body",
+                            "name": "body",
+                            "type": "wysiwyg",
+                            "instructions": "",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "default_value": "",
+                            "tabs": "visual",
+                            "toolbar": "basic",
+                            "media_upload": 0,
+                            "delay": 1
+                        },
+                        {
+                            "key": "field_5b44ae8a4348x",
+                            "label": "Link text",
+                            "name": "target_text",
+                            "type": "text",
+                            "instructions": "(max 150 chars)",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "default_value": "",
+                            "placeholder": "",
+                            "prepend": "",
+                            "append": "",
+                            "maxlength": 150
+                        },
+                        {
+                            "key": "field_5b44ae734348x",
+                            "label": "Link",
+                            "name": "target",
+                            "type": "url",
+                            "instructions": "",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "default_value": "",
+                            "placeholder": ""
+                        }
+                    ]
+                }
+            ]
         }
     ],
     "location": [
@@ -169,6 +276,13 @@
             {
                 "param": "page_template",
                 "operator": "==",
+                "value": "page-layout-c.php"
+            }
+        ],
+        [
+            {
+                "param": "page_template",
+                "operator": "==",
                 "value": "page-hub-listing.php"
             }
         ]
@@ -195,5 +309,5 @@
     ],
     "active": 1,
     "description": "Content block vertically stacked",
-    "modified": 1524557300
+    "modified": 1531310160
 }
