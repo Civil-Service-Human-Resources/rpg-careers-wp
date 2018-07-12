@@ -37,6 +37,7 @@
 	$main_cont_para_1 = get_post_meta($post_id,'main_content_paragraph_1',true);
 	$main_cont_para_2 = get_post_meta($post_id,'main_content_paragraph_2',true);
 	$main_cont_para_3 = get_post_meta($post_id,'main_content_paragraph_3',true);
+	$main_cont_para_4 = get_post_meta($post_id,'main_content_paragraph_4',true);
 	$main_cont_img_1 = intval(get_post_meta($post_id,'main_content_image_1',true));
 	$main_cont_img_2 = intval(get_post_meta($post_id,'main_content_image_2',true));
 	$image_ids[] = $main_cont_img_1;
@@ -138,7 +139,10 @@
             <?php if($main_cont_img_1) { ?>
 			<div class="image image--spaced"><img src="<?php echo $main_cont_img_1[0]; ?>" alt="<?php echo $main_cont_img_1_alt; ?>"></div>
 			<?php } ?>
-            <p><?php echo esc_html($main_cont_para_3); ?></p>
+			<p><?php echo esc_html($main_cont_para_3); ?></p>
+			<?php if($main_cont_para_4) { ?>
+			<p><?php echo $main_cont_para_4; ?></p>
+			<?php } ?>
         </div>
         <div class="content-two-col__last">
             <div class="aside aside--img-top">
