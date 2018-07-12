@@ -53,9 +53,11 @@
 <div id="global-cookie-message"<?php global $cookie_banner_set; if($cookie_banner_set){ echo ' style="display:block;"';}?>><p>GOV.UK uses cookies to make the site simpler. <a href="<?php echo get_site_url(); ?>/cookies">Find out more about cookies</a></p></div>
 <header class="masthead" role="banner">
 	<div class="masthead__brand">
+		<a href="<?php echo get_site_url(); ?>">
 		<span class="logo logo--horizontal">
 			<span class="logo__text">Civil Service</span>
 		</span>
+		</a>
 		<span class="masthead__brand-text">Careers</span>
 	</div>
 	<nav role="navigation" aria-label="site" class="masthead__nav">
