@@ -10,7 +10,10 @@
 	$bill_logo_text = get_post_meta($post_id,'billboard_logo_text',true);
 	$bill_logo_src = intval(get_post_meta($post_id,'billboard_logo',true));
 	$bill_heading = get_post_meta($post_id,'billboard_heading',true);
-	$bill_intro = get_post_meta($post_id,'billboard_intro_text',true);
+	$bill_intro_para_1 = get_post_meta($post_id,'billboard_paragraph_1',true);
+	$bill_intro_para_2 = get_post_meta($post_id,'billboard_paragraph_2',true);
+	$bill_intro_para_3 = get_post_meta($post_id,'billboard_paragraph_3',true);
+	$bill_intro_para_4 = get_post_meta($post_id,'billboard_paragraph_4',true);
 	$bill_image_src = intval(get_post_meta($post_id,'billboard_image',true));
 	$bill_image_src_resp = '';
 
@@ -32,7 +35,7 @@
 	$cont_block_vert_extra_link_target = get_post_meta($post_id,'extra_group_extra_target',true);
 
 	$sub_cont_heading = get_post_meta($post_id,'sub_content_heading',true);
-	$sub_cont_body = get_post_meta($post_id,'sub_content_body',true);
+	$sub_cont_body = wpautop(get_post_meta($post_id,'sub_content_body',true));
 	$sub_cont_image_1 = intval(get_post_meta($post_id,'sub_content_image_1',true));
 	$sub_cont_image_1_alt = get_post_meta($sub_cont_image_1, '_wp_attachment_image_alt', true);
 	$sub_cont_image_2 = intval(get_post_meta($post_id,'sub_content_image_2',true));
@@ -73,28 +76,50 @@
 	<style>.banner {background-image: url(<?php echo $bill_image_src_resp[0]; ?>);}@media (min-width: 768px) {.banner {background-image: url(<?php echo $bill_image_src[0]; ?>);}}</style>
 </div>
 <main id="content" role="main">
-<div class="department-intro">
-    <div class="department-intro__inner">
-        <div class="department-intro__head">
-            <div class="department-intro__head-logo">
-                <span class="logo" style="background-image:url(<?php echo $bill_logo_src[0]; ?>);">
-                <span class="logo__text"><?php echo esc_html($bill_logo_text); ?></span>
-            </span>
-            </div>
-            <h1 class="department-intro__head-title"><?php echo esc_html($bill_heading); ?></h1>
-        </div>
-		<div class="department-intro__content">
-			<p class="intro"><?php echo esc_html($bill_intro); ?></p>
+<div class="about-intro">
+	<div class="department-intro">
+		<div class="department-intro__inner">
+			<div class="department-intro__head">
+				<div class="department-intro__head-logo">
+					<span class="logo" style="background-image:url(<?php echo $bill_logo_src[0]; ?>);">
+					<span class="logo__text"><?php echo esc_html($bill_logo_text); ?></span>
+				</span>
+				</div>
+				<h1 class="department-intro__head-title"><?php echo esc_html($bill_heading); ?></h1>
+			</div>
+			<div class="department-intro__content"></div>
 		</div>
-    </div>
+	</div>
+	<div class="content-two-col content-two-col--stacked-left">
+		<div class="content-two-col__inner">
+			<div class="content-two-col__first">
+				<p class="intro"><?php echo esc_html($bill_intro_para_1); ?></p>
+				<p class="intro"><?php echo esc_html($bill_intro_para_2); ?></p>
+			</div>
+			<div class="content-two-col__last">
+				<p class="intro"><?php echo esc_html($bill_intro_para_3); ?></p>
+				<?php if($bill_intro_para_4 !== ''){ ?>
+					<p class="intro"><?php echo esc_html($bill_intro_para_4); ?></p>
+				<?php } ?>
+			</div>
+		</div>
+	</div>	
 </div>
-<iframe width="560" height="315" src="<?php echo esc_html($media_embed_link); ?>" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-<?php 
-	echo $media_embed_quote;
-	echo $media_embed_cta_text;
-	echo $media_embed_cta_link;
-?>
-
+<div class="wrapper wrapper--white">
+	<div class="content-two-col content-two-col--middle-align">
+		<div class="content-two-col__inner">
+			<div class="content-two-col__first">
+				<div class="image image--spaced">
+					<iframe width="480" height="235" src="<?php echo esc_html($media_embed_link); ?>" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+				</div>
+			</div>
+			<div class="content-two-col__last">
+				<blockquote><p class="intro"><?php echo esc_html($media_embed_quote); ?></p></blockquote>
+				<p class="intro"><a href="<?php echo esc_html($media_embed_cta_link); ?>" class="cta--arrow-link"><?php echo esc_html($media_embed_cta_text); ?></a></p>
+			</div>
+		</div>
+	</div>
+</div>
 <div class="content-two-col content-two-col--stacked-left">
     <div class="content-two-col__inner">
         <div class="content-two-col__first">
@@ -126,47 +151,46 @@ if($main_repeaters): ?>
                         <footer><?php echo esc_html($cont_block_vert_forename); ?> <?php echo esc_html($cont_block_vert_surname); ?><strong><?php echo esc_html($cont_block_vert_role); ?></strong></footer>
                     </blockquote>
 					<?php if($cont_block_vert_extra_heading !== ''){ ?>
-					<h2><?php echo esc_html($cont_block_vert_extra_heading); ?></h2>
+					<div class="aside--sub">
+					<h3 class="intro"><?php echo esc_html($cont_block_vert_extra_heading); ?></h3>
 					<?php echo $cont_block_vert_extra_body; ?>
-					<a href="<?php echo esc_html($cont_block_vert_extra_link_target); ?>"><?php echo esc_html($cont_block_vert_extra_link_text); ?></a>
+					<a href="<?php echo esc_html($cont_block_vert_extra_link_target); ?>" class="cta--arrow-link"><?php echo esc_html($cont_block_vert_extra_link_text); ?></a>
+					</div>
 					<?php } ?>
                 </div>
+			</div>
+			<div class="image">
+				<img src="<?php echo $sub_cont_image_1[0]; ?>" alt="<?php echo esc_html($sub_cont_image_1_alt); ?>">
             </div>
-			<div class="aside aside--img-top">
-                <div class="aside__inner">
-					<img src="<?php echo $sub_cont_image_1[0]; ?>" alt="<?php echo esc_html($sub_cont_image_1_alt); ?>">
-					<h2><?php echo esc_html($sub_cont_heading); ?></h2>
+			<div class="aside aside--white">
+				<div class="aside__inner">
+					<h3 class="intro"><?php echo esc_html($sub_cont_heading); ?></h3>
 					<?php echo $sub_cont_body; ?>
-					<img src="<?php echo $sub_cont_image_2[0]; ?>" alt="<?php echo esc_html($sub_cont_image_2_alt); ?>">
-                </div>
-            </div>
+					<div class="image">
+						<img src="<?php echo $sub_cont_image_2[0]; ?>" alt="<?php echo esc_html($sub_cont_image_2_alt); ?>">
+					</div>
+				</div>
+			</div>
         </div>
     </div>
 </div>
-<div class="cta-boxes">
-	<div class="cta-boxes__inner">
-		<div class="cta-boxes__item">
-			<div class="cta">
-				<div class="cta__content">
-					<h3 class="cta__title"><?php echo esc_html($content_block_with_cta_1_heading); ?></h3>
-					<p><?php echo esc_html($content_block_with_cta_1_para_1); ?></p>
-					<p><?php echo esc_html($content_block_with_cta_1_para_2); ?></p>
-					<a href="<?php echo esc_html($content_block_with_cta_1_cta_target); ?>"><?php echo esc_html($content_block_with_cta_1_cta_text); ?></a>
-				</div>
+<div class="wrapper wrapper--grey">
+	<div class="content-two-col content-two-col--middle-align">
+		<div class="content-two-col__inner">
+			<div class="content-two-col__equal">
+				<h3 class="intro"><?php echo esc_html($content_block_with_cta_1_heading); ?></h3>
+				<p><?php echo esc_html($content_block_with_cta_1_para_1); ?></p>
+				<p><?php echo esc_html($content_block_with_cta_1_para_2); ?></p>
+				<a href="<?php echo esc_html($content_block_with_cta_1_cta_target); ?>" class="cta--arrow-link"><?php echo esc_html($content_block_with_cta_1_cta_text); ?></a>
 			</div>
-		</div>
-		<div class="cta-boxes__item">
-			<div class="cta">
-			<div class="cta__content">
-					<h3 class="cta__title"><?php echo esc_html($content_block_with_cta_2_heading); ?></h3>
-					<p><?php echo esc_html($content_block_with_cta_2_para_1); ?></p>
-					<p><?php echo esc_html($content_block_with_cta_2_para_2); ?></p>
-					<a href="<?php echo esc_html($content_block_with_cta_2_cta_target); ?>"><?php echo esc_html($content_block_with_cta_2_cta_text); ?></a>
-				</div>
+			<div class="content-two-col__equal">
+				<h3 class="intro"><?php echo esc_html($content_block_with_cta_2_heading); ?></h3>
+				<p><?php echo esc_html($content_block_with_cta_2_para_1); ?></p>
+				<p><?php echo esc_html($content_block_with_cta_2_para_2); ?></p>
+				<a href="<?php echo esc_html($content_block_with_cta_2_cta_target); ?>" class="cta--arrow-link"><?php echo esc_html($content_block_with_cta_2_cta_text); ?></a>
 			</div>
 		</div>
 	</div>
 </div>
-
 <?php
 get_footer();
