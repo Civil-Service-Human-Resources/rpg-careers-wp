@@ -25,8 +25,6 @@
 	$cont_block_hori_image_alt = '';
 
 	$bill_logo_text = get_post_meta($post_id,'billboard_logo_text',true);
-	$bill_logo_src = intval(get_post_meta($post_id,'billboard_logo',true));
-	$image_ids[] = $bill_logo_src;
 	$bill_heading = get_post_meta($post_id,'billboard_heading',true);
 	$bill_intro = get_post_meta($post_id,'billboard_intro_text',true);
 	$bill_image_src = intval(get_post_meta($post_id,'billboard_image',true));
@@ -82,9 +80,6 @@
 	}
 
 	//GET IMAGE SRC
-	if ($bill_logo_src) {
-		$bill_logo_src = wp_get_attachment_image_src($bill_logo_src, 'full');
-	}
 	if ($bill_image_src) {
 		$bill_image_src_resp = $bill_image_src;
 		$bill_image_src = wp_get_attachment_image_src($bill_image_src, 'full');
@@ -105,9 +100,39 @@
 
 	//THEMING
 	$post_theme = get_post_meta($post_id,'rpg-theme',true);
+	$logo_band = '';
+	$logo_src = '';
+	$theme_display_name = '';
+	$theme_display_name_2 = '';
+	$theme_display_name_3 = '';
 
 	if($post_theme !==''){
-		$theme_colour = get_term_meta($post_theme, 'content_team_theme_colour', true);
+		//BACK END ONLY?
+		$back_end = get_term_meta($post_theme, 'content_team_back_end_only', true);
+
+		if($back_end === ''){
+			$theme_colour = get_term_meta($post_theme, 'content_team_theme_colour', true);
+			if($theme_colour !==''){
+				$logo_band = ' border-left-color:' . $theme_colour . ';';
+			}
+
+			$theme_logo = intval(get_term_meta($post_theme, 'content_team_logo_id', true));
+
+			if($theme_logo !==''){
+				$theme_logo = wp_get_attachment_image_src($theme_logo, 'full');
+				
+				if($theme_logo){
+					$logo_src = 'background-image:url(' . $theme_logo[0] . ');';		
+				}
+			}
+
+			$theme_display_name = get_term_meta($post_theme, 'content_team_display_name', true);
+			$theme_display_name_2 = get_term_meta($item_theme, 'content_team_display_name_2', true);
+			$theme_display_name_3 = get_term_meta($item_theme, 'content_team_display_name_3', true);
+			if($theme_display_name ===''){
+				$theme_display_name = 'THEME NOT SET';
+			}
+		}
 	}
 
 ?>
@@ -119,8 +144,8 @@
     <div class="department-intro__inner">
         <div class="department-intro__head">
             <div class="department-intro__head-logo">
-                <span class="logo" style="background-image:url(<?php echo $bill_logo_src[0]; ?>);">
-                <span class="logo__text"><?php echo esc_html($bill_logo_text); ?></span>
+                <span class="logo" style="<?php echo $logo_src; echo $logo_band; ?>">
+                <span class="logo__text"><?php echo esc_html($theme_display_name).' '.esc_html($theme_display_name_2).' '.esc_html($theme_display_name_3); ?></span>
             </span>
             </div>
             <h1 class="department-intro__head-title"><?php echo esc_html($bill_heading); ?></h1>
@@ -139,7 +164,7 @@
             <?php if($main_cont_img_1) { ?>
 			<div class="image image--spaced"><img src="<?php echo $main_cont_img_1[0]; ?>" alt="<?php echo $main_cont_img_1_alt; ?>"></div>
 			<?php } ?>
-			<p><?php echo esc_html($main_cont_para_3); ?></p>
+            <p><?php echo esc_html($main_cont_para_3); ?></p>
 			<?php if($main_cont_para_4) { ?>
 			<p><?php echo $main_cont_para_4; ?></p>
 			<?php } ?>
