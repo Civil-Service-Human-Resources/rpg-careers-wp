@@ -37,8 +37,8 @@
                     "key": "field_5ac4d0a0f95dx",
                     "label": "Media link",
                     "name": "media_link",
-                    "type": "text",
-                    "instructions": "(max 450 chars)",
+                    "type": "url",
+                    "instructions": "",
                     "required": 1,
                     "conditional_logic": 0,
                     "wrapper": {
@@ -47,10 +47,7 @@
                         "id": ""
                     },
                     "default_value": "",
-                    "placeholder": "",
-                    "prepend": "",
-                    "append": "",
-                    "maxlength": 450
+                    "placeholder": ""
                 },
                 {
                     "key": "field_5ac4d77670508",
