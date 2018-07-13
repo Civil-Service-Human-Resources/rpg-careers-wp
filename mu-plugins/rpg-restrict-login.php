@@ -300,8 +300,31 @@ class rpgrestrictlogin{
 	public function generate_and_email_token($user) {
 		$token = $this->generate_token($user->ID);
 		
-		//TODO: SEND TOKEN TO USER EMAIL ADDRESS ($user->user_email)
-		echo $token;
+		$data = array('email' => $user->user_email, 'templateID' => AUTH_EXTEND_TOKEN_TEMPLATE, 'notifyCode' => $token);
+		$data_string = json_encode($data);       
+																															 
+		$ch = curl_init(AUTH_EXTEND_TOKEN_SEND);                                                                      
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');                                                                     
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);                                                                  
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  
+		curl_setopt($ch, CURLOPT_TIMEOUT, 30);   
+		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+		curl_setopt($ch, CURLOPT_USERPWD, AUTH_EXTEND_TOKEN_AUTH_A . ':' . AUTH_EXTEND_TOKEN_AUTH_B);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);  
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);                                                                
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(                                                                          
+			'Content-Type: application/json',                                                                                
+			'Content-Length: ' . strlen($data_string))                                                                       
+		);                                                                                                                   
+		
+		$errors = curl_error($ch);
+		$result = curl_exec($ch);
+		$returnCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	
+		//TODO: HOW TO HANDLE ERRORS
+		curl_close($ch);
+
+	
 	}
 
 	public function pre_process_authentication($user) {
