@@ -50,19 +50,58 @@ get_header(); ?>
 				if($list_items):
 				for ($i=0;$i<$list_items;$i++) { ?>
 					<div class="text-image-list__item">
+					<?php 
+					$item_theme = get_post_meta($post_id, 'list_repeater_items_'.$i.'_team', true);
+					$logo_band = '';
+					$logo_src = '';
+					$theme_display_name = '';
+					$theme_display_name_2 = '';
+					$theme_display_name_3 = '';
+
+					if($item_theme !==''){
+						//BACK END ONLY?
+						$back_end = get_term_meta($item_theme, 'content_team_back_end_only', true);
+				
+						if($back_end === ''){
+							$theme_colour = get_term_meta($item_theme, 'content_team_theme_colour', true);
+							if($theme_colour !==''){
+								$logo_band = ' border-left-color:' . $theme_colour . ';';
+							}
+				
+							$theme_logo = intval(get_term_meta($item_theme, 'content_team_logo_id', true));
+				
+							if($theme_logo !==''){
+								$theme_logo = wp_get_attachment_image_src($theme_logo, 'full');
+								
+								if($theme_logo){
+									$logo_src = 'background-image:url(' . $theme_logo[0] . ');';		
+								}
+							}
+				
+							$theme_display_name = get_term_meta($item_theme, 'content_team_display_name', true);
+							$theme_display_name_2 = get_term_meta($item_theme, 'content_team_display_name_2', true);
+							$theme_display_name_3 = get_term_meta($item_theme, 'content_team_display_name_3', true);
+
+							if($theme_display_name ===''){
+								$theme_display_name = 'THEME NOT SET';
+							}
+						}
+					}
+					?>
 						<div class="text-image-list__img">
 							<img src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'list_repeater_items_'.$i.'_image', true), 'medium_large')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'list_repeater_items_'.$i.'_image', true), '_wp_attachment_image_alt', true); ?>">
 						</div>
 						<div class="text-image-list__logo">
-							<span class="logo logo--small" style="background-image:url(<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'list_repeater_items_'.$i.'_logo', true), 'full')[0]; ?>);">
-								<span class="logo__text"><?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_logo_text_line_1', true)); ?>
+							<span class="logo logo--small"  style="<?php echo $logo_src; echo $logo_band; ?>">
+								<span class="logo__text"><?php echo esc_html($theme_display_name); ?>
 								<?php 
-								if (metadata_exists('post', $post_id, 'list_repeater_items_'.$i.'_logo_text_line_2')) {
-									echo '<br/>'.esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_logo_text_line_2', true));
+								if ($theme_display_name_2 !== '') {
+									echo '<br/>'.esc_html($theme_display_name_2);
 								}
-								if (metadata_exists('post', $post_id, 'list_repeater_items_'.$i.'_logo_text_line_3')) {
-									echo '<br/>'.esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_logo_text_line_3', true));
-								} ?>
+								if ($theme_display_name_3 !== '') {
+									echo '<br/>'.esc_html($theme_display_name_3);
+								}
+								?>
 								</span>
 							</span>
 						</div>

@@ -53,85 +53,26 @@
                     "button_label": "Add item",
                   "sub_fields": [
                     {
-                      "key": "field_5adeeeab1d120",
-                      "label": "Logo",
-                      "name": "logo",
-                      "type": "image",
-                      "instructions": "",
-                      "required": 1,
-                      "conditional_logic": 0,
-                      "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                      },
-                      "return_format": "url",
-                      "preview_size": "thumbnail",
-                      "library": "all",
-                      "min_width": "",
-                      "min_height": "",
-                      "min_size": "",
-                      "max_width": "",
-                      "max_height": "",
-                      "max_size": "",
-                      "mime_types": ""
-                    },
-                    {
-                      "key": "field_5adef0486f439",
-                      "label": "Logo text line 1",
-                      "name": "logo_text_line_1",
-                      "type": "text",
-                      "instructions": "(max 25 chars)",
-                      "required": 1,
-                      "conditional_logic": 0,
-                      "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                      },
-                      "default_value": "",
-                      "placeholder": "",
-                      "prepend": "",
-                      "append": "",
-                      "maxlength": 25
-                    },
-                    {
-                      "key": "field_5adef0e16f43a",
-                      "label": "Logo text line 2",
-                      "name": "logo_text_line_2",
-                      "type": "text",
-                      "instructions": "OPTIONAL\r\n(max 25 chars)",
-                      "required": 0,
-                      "conditional_logic": 0,
-                      "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                      },
-                      "default_value": "",
-                      "placeholder": "",
-                      "prepend": "",
-                      "append": "",
-                      "maxlength": 25
-                    },
-                    {
-                      "key": "field_5adef10e6f43b",
-                      "label": "Logo text line 3",
-                      "name": "logo_text_line_3",
-                      "type": "text",
-                      "instructions": "OPTIONAL\r\n(max 25 chars)",
-                      "required": 0,
-                      "conditional_logic": 0,
-                      "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                      },
-                      "default_value": "",
-                      "placeholder": "",
-                      "prepend": "",
-                      "append": "",
-                      "maxlength": 25
+                        "key": "field_5b48a37b55eyy",
+                        "label": "Team",
+                        "name": "team",
+                        "type": "taxonomy",
+                        "instructions": "",
+                        "required": 1,
+                        "conditional_logic": 0,
+                        "wrapper": {
+                            "width": "",
+                            "class": "",
+                            "id": ""
+                        },
+                        "taxonomy": "content_team",
+                        "field_type": "select",
+                        "allow_null": 0,
+                        "add_term": 0,
+                        "save_terms": 1,
+                        "load_terms": 1,
+                        "return_format": "id",
+                        "multiple": 0
                     },
                     {
                       "key": "field_5adeee731d11e",
