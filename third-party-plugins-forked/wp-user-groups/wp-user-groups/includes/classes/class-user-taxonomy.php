@@ -174,8 +174,8 @@ class WP_User_Taxonomy {
 
 	function rpg_add_new_fields($taxonomy){
 		echo '<div class="form-field form-required term-display-name-wrap"><label for="tag-display-name">Pretty Line 1</label><input name="tag-display-name" id="tag-display-name" value="" size="40" aria-required="true" type="text" maxlength="150"></div>';
-		echo '<div class="form-field term-display-name-2-wrap"><label for="tag-display-name">Pretty Line 2 (OPTIONAL)</label><input name="tag-display-name-2" id="tag-display-name-2" value="" size="40" aria-required="true" type="text" maxlength="150"></div>';
-		echo '<div class="form-field term-display-name-3-wrap"><label for="tag-display-name">Pretty Line 3 (OPTIONAL)</label><input name="tag-display-name-3" id="tag-display-name-3" value="" size="40" aria-required="true" type="text" maxlength="150"></div>';
+		echo '<div class="form-field term-display-name-2-wrap"><label for="tag-display-name-2">Pretty Line 2 (OPTIONAL)</label><input name="tag-display-name-2" id="tag-display-name-2" value="" size="40" aria-required="true" type="text" maxlength="150"></div>';
+		echo '<div class="form-field term-display-name-3-wrap"><label for="tag-display-name-3">Pretty Line 3 (OPTIONAL)</label><input name="tag-display-name-3" id="tag-display-name-3" value="" size="40" aria-required="true" type="text" maxlength="150"></div>';
 		echo '<div class="form-field form-required term-theme-colour-wrap"><label for="tag-theme-colour">Theme colour</label><input name="tag-theme-colour" id="tag-theme-colour" value="" size="10" aria-required="true" type="text" maxlength="7" style="width:15%;"></div>';
 		echo '<div class="form-field term-back-end-wrap"><label for="tag-back-end">Back end only?</label><input name="tag-back-end" id="tag-back-end" value="1" type="checkbox"></div>';
 		echo '<div class="form-field form-required term-logo-wrap"><label for="tag-logo">Logo</label><div id="tag-logo" style="margin:20px; border:1px solid #ddd; height:100px;width:100px;"></div><input type="hidden" name="tag-logo-id" id="tag-logo-id" /></div>';
@@ -235,8 +235,8 @@ class WP_User_Taxonomy {
 		$logo_src = wp_get_attachment_image_src($logo_id);
 
 		echo '<tr class="form-field form-required term-display-name-wrap"><th scope="row"><label for="tag-display-name">Pretty Line 1</label></th><td><input name="tag-display-name" id="tag-display-name" value="'. $display_name .'" size="40" aria-required="true" type="text" maxlength="150"></td></tr>';
-		echo '<tr class="form-field term-display-name-wrap"><th scope="row"><label for="tag-display-name">Pretty Line 2 (OPTIONAL)</label></th><td><input name="tag-display-name-2" id="tag-display-name-2" value="'. $display_name_2 .'" size="40" aria-required="true" type="text" maxlength="150"></td></tr>';
-		echo '<tr class="form-field term-display-name-wrap"><th scope="row"><label for="tag-display-name">Pretty Line 3 (OPTIONAL)</label></th><td><input name="tag-display-name-3" id="tag-display-name-3" value="'. $display_name_3 .'" size="40" aria-required="true" type="text" maxlength="150"></td></tr>';
+		echo '<tr class="form-field term-display-name-wrap"><th scope="row"><label for="tag-display-name-2">Pretty Line 2 (OPTIONAL)</label></th><td><input name="tag-display-name-2" id="tag-display-name-2" value="'. $display_name_2 .'" size="40" aria-required="true" type="text" maxlength="150"></td></tr>';
+		echo '<tr class="form-field term-display-name-wrap"><th scope="row"><label for="tag-display-name-3">Pretty Line 3 (OPTIONAL)</label></th><td><input name="tag-display-name-3" id="tag-display-name-3" value="'. $display_name_3 .'" size="40" aria-required="true" type="text" maxlength="150"></td></tr>';
 		echo '<tr class="form-field form-required term-theme-colour-wrap"><th scope="row"><label for="tag-theme-colour">Theme colour</label></th><td><input name="tag-theme-colour" id="tag-theme-colour" value="'. $theme_colour .'" size="10" aria-required="true" type="text" maxlength="7" style="width:15%;"></td></tr>';
 		echo '<tr class="form-field term-back-end-only-wrap"><th scope="row"><label for="tag-back-end">Back end only?</label></th><td><input name="tag-back-end" id="tag-back-end" value="1" type="checkbox"'. $back_end_only_checked .'></td></tr>';
 		echo '<tr class="form-field form-required term-logo-wrap"><th scope="row"><label for="tag-logo">Logo</label></th><td><div id="tag-logo" style="border:1px solid #ddd; height:100px;width:100px;"><img src="'. $logo_src[0] .'" alt="" style="max-width:100%;"/></div><input type="hidden" aria-required="true" name="tag-logo-id" id="tag-logo-id" value="'. $logo_id .'" /><br/><a id="tag-choose-logo" class="button">Choose logo</a><a id="tag-remove-logo" class="button hidden">Remove logo</a></td></tr>';
@@ -250,12 +250,12 @@ class WP_User_Taxonomy {
 
 		if(isset($_POST['tag-display-name-2']) && '' !== $_POST['tag-display-name-2']){
 			$group = sanitize_text_field($_POST['tag-display-name-2']);
-			add_term_meta($term_id, $this->taxonomy.'_display_name_2', $group, true);
+			update_term_meta($term_id, $this->taxonomy.'_display_name_2', $group);
 		}
-
+		
 		if(isset($_POST['tag-display-name-3']) && '' !== $_POST['tag-display-name-3']){
 			$group = sanitize_text_field($_POST['tag-display-name-3']);
-			add_term_meta($term_id, $this->taxonomy.'_display_name_3', $group, true);
+			update_term_meta($term_id, $this->taxonomy.'_display_name_3', $group);
 		}
 
 		if(isset($_POST['tag-theme-colour']) && '' !== $_POST['tag-theme-colour']){
