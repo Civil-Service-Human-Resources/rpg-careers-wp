@@ -127,8 +127,8 @@
 			}
 
 			$theme_display_name = get_term_meta($post_theme, 'content_team_display_name', true);
-			$theme_display_name_2 = get_term_meta($item_theme, 'content_team_display_name_2', true);
-			$theme_display_name_3 = get_term_meta($item_theme, 'content_team_display_name_3', true);
+			$theme_display_name_2 = get_term_meta($post_theme, 'content_team_display_name_2', true);
+			$theme_display_name_3 = get_term_meta($post_theme, 'content_team_display_name_3', true);
 			if($theme_display_name ===''){
 				$theme_display_name = 'THEME NOT SET';
 			}
@@ -145,7 +145,7 @@
         <div class="department-intro__head">
             <div class="department-intro__head-logo">
                 <span class="logo" style="<?php echo $logo_src; echo $logo_band; ?>">
-                <span class="logo__text"><?php echo esc_html($theme_display_name).' '.esc_html($theme_display_name_2).' '.esc_html($theme_display_name_3); ?></span>
+                <span class="logo__text"><?php echo esc_html($theme_display_name).' <br/>'.esc_html($theme_display_name_2).' <br/>'.esc_html($theme_display_name_3); ?></span>
             </span>
             </div>
             <h1 class="department-intro__head-title"><?php echo esc_html($bill_heading); ?></h1>
