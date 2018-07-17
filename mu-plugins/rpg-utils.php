@@ -631,7 +631,7 @@ switch ($post_status) {
 				var j = document.getElementById('submitdiv');
 				var e = document.querySelectorAll('input[name=page_action]'), f = document.querySelector('input[name=page_action]:checked');
 				var g = document.getElementById('save-post'), h = document.getElementById('workflow_submit'), i, l, m, n;
-				var o = document.getElementById('workflow_revise_draft'), p = document.getElementById('post-preview'), q = document.getElementById('exit_link');
+				var o = document.getElementById('workflow_revise_draft'), p = document.getElementById('post-preview'), q = document.getElementById('exit_link'),r = false;
 
 				j.setAttribute('style','opacity:0.3;');
 
@@ -772,7 +772,11 @@ switch ($post_status) {
 						j.setAttribute('style','opacity:1;');
 					}else{
 						clearInterval(i);
-						i = setInterval(getElementE, 500);
+						if(r){
+							i = setInterval(getElementI, 500);
+						}else{
+							i = setInterval(getElementE, 500);
+						}
 					}
 				}
 
@@ -783,6 +787,7 @@ switch ($post_status) {
 						j.setAttribute('style','opacity:1;');
 					}else{
 						clearInterval(i);
+						r = true;
 						i = setInterval(getElementD, 500);
 					}
 				}
@@ -813,6 +818,14 @@ switch ($post_status) {
 						j.setAttribute('style','opacity:1;');
 						clearInterval(i);
 						i = setInterval(getElementG, 500);
+					}
+				}
+
+				function getElementI(){
+					h = document.getElementById('workflow_submit');
+					if(h!==null){
+						clearInterval(i);
+						j.setAttribute('style','opacity:1;');
 					}
 				}
 

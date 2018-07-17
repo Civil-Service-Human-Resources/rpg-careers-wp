@@ -12,7 +12,7 @@
                 jQuery( "#publishing-action" ).append("<input type='button' id='workflow_revise_draft' class='button button-primary button-large'" + " value='Create' />");
             }
 
-            jQuery( "#publishing-action" ).append("<input type='button' id='workflow_submit' class='button button-primary button-large'" + " value='" + owf_submit_workflow_vars.submitToWorkflowButton + "' style='margin-left:5px;float:right;' />");
+            jQuery( "#publishing-action" ).append("<input type='button' id='workflow_submit' class='button button-primary button-large'" + " value='" + owf_submit_workflow_vars.submitToWorkflowButton + "' style='margin:-1px 0 0 5px;float:right;' />");
 
             jQuery( "#post" ).append(
                     "<input type='hidden' id='hi_workflow_id' name='hi_workflow_id' />" +
