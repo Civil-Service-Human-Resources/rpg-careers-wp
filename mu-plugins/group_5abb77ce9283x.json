@@ -39,7 +39,7 @@
                     "name": "media_link",
                     "type": "url",
                     "instructions": "",
-                    "required": 1,
+                    "required": 0,
                     "conditional_logic": 0,
                     "wrapper": {
                         "width": "",
@@ -50,12 +50,12 @@
                     "placeholder": ""
                 },
                 {
-                    "key": "field_5ac4d77670508",
+                    "key": "field_5ac4d7767050z",
                     "label": "Quote",
                     "name": "quote",
                     "type": "textarea",
                     "instructions": "(max 300 chars)",
-                    "required": 1,
+                    "required": 0,
                     "conditional_logic": 0,
                     "wrapper": {
                         "width": "",
@@ -69,12 +69,12 @@
                     "new_lines": ""
                 },
                 {
-                    "key": "field_5acc74bf6352x",
+                    "key": "field_5acc74bf635zx",
                     "label": "CTA text",
                     "name": "cta_text",
                     "type": "text",
                     "instructions": "(max 150 chars)",
-                    "required": 1,
+                    "required": 0,
                     "conditional_logic": 0,
                     "wrapper": {
                         "width": "",
@@ -93,7 +93,7 @@
                     "name": "cta_target",
                     "type": "url",
                     "instructions": "",
-                    "required": 1,
+                    "required": 0,
                     "conditional_logic": 0,
                     "wrapper": {
                         "width": "",
@@ -137,5 +137,5 @@
     ],
     "active": 1,
     "description": "Media embed with quote",
-    "modified": 1531302540
+    "modified": 1531834869
 }

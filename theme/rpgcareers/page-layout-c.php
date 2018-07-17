@@ -17,10 +17,15 @@
 	$bill_image_src = intval(get_post_meta($post_id,'billboard_image',true));
 	$bill_image_src_resp = '';
 
-	$media_embed_link = get_post_meta($post_id,'media_media_link',true);
-	$media_embed_quote = get_post_meta($post_id,'media_quote',true);
-	$media_embed_cta_text = get_post_meta($post_id,'media_cta_text',true);
-	$media_embed_cta_link = get_post_meta($post_id,'media_cta_target',true);
+	$media_embed_link = trim(get_post_meta($post_id,'media_media_link',true));
+	$media_embed_quote = trim(get_post_meta($post_id,'media_quote',true));
+	$media_embed_cta_text = trim(get_post_meta($post_id,'media_cta_text',true));
+	$media_embed_cta_link = trim(get_post_meta($post_id,'media_cta_target',true));
+	$media_render = true;
+
+	if($media_embed_link === '' || $media_embed_quote === '' || $media_embed_cta_text === '' || $media_embed_cta_link === ''){
+		$media_render = false;
+	}
 
 	$cont_block_vert_image = intval(get_post_meta($post_id,'content_block_vertical_image',true));
 	$cont_block_vert_image_alt = get_post_meta($cont_block_vert_image, '_wp_attachment_image_alt', true);
@@ -105,6 +110,7 @@
 		</div>
 	</div>	
 </div>
+<?php if($media_render) { ?>
 <div class="wrapper wrapper--white">
 	<div class="content-two-col content-two-col--middle-align">
 		<div class="content-two-col__inner">
@@ -120,7 +126,8 @@
 		</div>
 	</div>
 </div>
-<div class="content-two-col content-two-col--stacked-left">
+<?php } ?>
+<div class="content-two-col content-two-col--stacked-left"<?php if(!$media_render) { ?> style="margin-top:70px;"<?php } ?>>
     <div class="content-two-col__inner">
         <div class="content-two-col__first">
 
