@@ -197,10 +197,13 @@ class OW_Process_Flow {
          $action_name = sanitize_text_field($_POST['owf_action_name']);
       }
 
-	  //STORE PRE WORKFLOW POST STATUS - USED IF WORKFLOW IS ABORTED
-	  $current_post_status = get_post_status($post_id);
-	  add_post_meta($post_id, '_rpg_pre_worflow_status', $current_post_status, true);
-
+	  //STORE PRE WORKFLOW POST STATUS + TEAM ASSIGNED + PAGE THEME - USED IF WORKFLOW IS ABORTED
+      $current_post_status = get_post_status($post_id);
+      $current_team =  get_post_meta($post_id, 'rpg-team', true);
+      $current_theme = get_post_meta($post_id, 'rpg-theme', true);
+      add_post_meta($post_id, '_rpg_pre_worflow_status', $current_post_status, true);
+      add_post_meta($post_id, '_rpg_pre_worflow_team', $current_team, true);
+      add_post_meta($post_id, '_rpg_pre_worflow_theme', $current_theme, true);
 
       $post_status = 'draft'; // default status, if nothing found
 	  $status_prefix = '';
@@ -3128,13 +3131,27 @@ class OW_Process_Flow {
          $new_action_history_id = $this->save_action( $data, $actors, $history_id );
          //------post status change----------
 		if($step_decision == 'unable'){
-			//REVERT STATUS BACK TO PRE WORKFLOW STATE - STORED IN post_meta DATA AS _rpg_pre_worflow_status
+			//REVERT STATUS BACK TO PRE WORKFLOW STATE - STORED IN post_meta DATA AS _rpg_pre_worflow_status + _rpg_pre_worflow_team + _rpg_pre_worflow_theme
 			//SET IN FUNCTION validate_submit_to_workflow
-			$pre_workflow_status = get_post_meta($post_id, '_rpg_pre_worflow_status', true);
+            $pre_workflow_status = get_post_meta($post_id, '_rpg_pre_worflow_status', true);
+            $pre_workflow_team = get_post_meta($post_id, '_rpg_pre_worflow_team', true);
+            $pre_workflow_theme = get_post_meta($post_id, '_rpg_pre_worflow_theme', true);
+
+            if($pre_workflow_theme === ''){
+                $pre_workflow_theme = get_post_meta($post_id, 'rpg-theme', true);
+            }
 
 			if($pre_workflow_status != ''){
 				$post = array('ID' => $post_id, 'post_status' => $pre_workflow_status);
-				wp_update_post($post);
+                wp_update_post($post);
+                
+                if($pre_workflow_team != ''){
+                    update_post_meta($post_id, 'rpg-team', $pre_workflow_team);
+                }
+
+                if($pre_workflow_theme != ''){
+                    update_post_meta($post_id, 'rpg-theme', $pre_workflow_theme);
+                }
 			}
 		} else {
 			$this->copy_step_status_to_post( $post_id, $history_details->step_id, $new_action_history_id, $workflow_signoff_data['current_page'], null, null, $action_name );
@@ -3448,13 +3465,28 @@ class OW_Process_Flow {
 
 	  //--------post status change---------------
       if($result == 'unable'){
-		//REVERT STATUS BACK TO PRE WORKFLOW STATE - STORED IN post_meta DATA AS _rpg_pre_worflow_status
-		//SET IN FUNCTION validate_submit_to_workflow
-		$pre_workflow_status = get_post_meta($action->post_id, '_rpg_pre_worflow_status', true);
+		//REVERT STATUS BACK TO PRE WORKFLOW STATE - STORED IN post_meta DATA AS _rpg_pre_worflow_status + _rpg_pre_worflow_team+ _rpg_pre_worflow_theme
+        //SET IN FUNCTION validate_submit_to_workflow
+        $post_id = intval($action->post_id);
+        $pre_workflow_status = get_post_meta($post_id, '_rpg_pre_worflow_status', true);
+        $pre_workflow_team = get_post_meta($post_id, '_rpg_pre_worflow_team', true);
+        $pre_workflow_theme = get_post_meta($post_id, '_rpg_pre_worflow_theme', true);
+
+        if($pre_workflow_theme === ''){
+            $pre_workflow_theme = get_post_meta($post_id, 'rpg-theme', true);
+        }
 
 		if($pre_workflow_status != ''){
-			$post = array('ID' => $action->post_id, 'post_status' => $pre_workflow_status);
-			wp_update_post($post);
+			$post = array('ID' => $post_id, 'post_status' => $pre_workflow_status);
+            wp_update_post($post);
+            
+            if($pre_workflow_team != ''){
+                update_post_meta($post_id, 'rpg-team', $pre_workflow_team);
+            }
+
+            if($pre_workflow_theme != ''){
+                update_post_meta($post_id, 'rpg-theme', $pre_workflow_theme);
+            }
 		}
 	  } else {
 		$this->copy_step_status_to_post( $action->post_id, $action->step_id, $new_action_history_id, "edit", null, null, $action_name );
@@ -3547,13 +3579,26 @@ class OW_Process_Flow {
           'create_datetime' => current_time( 'mysql' )
       );
 
-	  //REVERT STATUS BACK TO PRE WORKFLOW STATE - STORED IN post_meta DATA AS _rpg_pre_worflow_status
-	  //SET IN FUNCTION validate_submit_to_workflow
-	  $pre_workflow_status = get_post_meta($action->post_id, '_rpg_pre_worflow_status', true);
+	  //REVERT STATUS BACK TO PRE WORKFLOW STATE - STORED IN post_meta DATA AS _rpg_pre_worflow_status + _rpg_pre_worflow_team + _rpg_pre_worflow_theme
+      //SET IN FUNCTION validate_submit_to_workflow
+      $post_id = intval($action->post_id);
+      $pre_workflow_status = get_post_meta($post_id, '_rpg_pre_worflow_status', true);
+      $pre_workflow_team = get_post_meta($post_id, '_rpg_pre_worflow_team', true);
+      $pre_workflow_theme = get_post_meta($post_id, '_rpg_pre_worflow_theme', true);
+      
+      if($pre_workflow_theme === ''){
+        $pre_workflow_theme = get_post_meta($post_id, 'rpg-theme', true);
+      }
 
 	  if($pre_workflow_status != ''){
-		$post = array('ID' => $action->post_id, 'post_status' => $pre_workflow_status);
-		wp_update_post($post);
+		$post = array('ID' => $post_id, 'post_status' => $pre_workflow_status);
+        wp_update_post($post);
+        if($pre_workflow_team != ''){
+            update_post_meta($post_id, 'rpg-team', $pre_workflow_team);
+        }
+        if($pre_workflow_theme != ''){
+            update_post_meta($post_id, 'rpg-theme', $pre_workflow_theme);
+        }
 	  }
 
       $action_table = OW_Utility::instance()->get_action_table_name();
@@ -3832,7 +3877,7 @@ class OW_Process_Flow {
 
             include( OASISWF_PATH . "includes/pages/subpages/submit-workflow.php" );
             $this->enqueue_and_localize_submit_workflow_script();
-         } else {
+        } else {
             if ( current_user_can( 'ow_sign_off_step' ) && is_numeric( $chkResult ) &&
                     is_admin() && preg_match_all( '/page=oasiswf(.*)|post-new\.(.*)|post\.(.*)/', $_SERVER[ 'REQUEST_URI' ], $matches ) ) {
                include( OASISWF_PATH . "includes/pages/subpages/submit-step.php" );

@@ -4,7 +4,6 @@ jQuery( document ).ready( function () {
       jQuery( '.error' ).hide();
    }
    jQuery( document ).on("click", "#exit_link", function(){
-		if(!confirm(owf_abort_workflow_vars.abortWorkflowConfirm))return ;
 		data = {
 			action: 'workflow_abort' ,
 			history_id: exit_wfid,
