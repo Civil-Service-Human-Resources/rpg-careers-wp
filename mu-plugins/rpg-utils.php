@@ -1887,14 +1887,20 @@ switch ($post_status) {
 
 				//AT LEAST ONE COMMON TEAM SO ADD THE LOOP USER					
 				if(count($diffs) != count($current_user_teams)){
-					array_push($new_assignees, $loop_user);	
+
+					//NOW CHECK THE ROLE - adminstrators EXCLUDED
+					$user_meta = get_userdata($loop_user->ID); 
+					$user_roles = $user_meta->roles; 
+					if (!in_array('administrator', $user_roles)){
+						array_push($new_assignees, $loop_user);	
+					}
 				}
 			}
 		}
  
 		//REPLACE 'users' KEY WITH NEW SET OF ASSIGNEES
 		$users_and_process_info['users'] = $new_assignees;
- 
+
 		return $users_and_process_info;
 	}
 
