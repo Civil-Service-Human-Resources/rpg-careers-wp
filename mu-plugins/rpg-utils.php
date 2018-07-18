@@ -436,6 +436,11 @@ class rpgutils{
 		
 	function amend_quick_links($actions, $post) {
 
+		//ONLY SHOW edit LINK FOR POSTS/PAGES @ draft OR publish
+		if($post->post_status !== 'draft' && $post->post_status !== 'publish'){
+			unset($actions['edit']);
+		}
+
 		if (isset($actions['inline hide-if-no-js'])) {
 			unset($actions['inline hide-if-no-js']);
 		}
@@ -1567,6 +1572,12 @@ switch ($post_status) {
 								}
 							}
 						}
+					}
+
+					//CHECK POST STATUS - IF draft OR publish THEN CAN VIEW THE PAGE AND THEREFORE ABLE TO KICK OFF A WORKFLOW REQUEST
+					$post_status = get_post_status($post->ID);
+					if($post_status !== 'draft' && $post_status !== 'publish'){
+						$canaccess= false;
 					}
                 }
 
