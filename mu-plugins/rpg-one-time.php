@@ -60,6 +60,7 @@ class rpgonetime{
             'edit_others_posts'				=> true,
 			'upload_files'					=> true,
             'ow_submit_to_workflow'			=> true,
+            'ow_abort_workflow'			    => true,
         );
 
         $contentApproverCaps = array(
@@ -84,6 +85,7 @@ class rpgonetime{
             'ow_view_others_inbox'			=> true,
             'ow_view_reports'				=> true,
             'ow_view_workflow_history'		=> true,
+            'ow_abort_workflow'			    => true,
         );
 
         $contentPublisherCaps = array(
@@ -108,6 +110,7 @@ class rpgonetime{
             'ow_view_others_inbox'			=> true,
             'ow_view_reports'				=> true,
             'ow_view_workflow_history'		=> true,
+            'ow_abort_workflow'			    => true,
         );
 
         $contentAdminCaps = array(
@@ -143,6 +146,7 @@ class rpgonetime{
             'ow_view_others_inbox'			=> true,
             'ow_view_reports'				=> true,
             'ow_view_workflow_history'		=> true,
+            'ow_abort_workflow'			    => true,
         );
 
         $contentSnippets = array(
