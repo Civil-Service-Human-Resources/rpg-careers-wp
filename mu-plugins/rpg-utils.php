@@ -1577,7 +1577,16 @@ switch ($post_status) {
 					//CHECK POST STATUS - IF draft OR publish THEN CAN VIEW THE PAGE AND THEREFORE ABLE TO KICK OFF A WORKFLOW REQUEST
 					$post_status = get_post_status($post->ID);
 					if($post_status !== 'draft' && $post_status !== 'publish'){
-						$canaccess= false;
+
+						//IS CURRENT PAGE ASSIGNED TO USER IN WORKFLOW
+						$ow_process_flow = new OW_Process_Flow();
+						$workflow_item = $ow_process_flow->get_assigned_post($post->ID, get_current_user_id(),'row');
+
+						if($workflow_item){
+							$canaccess = true;
+						} else {
+							$canaccess= false;
+						}
 					}
                 }
 
