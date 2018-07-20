@@ -2244,7 +2244,7 @@ class OW_Process_Flow {
       
 	 
 
-      if ( $publish_datetime ) { // user intends to publish or schedule the post
+    if ( $publish_datetime ) { // user intends to publish or schedule the post
          $original_post_id = get_post_meta( $post_id, '_oasis_original', true );
          
          if ( empty( $original_post_id ) ) { // for new posts
@@ -2337,7 +2337,23 @@ class OW_Process_Flow {
 			}
 		}
 
-         if ( $current_page == "inbox" ) {
+        //IF $step_status IS draft I.E. PAGE HAS BEEN UNPUBLISHED SET ORIGINAL TEAM + THEME
+        $pre_workflow_team = get_post_meta($post_id, '_rpg_pre_worflow_team', true);
+        $pre_workflow_theme = get_post_meta($post_id, '_rpg_pre_worflow_theme', true);
+
+        if($pre_workflow_theme === ''){
+            $pre_workflow_theme = get_post_meta($post_id, 'rpg-theme', true);
+        }
+
+        if($pre_workflow_team != ''){
+            update_post_meta($post_id, 'rpg-team', $pre_workflow_team);
+        }
+
+        if($pre_workflow_theme != ''){
+            update_post_meta($post_id, 'rpg-theme', $pre_workflow_theme);
+        }
+
+        if ( $current_page == "inbox" ) {
 
             /** This action is documented in wp-includes/post.php */
             // Calling this action, since quite a few plugins depend on this, like Jetpack etc.
