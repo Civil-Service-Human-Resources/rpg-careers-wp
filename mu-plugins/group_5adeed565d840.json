@@ -75,6 +75,24 @@
                         "multiple": 0
                     },
                     {
+                        "key": "field_5b51e486979zz",
+                        "label": "Team",
+                        "name": "team",
+                        "type": "team",
+                        "instructions": "",
+                        "required": 1,
+                        "conditional_logic": 0,
+                        "wrapper": {
+                            "width": "",
+                            "class": "",
+                            "id": ""
+                        },
+                        "choices": "",
+                        "return_format": "array",
+                        "default_value": "",
+                        "placeholder": "Select a team"
+                    },
+                    {
                       "key": "field_5adeee731d11e",
                       "label": "Body",
                       "name": "body",
