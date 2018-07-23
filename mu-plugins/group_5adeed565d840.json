@@ -53,28 +53,6 @@
                     "button_label": "Add item",
                   "sub_fields": [
                     {
-                        "key": "field_5b48a37b55eyy",
-                        "label": "Team",
-                        "name": "team",
-                        "type": "taxonomy",
-                        "instructions": "",
-                        "required": 1,
-                        "conditional_logic": 0,
-                        "wrapper": {
-                            "width": "",
-                            "class": "",
-                            "id": ""
-                        },
-                        "taxonomy": "content_team",
-                        "field_type": "select",
-                        "allow_null": 0,
-                        "add_term": 0,
-                        "save_terms": 1,
-                        "load_terms": 1,
-                        "return_format": "id",
-                        "multiple": 0
-                    },
-                    {
                         "key": "field_5b51e486979zz",
                         "label": "Team",
                         "name": "team",
