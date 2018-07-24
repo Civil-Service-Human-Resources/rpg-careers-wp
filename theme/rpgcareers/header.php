@@ -38,8 +38,6 @@
 	<meta name="theme-color" content="#ffffff">
 	<?php do_action('gtm_head'); ?>
 	<?php wp_head(); ?>
-	<style id="fKill">body{display:none!important;}</style>
-	<script>if(self===top){var f=document.getElementById('fKill');f.parentNode.removeChild(f);}else{top.location=self.location;}</script>
 	<!--[if lt IE 9]>
     <script src="<?php echo get_stylesheet_directory_uri(); ?>/assets/js/respond.min.js"></script>
 	<script src="<?php echo get_stylesheet_directory_uri(); ?>/assets/js/respond.matchmedia.addListener.min.js"></script>
