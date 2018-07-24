@@ -110,7 +110,7 @@
                       "label": "Target text",
                       "name": "target_text",
                       "type": "text",
-                      "instructions": "(max 30 chars)",
+                      "instructions": "(max 100 chars)",
                       "required": 1,
                       "conditional_logic": 0,
                       "wrapper": {
@@ -122,7 +122,7 @@
                       "placeholder": "",
                       "prepend": "",
                       "append": "",
-                      "maxlength": 30
+                      "maxlength": 100
                     },
                     {
                       "key": "field_5adeee9f1d11f",

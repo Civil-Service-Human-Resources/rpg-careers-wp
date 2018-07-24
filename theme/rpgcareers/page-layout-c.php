@@ -11,9 +11,6 @@
 	$bill_logo_src = intval(get_post_meta($post_id,'billboard_logo',true));
 	$bill_heading = get_post_meta($post_id,'billboard_heading',true);
 	$bill_intro_para_1 = get_post_meta($post_id,'billboard_paragraph_1',true);
-	$bill_intro_para_2 = get_post_meta($post_id,'billboard_paragraph_2',true);
-	$bill_intro_para_3 = get_post_meta($post_id,'billboard_paragraph_3',true);
-	$bill_intro_para_4 = get_post_meta($post_id,'billboard_paragraph_4',true);
 	$bill_image_src = intval(get_post_meta($post_id,'billboard_image',true));
 	$bill_image_src_resp = '';
 
@@ -81,34 +78,18 @@
 	<style>.banner {background-image: url(<?php echo $bill_image_src_resp[0]; ?>);}@media (min-width: 768px) {.banner {background-image: url(<?php echo $bill_image_src[0]; ?>);}}</style>
 </div>
 <main id="content" role="main">
-<div class="about-intro">
-	<div class="department-intro">
-		<div class="department-intro__inner">
-			<div class="department-intro__head">
-				<div class="department-intro__head-logo">
-					<span class="logo" style="background-image:url(<?php echo $bill_logo_src[0]; ?>);">
-					<span class="logo__text"><?php echo esc_html($bill_logo_text); ?></span>
-				</span>
-				</div>
-				<h1 class="department-intro__head-title"><?php echo esc_html($bill_heading); ?></h1>
+<div class="department-intro" style="background-color:#AC1151;">
+	<div class="department-intro__inner">
+		<div class="department-intro__head">
+			<div class="department-intro__head-logo">
+				<span class="logo" style="background-image:url(<?php echo $bill_logo_src[0]; ?>);">
+				<span class="logo__text"><?php echo esc_html($bill_logo_text); ?></span>
+			</span>
 			</div>
-			<div class="department-intro__content"></div>
+			<h1 class="department-intro__head-title"><?php echo esc_html($bill_heading); ?></h1>
 		</div>
+		<div class="department-intro__content"><p class="intro"><?php echo esc_html($bill_intro_para_1); ?></p></div>
 	</div>
-	<div class="content-two-col content-two-col--stacked-left">
-		<div class="content-two-col__inner">
-			<div class="content-two-col__first">
-				<p class="intro"><?php echo esc_html($bill_intro_para_1); ?></p>
-				<p class="intro"><?php echo esc_html($bill_intro_para_2); ?></p>
-			</div>
-			<div class="content-two-col__last">
-				<p class="intro"><?php echo esc_html($bill_intro_para_3); ?></p>
-				<?php if($bill_intro_para_4 !== ''){ ?>
-					<p class="intro"><?php echo esc_html($bill_intro_para_4); ?></p>
-				<?php } ?>
-			</div>
-		</div>
-	</div>	
 </div>
 <?php if($media_render) { ?>
 <div class="wrapper wrapper--white">
