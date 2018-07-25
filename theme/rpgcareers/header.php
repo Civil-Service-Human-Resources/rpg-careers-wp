@@ -56,7 +56,7 @@
 			<span class="logo__text">Civil Service</span>
 		</span>
 		</a>
-		<span class="masthead__brand-text">Careers</span>
+		<span class="masthead__brand-text">Civil Service careers</span>
 	</div>
 	<nav role="navigation" aria-label="site" class="masthead__nav">
 	<?php
