@@ -436,8 +436,8 @@ class rpgutils{
 		
 	function amend_quick_links($actions, $post) {
 
-		//ONLY SHOW edit LINK FOR POSTS/PAGES @ draft OR publish
-		if($post->post_status !== 'draft' && $post->post_status !== 'publish'){
+		//ONLY SHOW edit LINK FOR POSTS/PAGES @ draft OR pending OR publish
+		if($post->post_status !== 'draft' && $post->post_status !== 'pending' && $post->post_status !== 'publish'){
 			unset($actions['edit']);
 		}
 
@@ -482,6 +482,7 @@ class rpgutils{
 switch ($post_status) {
 	case 'draft':
 	case 'auto-draft':
+	case 'pending':
 		_e('Draft');
 		if(get_post_meta($post->ID, '_rpg_page_revision_of', true)!==''){
 			echo ' - REVISION';
@@ -568,16 +569,22 @@ switch ($post_status) {
 			switch ($post_status) {
 				case 'draft':
 				case 'auto-draft':
+				case 'pending':
 					$action_output = '<li><input type="radio" id="action1" name="page_action" value="save"><label for="action1">Save</label></li>
 										<li><input type="radio" id="action2" name="page_action" value="publish" checked><label for="action2">Publish</label></li>
 										<li><input type="radio" id="action3" name="page_action" value="delete"><label for="action3">Delete</label></li>';
 					break;
 				case 'publish':
 				case 'future':
-				case 'pending':
-					$action_output = '<li><input type="radio" id="action4" name="page_action" value="unpublish"><label for="action4">Unpublish</label></li>
-										<li><input type="radio" id="action5" name="page_action" value="revise" checked><label for="action5">Revise</label></li>
-										<li><input type="radio" id="action3" name="page_action" value="delete"><label for="action3">Delete</label></li>';
+					if(current_user_can('ow_rpg_unpublish_workflow_item')){
+						$action_output = '<li><input type="radio" id="action4" name="page_action" value="unpublish"><label for="action4">Unpublish</label></li>';
+					}
+
+					$action_output = '<li><input type="radio" id="action5" name="page_action" value="revise" checked><label for="action5">Revise</label></li>';
+					
+					if(current_user_can('ow_rpg_delete_workflow_item')){
+						$action_output = '<li><input type="radio" id="action3" name="page_action" value="delete"><label for="action3">Delete</label></li>';
+					}
 					$need_nonce = true;
 					break;
 				case 'del-with-approver':
@@ -1556,8 +1563,8 @@ switch ($post_status) {
 						$teams = $this->get_setting('users_teams');
 						$post_teams = get_post_meta($post->ID, 'rpg-team');
 						
-						//TEST WHETHER PAGE IS IN DRAFT, WITH NO TEAM AND content_author IS CURRENT USER i.e. PREVIOUS 'missing-team' VALIDATION ERROR WAS THROWN AND ACCESSING FROM THE PAGE LISTING
-						if($post->post_status ='draft' && $post->post_author = get_current_user_id() && count($post_teams) == 0){
+						//TEST WHETHER PAGE IS IN DRAFT/PENDING, WITH NO TEAM AND content_author IS CURRENT USER i.e. PREVIOUS 'missing-team' VALIDATION ERROR WAS THROWN AND ACCESSING FROM THE PAGE LISTING
+						if(($post->post_status = 'draft' || $post->post_status = 'pending') && $post->post_author = get_current_user_id() && count($post_teams) == 0){
 							$canaccess = true;
 						}
 
@@ -1574,9 +1581,9 @@ switch ($post_status) {
 						}
 					}
 
-					//CHECK POST STATUS - IF draft OR publish THEN CAN VIEW THE PAGE AND THEREFORE ABLE TO KICK OFF A WORKFLOW REQUEST
+					//CHECK POST STATUS - IF draft OR pending OR publish THEN CAN VIEW THE PAGE AND THEREFORE ABLE TO KICK OFF A WORKFLOW REQUEST
 					$post_status = get_post_status($post->ID);
-					if($post_status !== 'draft' && $post_status !== 'publish'){
+					if($post_status !== 'draft' && $post_status !== 'pending' && $post_status !== 'publish'){
 
 						//IS CURRENT PAGE ASSIGNED TO USER IN WORKFLOW
 						$ow_process_flow = new OW_Process_Flow();
@@ -1662,7 +1669,7 @@ switch ($post_status) {
                     }
                 }
 
-                $output .= '<li id="rpg-'.$team->slug.'"><label class="selectit"><input value="'.$team->term_id.'" name="rpg-team'.$team->term_id.'" id="in-rpg-'.$team->slug.'" ' .$checked. ' type="checkbox"'. (count($teams)==1 && $status != 'draft' ? ' onclick="this.checked=!this.checked;"': '').'>'.$team->name.'</label></li>';
+                $output .= '<li id="rpg-'.$team->slug.'"><label class="selectit"><input value="'.$team->term_id.'" name="rpg-team'.$team->term_id.'" id="in-rpg-'.$team->slug.'" ' .$checked. ' type="checkbox"'. (count($teams)==1 && $status != 'draft' && $status != 'pending' ? ' onclick="this.checked=!this.checked;"': '').'>'.$team->name.'</label></li>';
             }
 
             $output .= '</ul>';
@@ -1900,6 +1907,7 @@ switch ($post_status) {
 					//NOW CHECK THE ROLE - adminstrators EXCLUDED
 					$user_meta = get_userdata($loop_user->ID); 
 					$user_roles = $user_meta->roles; 
+
 					if (!in_array('administrator', $user_roles)){
 						array_push($new_assignees, $loop_user);	
 					}
@@ -1915,7 +1923,14 @@ switch ($post_status) {
 
 	function set_cache_headers($headers){
 		if (!is_admin()){
-			$headers = array_merge($headers, wp_get_nocache_headers());
+			$cache_control_in_seconds = 300;
+			$cache_control_in_minutes = 5;
+			
+			unset($headers['Cache-Control']);
+			unset($headers['Expires']);
+
+			$headers['Cache-Control'] = 'public, must-revalidate, max-age='.$cache_control_in_seconds;
+			$headers['Expires'] = gmdate('D, d M Y H:i:s \G\M\T', time() + (60 * $cache_control_in_minutes));
 		}
 		return $headers;
 	}

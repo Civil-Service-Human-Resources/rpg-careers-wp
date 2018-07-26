@@ -50,6 +50,17 @@ class rpgonetime{
         remove_role('content_admin');
 		remove_role('content_snippets');
 
+        //CUSTOM CAPABILITIES FOR WORKFLOW ACCESS CONTROL
+        global $wp_roles;
+
+        if (class_exists('WP_Roles')) {
+            if (!isset($wp_roles)) {
+                $wp_roles = new WP_Roles();
+            }
+        }
+        $wp_roles->add_cap('administrator', 'ow_rpg_unpublish_workflow_item');
+        $wp_roles->add_cap('administrator', 'ow_rpg_delete_workflow_item');
+
         //DEFINE CAPABILITIES
         $contentAuthorCaps = array(
             'read'							=> true,
@@ -111,6 +122,7 @@ class rpgonetime{
             'ow_view_reports'				=> true,
             'ow_view_workflow_history'		=> true,
             'ow_abort_workflow'			    => true,
+            'ow_rpg_unpublish_workflow_item'=> true,
         );
 
         $contentAdminCaps = array(
@@ -147,6 +159,8 @@ class rpgonetime{
             'ow_view_reports'				=> true,
             'ow_view_workflow_history'		=> true,
             'ow_abort_workflow'			    => true,
+            'ow_rpg_unpublish_workflow_item'=> true,
+            'ow_rpg_delete_workflow_item'   => true,
         );
 
         $contentSnippets = array(
