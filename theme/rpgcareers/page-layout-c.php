@@ -116,7 +116,7 @@
 if($main_repeaters): ?>
 	<?php for ($i=0;$i<$main_repeaters;$i++) { ?>
 	<h2><?php echo esc_html(get_post_meta($post_id, 'main_content_repeater_content_'.$i.'_heading', true)); ?></h2>
-	<?php echo get_post_meta($post_id, 'main_content_repeater_content_'.$i.'_body', true); ?>
+	<?php echo wpautop(get_post_meta($post_id, 'main_content_repeater_content_'.$i.'_body', true)); ?>
 	<?php $repeater_image_src = intval(get_post_meta($post_id, 'main_content_repeater_content_'.$i.'_image',true));
 
 	if ($repeater_image_src) {
