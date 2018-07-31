@@ -566,6 +566,7 @@ switch ($post_status) {
 <?php }
 			$action_output = '';
 			$need_nonce = false;
+
 			switch ($post_status) {
 				case 'draft':
 				case 'auto-draft':
@@ -577,13 +578,13 @@ switch ($post_status) {
 				case 'publish':
 				case 'future':
 					if(current_user_can('ow_rpg_unpublish_workflow_item')){
-						$action_output = '<li><input type="radio" id="action4" name="page_action" value="unpublish"><label for="action4">Unpublish</label></li>';
+						$action_output .= '<li><input type="radio" id="action4" name="page_action" value="unpublish"><label for="action4">Unpublish</label></li>';
 					}
 
-					$action_output = '<li><input type="radio" id="action5" name="page_action" value="revise" checked><label for="action5">Revise</label></li>';
+					$action_output .= '<li><input type="radio" id="action5" name="page_action" value="revise" checked><label for="action5">Revise</label></li>';
 					
 					if(current_user_can('ow_rpg_delete_workflow_item')){
-						$action_output = '<li><input type="radio" id="action3" name="page_action" value="delete"><label for="action3">Delete</label></li>';
+						$action_output .= '<li><input type="radio" id="action3" name="page_action" value="delete"><label for="action3">Delete</label></li>';
 					}
 					$need_nonce = true;
 					break;
