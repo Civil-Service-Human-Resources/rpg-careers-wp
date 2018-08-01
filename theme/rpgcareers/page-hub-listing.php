@@ -53,7 +53,8 @@ get_header(); ?>
 					<?php 
 					$item_theme = get_post_meta($post_id, 'list_repeater_items_'.$i.'_team', true);
 					$logo_band = '';
-					$logo_src = '';
+					$logo_src = get_template_directory_uri() .'/assets/images/cabinet-office.svg';
+					$logo_alt = '';
 					$theme_display_name = '';
 					$theme_display_name_2 = '';
 					$theme_display_name_3 = '';
@@ -71,10 +72,11 @@ get_header(); ?>
 							$theme_logo = intval(get_term_meta($item_theme, 'content_team_logo_id', true));
 				
 							if($theme_logo !==''){
+								$logo_alt = get_post_meta($theme_logo, '_wp_attachment_image_alt', true);
 								$theme_logo = wp_get_attachment_image_src($theme_logo, 'full');
 								
 								if($theme_logo){
-									$logo_src = 'background-image:url(' . $theme_logo[0] . ');';		
+									$logo_src = $theme_logo[0];
 								}
 							}
 				
@@ -92,7 +94,8 @@ get_header(); ?>
 							<img src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'list_repeater_items_'.$i.'_image', true), 'medium_large')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'list_repeater_items_'.$i.'_image', true), '_wp_attachment_image_alt', true); ?>">
 						</div>
 						<div class="text-image-list__logo">
-							<span class="logo logo--small"  style="<?php echo $logo_src; echo $logo_band; ?>">
+							<span class="text-image-list__title" style="<?php echo $logo_band; ?>">
+								<img src="<?php echo $logo_src; ?>" alt="<?php echo $logo_alt; ?>">
 								<span class="logo__text"><?php echo esc_html($theme_display_name); ?>
 								<?php 
 								if ($theme_display_name_2 !== '') {
@@ -101,13 +104,12 @@ get_header(); ?>
 								if ($theme_display_name_3 !== '') {
 									echo '<br/>'.esc_html($theme_display_name_3);
 								}
-								?>
-								</span>
+								?></span>
 							</span>
 						</div>
 						<div class="text-image-list__content">
 							<p class="smaller"><?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_body', true)); ?></p>
-							<span class="smaller"><a href="<?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_target', true)); ?>" class="readmore-link"><?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_target_text', true)); ?></a></span>
+							<a href="<?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_target', true)); ?>" class="readmore-link"><span><?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_target_text', true)); ?></span><i aria-hidden="true"></i></a>
 						</div>
 					</div>
 				<?php } ?>
