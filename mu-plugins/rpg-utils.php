@@ -618,23 +618,26 @@ switch ($post_status) {
     </div>
 	<div id="major-publishing-actions">
         <div id="publishing-action" style="width: 100%;">
+		<ul>
 		<?php if ( is_post_type_viewable( $post_type_object ) ) : ?>
-		<div id="preview-action">
+		<li style="margin-bottom:12px;"><div id="preview-action">
 		<?php
 		$preview_link = esc_url( get_preview_post_link( $post ) );
 		$preview_button_text = __( 'Preview' );
 		$preview_button = sprintf( '%1$s<span class="screen-reader-text"> %2$s</span>',$preview_button_text,__('(opens in a new window)'));
 		?>
-		<a style="float:left;" class="preview button" href="<?php echo $preview_link; ?>" target="wp-preview-<?php echo (int) $post->ID; ?>" id="post-preview"><?php echo $preview_button; ?></a>
-		<input type="hidden" name="wp-preview" id="wp-preview" value="" />
+			<a style="float:left;" class="preview button" href="<?php echo $preview_link; ?>" target="wp-preview-<?php echo (int) $post->ID; ?>" id="post-preview"><?php echo $preview_button; ?></a>
+			<input type="hidden" name="wp-preview" id="wp-preview" value="" />
 		</div>
 		<?php endif; ?>
         <span class="spinner"></span>
         <input name="original_publish" type="hidden" id="original_publish" value="Publish">
 		<input name="acf_dummy" type="hidden" id="acf_dummy" value="acf_dummy">
         <input type="submit" name="publish" id="publish" class="button button-primary button-large" value="Publish" style="display: none;">
-		<input <?php if ( 'private' == $post_status || 'publish' == $post_status || 'future' == $post_status || 'pending' == $post_status || 'trash' == $post_status) { ?>style="display:none"<?php } ?> type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save Draft'); ?>" class="button button-primary button-large" />
-        </div>
+		</li>
+		<li style="margin-bottom:12px;"><input <?php if ( 'private' == $post_status || 'publish' == $post_status || 'future' == $post_status || 'pending' == $post_status || 'trash' == $post_status) { ?>style="display:none"<?php } ?> type="submit" name="save" id="save-post" value="<?php esc_attr_e('Save Draft'); ?>" class="button button-primary button-large" /></li>
+        </ul>
+		</div>
         <div class="clear"></div>
 	</div>
         </div>

@@ -17,17 +17,17 @@ jQuery( document ).ready( function () {
             }
             jQuery( ".loading" ).hide();
             if ( ! response.success ) {
-               jQuery( "#publishing-action" ).append(
-                       "<input type='button' id='step_submit' class='button button-primary button-large'" +
+               jQuery( "#publishing-action ul" ).append(
+                       "<li style='margin-bottom:12px;'><input type='button' id='step_submit' class='button button-primary button-large'" +
                        " value='" + owf_submit_step_vars.signOffButton + "' style='float:left;margin-top:10px;clear:both' />" +
                        "<input type='hidden' name='hi_process_info' id='hi_process_info' />" +
-                       "<input type='hidden' name='hi_oasiswf_redirect' id='hi_oasiswf_redirect' value=''/>" ).css( { "width": "100%" } );
+                       "<input type='hidden' name='hi_oasiswf_redirect' id='hi_oasiswf_redirect' value=''/></li>" ).css( { "width": "100%" } );
             } else {
-               jQuery( "#publishing-action" ).append(
-                       "<input type='button' id='claimButton' class='button button-primary button-large'" +
+               jQuery( "#publishing-action ul" ).append(
+                       "<li style='margin-bottom:12px;'><input type='button' id='claimButton' class='button button-primary button-large'" +
                        " value='" + owf_submit_step_vars.claimButton + "' style='float:left;margin-top:10px;clear:both' />" +
                        "<input type='hidden' name='hi_process_info' id='hi_process_info' />" +
-                       "<input type='hidden' name='hi_oasiswf_redirect' id='hi_oasiswf_redirect' value=''/>" ).css( { "width": "100%" } );
+                       "<input type='hidden' name='hi_oasiswf_redirect' id='hi_oasiswf_redirect' value=''/></li>" ).css( { "width": "100%" } );
             }
          } );
       } else {
@@ -46,11 +46,11 @@ jQuery( document ).ready( function () {
             }
             jQuery( ".loading" ).hide();
             if ( ! response.success ) {
-               jQuery( "#publishing-action" ).append( "<input type='button' id='step_submit' class='button button-primary button-large' " +
-                       "style='float:left;margin-top:10px;' value='" + owf_submit_step_vars.signOffButton + "' />" );
+               jQuery( "#publishing-action ul" ).append( "<li style='margin-bottom:12px;'><input type='button' id='step_submit' class='button button-primary button-large' " +
+                       "style='float:left;margin-top:10px;' value='" + owf_submit_step_vars.signOffButton + "' /></li>" );
             } else {
-               jQuery( "#publishing-action" ).append( "<input type='button' id='claimButton' class='button button-primary button-large' " +
-                       "style='float:left;margin-top:10px;' value='" + owf_submit_step_vars.claimButton + "' />" );
+               jQuery( "#publishing-action ul" ).append( "<li style='margin-bottom:12px;'><input type='button' id='claimButton' class='button button-primary button-large' " +
+                       "style='float:left;margin-top:10px;' value='" + owf_submit_step_vars.claimButton + "' /></li>" );
             }
          } );
       }
