@@ -64,20 +64,117 @@ jQuery( document ).ready( function () {
    
     jQuery( document ).on( "click", "#step_submit", function () {
 
-      // hook for custom validation before submitting to the workflow
-      if ( typeof owSignOffPre === 'function' ) {
-         var sign_off_pre_result = owSignOffPre();
-         if ( sign_off_pre_result == false ) {
+         // hook for custom validation before submitting to the workflow
+         if ( typeof owSubmitToWorkflowPre === 'function' ) {
+            var pre_submit_to_workflow_result = owSubmitToWorkflowPre();
+            if ( pre_submit_to_workflow_result == false ) {
             return false;
-         }
-      }
+            }
+        }
 
-      // hook for running ACF or other third party plugin validation if needed prior to signing off on the workflow
-      owThirdPartyValidation.run( signOffSubmit );
+        RPGUtil.validrunacf = false;
+        RPGUtil.validrunrpg = false;
 
-      return false;
+        //BESPOKE VALIDATION
+        RPGUtil.valid = false;
+        var $form = jQuery('form#post');
+        var data = acf.serialize($form);
+		data.action = 'rpg_validate_save_post';
+		data = acf.prepare_for_ajax(data);
 
-   } );
+        jQuery('#rpg-teams-access').attr('style','');
+        jQuery('#title').attr('style','');
+        jQuery('div.rpg-error-message').remove();
+            
+        jQuery.ajax({
+			url: acf.get('ajaxurl'),
+			data: data,
+			type: 'post',
+			dataType: 'json',
+			success: function(json){
+				var json = json.data;
+                var msg = '';
+
+                //VALIDATE JSON
+			    if (!json || json.valid || !json.errors) {	
+                    RPGUtil.valid = true;
+				    return;
+			    }
+
+                //GOT ERRORS
+                RPGUtil.valid = false;
+                if (json.errors && json.errors.length > 0) {
+				    for (var i in json.errors) {	
+                        var error = json.errors[i];	
+                        msg += error.message + '<br/>';
+                        var $input = $form.find('[name="' + error.input + '"]').first();
+
+                        if (!$input.exists()) {
+						    $input = $form.find('[name^="' + error.input + '"]').first();
+					    }					
+		
+                        if (!$input.exists()) {
+                            $input = jQuery('#'+ error.input);
+                        }
+
+					    if (!$input.exists()) {
+						    continue;
+					    }	
+
+                        $input.attr('style','border:2px solid #F55E4F;');
+                    }
+
+                    // get $message
+			        var $message = $form.children('div.rpg-error-message');
+
+			        if (!$message.exists()) {
+				        $message = jQuery('<div class="error notice rpg-error-message"><p></p></div>');
+				        $form.prepend($message);
+			        }
+
+			        $message.children('p').html(msg);
+                }
+			}
+		});
+       
+        //RUN ACF VALIDATION
+        var $form = jQuery('#post');
+        acf.do_action('submit', $form);
+        
+        acf.validation.$trigger = jQuery('#acf_dummy');
+        acf.validation.fetch($form);
+
+    });
+
+   jQuery(document).ajaxComplete(function(event, xhr, settings) {
+        if(settings.data){
+            if(settings.data.indexOf('&action=acf%2Fvalidate_save_post') !== -1){
+                RPGUtil.validrunacf = true;
+                if (acf.validation.valid && RPGUtil.valid) {
+                    normalWorkFlowSubmit(signOffSubmit);
+                }
+            }
+            if(settings.data.indexOf('&action=rpg_validate_save_post') !== -1){
+                RPGUtil.validrunrpg = true;
+                if (acf.validation.valid && RPGUtil.valid) {
+                    normalWorkFlowSubmit(signOffSubmit);
+                }
+            }
+        }
+
+        if(RPGUtil.validrunrpg && RPGUtil.validrunacf){
+            if(!acf.validation.valid || !RPGUtil.valid){
+                resetControls();
+            }
+        }
+    });
+
+    function resetControls(){
+        jQuery('#workflow_submit').removeAttr('disabled').removeClass('disabled button-disabled button-primary-disabled');
+        jQuery('#exit_link').removeAttr('disabled').removeClass('disabled button-disabled button-primary-disabled');
+        jQuery('#preview-action a').removeAttr('disabled').removeClass('disabled button-disabled button-primary-disabled');
+		jQuery('#publishing-action .spinner').removeClass('is-active');
+   }
 
     // to clear the dates
    jQuery( document ).on( "click", ".date-clear", function () {
@@ -375,7 +472,11 @@ jQuery( document ).ready( function () {
                 //SHOW PAGE LISTING
                 window.location.replace(window.location.origin + '/wp-admin/edit.php?post_type=page');
             } else {
-                jQuery( "#save-post" ).click();
+                jQuery("#save-post").click();
+
+               // if(response.data.new_post_status == 'publish'){
+                 //   setTimeout(function() {window.location.replace(window.location.origin + '/wp-admin/edit.php?post_type=page');}, 2000);
+                //}
             }
          }
       } );
@@ -492,6 +593,7 @@ jQuery( document ).ready( function () {
    modal_close = function () {
       wfpath = "";
       stepProcess = "";
+      resetControls();
       jQuery.modal.close();
       if ( jQuery( "#hi_parrent_page" ).val() == "inbox" )
          jQuery( document ).find( "#step_submit_content" ).html( "" );
