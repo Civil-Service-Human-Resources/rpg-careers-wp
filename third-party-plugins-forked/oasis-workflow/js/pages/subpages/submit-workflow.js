@@ -9,10 +9,10 @@
       if ( jQuery.inArray( current_post_type, allowed_post_types ) != -1 )
       {
             if(owf_post_status === 'publish'){
-                jQuery( "#publishing-action" ).append("<input type='button' id='workflow_revise_draft' class='button button-primary button-large'" + " value='Create' />");
+                jQuery( "#publishing-action ul" ).append("<li style='margin-bottom:12px;'><input type='button' id='workflow_revise_draft' class='button button-primary button-large'" + " value='Create' /><li>");
             }
 
-            jQuery( "#publishing-action" ).append("<input type='button' id='workflow_submit' class='button button-primary button-large'" + " value='" + owf_submit_workflow_vars.submitToWorkflowButton + "' style='margin:-1px 0 0 5px;float:right;' />");
+            jQuery( "#publishing-action ul" ).append("<li style='margin-bottom:12px;'><input type='button' id='workflow_submit' class='button button-primary button-large'" + " value='" + owf_submit_workflow_vars.submitToWorkflowButton + "' style='margin:-1px 0 0 5px;' /></li>");
 
             jQuery( "#post" ).append(
                     "<input type='hidden' id='hi_workflow_id' name='hi_workflow_id' />" +
@@ -159,7 +159,7 @@ jQuery( document ).ready( function () {
         acf.validation.fetch($form);
 
     });
-    
+
     jQuery(document).ajaxComplete(function(event, xhr, settings) {
         if(settings.data){
             if(settings.data.indexOf('&action=acf%2Fvalidate_save_post') !== -1){
@@ -178,8 +178,7 @@ jQuery( document ).ready( function () {
 
         if(RPGUtil.validrunrpg && RPGUtil.validrunacf){
             if(!acf.validation.valid || !RPGUtil.valid){
-                jQuery('#workflow_submit').removeAttr('disabled').removeClass('disabled button-disabled button-primary-disabled');
-				jQuery('#publishing-action .spinner').removeClass('is-active');	
+                resetControls();
             }
         }
     });
@@ -416,7 +415,15 @@ jQuery( document ).ready( function () {
    function modalClose() {
       // init the stepProcess and close the modal window
       stepProcess = "";
+      resetControls();
       jQuery.modal.close();
+   }
+
+   function resetControls(){
+        jQuery('#workflow_submit').removeAttr('disabled').removeClass('disabled button-disabled button-primary-disabled');
+        jQuery('#exit_link').removeAttr('disabled').removeClass('disabled button-disabled button-primary-disabled');
+        jQuery('#preview-action a').removeAttr('disabled').removeClass('disabled button-disabled button-primary-disabled');
+		jQuery('#publishing-action .spinner').removeClass('is-active');
    }
 
    /* field settings when select */
@@ -490,9 +497,17 @@ jQuery( document ).ready( function () {
          }
          var stepinfo = { };
             stepinfo = response.data;
-            jQuery( "#step-select" ).find( 'option' ).remove();
-            jQuery( "#step-select" ).append( "<option value='" + stepinfo["first"][0][0] + "'>" + stepinfo["first"][0][1] + "</option>" );
-            jQuery( "#step-select" ).change();
+
+            var stepDrop = jQuery( "#step-select" );
+            stepDrop.find( 'option' ).remove();
+            key = 'first';
+
+            if(owf_post_status === 'pub-with-approver'){
+                key = 'last';
+            }
+
+            stepDrop.append( "<option value='" + stepinfo[key][0][0] + "'>" + stepinfo[key][0][1] + "</option>" );
+            stepDrop.change();
       } );
    }
    

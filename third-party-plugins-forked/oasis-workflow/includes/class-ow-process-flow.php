@@ -128,112 +128,127 @@ class OW_Process_Flow {
     */
    public function validate_submit_to_workflow() {
 
-      // nonce check
-      check_ajax_referer( 'owf_signoff_ajax_nonce', 'security' );
+        // nonce check
+        check_ajax_referer( 'owf_signoff_ajax_nonce', 'security' );
 
-      $step_id = intval( $_POST[ 'step_id' ] );
+        $step_id = intval( $_POST[ 'step_id' ] );
 
-      $form = $_POST[ 'form' ];
-      parse_str( $form, $_POST );
-	  $action_name = '';
+        $form = $_POST[ 'form' ];
+        parse_str( $form, $_POST );
+        $action_name = '';
 
-      $post_tag_count = 0;
-      if ( ! empty( $_POST[ 'tax_input' ][ 'post_tag' ] ) ) {
-         $post_tag_count = count( explode( ',', sanitize_text_field( $_POST[ 'tax_input' ][ 'post_tag' ] ) ) );
-      }
-      // for some reason, there is an entry for "0" in the list, so lets minus that
-      $post_category_count = ( isset( $_POST[ 'post_category' ] ) ) ? intval( count( $_POST[ 'post_category' ] ) ) - 1 : 0;
+        $post_tag_count = 0;
+        if ( ! empty( $_POST[ 'tax_input' ][ 'post_tag' ] ) ) {
+            $post_tag_count = count( explode( ',', sanitize_text_field( $_POST[ 'tax_input' ][ 'post_tag' ] ) ) );
+        }
+        // for some reason, there is an entry for "0" in the list, so lets minus that
+        $post_category_count = ( isset( $_POST[ 'post_category' ] ) ) ? intval( count( $_POST[ 'post_category' ] ) ) - 1 : 0;
 
-      $data = @array_map( 'esc_attr', $_POST );
-      $post_id = $data[ 'post_ID' ];
-      
-      // capability check
-      if ( ! OW_Utility::instance()->is_post_editable( $post_id ) ) {
-         wp_die( __( 'You are not allowed to create/edit post.' ) );
-      }
+        $data = @array_map( 'esc_attr', $_POST );
+        $post_id = $data[ 'post_ID' ];
+        
+        // capability check
+        if ( ! OW_Utility::instance()->is_post_editable( $post_id ) ) {
+            wp_die( __( 'You are not allowed to create/edit post.' ) );
+        }
 
-      $post_title = isset( $data["post_title"] ) ? $data["post_title"] : '' ;
-      $post_excerpt = isset( $data[ 'excerpt' ] ) ? $data[ 'excerpt' ] : '';
-      $post_content =  isset( $_POST['content'] ) ? $_POST['content'] : '';
-      $user_provided_due_date = $data[ 'hi_due_date' ];
+        $post_title = isset( $data["post_title"] ) ? $data["post_title"] : '' ;
+        $post_excerpt = isset( $data[ 'excerpt' ] ) ? $data[ 'excerpt' ] : '';
+        $post_content =  isset( $_POST['content'] ) ? $_POST['content'] : '';
+        $user_provided_due_date = $data[ 'hi_due_date' ];
 
-      // returns the post id of autosave post
-      // ref :  https://wordpress.org/support/topic/need-to-invoke-autosave-programmatically-before-running-a-custom-action?replies=4#post-7853159
-      //$saved_post_id = wp_create_post_autosave( $_POST );
-      // create an array of all the inputs
-      $submit_to_workflow_params = array(
-          "step_id" => $step_id,
-          "step_decision" => "complete",
-          "history_id" => "", //since the post is being submitted to a workflow, so no history_id exists
-          "post_id" => $post_id,
-          "post_content" => $post_content,
-          "post_title" => $post_title,
-          "post_tag" => $post_tag_count,
-          "category" => $post_category_count,
-          "post_excerpt" => $post_excerpt
-      );
+        // returns the post id of autosave post
+        // ref :  https://wordpress.org/support/topic/need-to-invoke-autosave-programmatically-before-running-a-custom-action?replies=4#post-7853159
+        //$saved_post_id = wp_create_post_autosave( $_POST );
+        // create an array of all the inputs
+        $submit_to_workflow_params = array(
+            "step_id" => $step_id,
+            "step_decision" => "complete",
+            "history_id" => "", //since the post is being submitted to a workflow, so no history_id exists
+            "post_id" => $post_id,
+            "post_content" => $post_content,
+            "post_title" => $post_title,
+            "post_tag" => $post_tag_count,
+            "category" => $post_category_count,
+            "post_excerpt" => $post_excerpt
+        );
 
-      $validation_result = array();
-      $messages = "";
+        $validation_result = array();
+        $messages = "";
 
-      // Check if due date selected is past date if yes show error message
-      $valid_due_date = $this->validate_due_date( $user_provided_due_date );
-      if ( ! $valid_due_date ) {
-         $due_date_error_message = __( 'Due date must be greater than the current date.', 'oasisworkflow' );
-         array_push( $validation_result, $due_date_error_message );
-      }
+        // Check if due date selected is past date if yes show error message
+        $valid_due_date = $this->validate_due_date( $user_provided_due_date );
+        if ( ! $valid_due_date ) {
+            $due_date_error_message = __( 'Due date must be greater than the current date.', 'oasisworkflow' );
+            array_push( $validation_result, $due_date_error_message );
+        }
 
-      // let the filter excute pre submit-to-workflow validations and return validation error messages, if any
-      $validation_result = apply_filters( 'owf_submit_to_workflow_pre', $validation_result, $submit_to_workflow_params );
+        // let the filter excute pre submit-to-workflow validations and return validation error messages, if any
+        $validation_result = apply_filters( 'owf_submit_to_workflow_pre', $validation_result, $submit_to_workflow_params );
 
-      if ( count( $validation_result ) > 0 ) {
-         $messages .= "<div id='message' class='error error-message-background '>";
-         $messages .= '<p>' . implode( "<br>", $validation_result ) . '</p>';
-         $messages .= "</div>";
-         wp_send_json_error( array( 'errorMessage' => $messages ) );
-      }
+        if ( count( $validation_result ) > 0 ) {
+            $messages .= "<div id='message' class='error error-message-background '>";
+            $messages .= '<p>' . implode( "<br>", $validation_result ) . '</p>';
+            $messages .= "</div>";
+            wp_send_json_error( array( 'errorMessage' => $messages ) );
+        }
 
-	  if (!empty($_POST['owf_action_name'])) {
-         $action_name = sanitize_text_field($_POST['owf_action_name']);
-      }
+        if (!empty($_POST['owf_action_name'])) {
+            $action_name = sanitize_text_field($_POST['owf_action_name']);
+        }
 
-	  //STORE PRE WORKFLOW POST STATUS + TEAM ASSIGNED + PAGE THEME - USED IF WORKFLOW IS ABORTED
-      $current_post_status = get_post_status($post_id);
-      $current_team =  get_post_meta($post_id, 'rpg-team', true);
-      $current_theme = get_post_meta($post_id, 'rpg-theme', true);
-      add_post_meta($post_id, '_rpg_pre_worflow_status', $current_post_status, true);
-      add_post_meta($post_id, '_rpg_pre_worflow_team', $current_team, true);
-      add_post_meta($post_id, '_rpg_pre_worflow_theme', $current_theme, true);
+        //STORE PRE WORKFLOW POST STATUS + TEAM ASSIGNED + PAGE THEME - USED IF WORKFLOW IS ABORTED
+        $current_post_status = get_post_status($post_id);
+        $current_team =  get_post_meta($post_id, 'rpg-team', true);
+        $current_theme = get_post_meta($post_id, 'rpg-theme', true);
+        add_post_meta($post_id, '_rpg_pre_worflow_status', $current_post_status, true);
+        add_post_meta($post_id, '_rpg_pre_worflow_team', $current_team, true);
+        add_post_meta($post_id, '_rpg_pre_worflow_theme', $current_theme, true);
 
-      $post_status = 'draft'; // default status, if nothing found
-	  $status_prefix = '';
-		// get post_status according to first step
-		$ow_workflow_service = new OW_Workflow_Service();
-		$step = $ow_workflow_service->get_step_by_id($step_id);
+        $post_status = 'draft'; // default status, if nothing found
+        $status_prefix = '';
 
-		if ( $step && $workflow = $ow_workflow_service->get_workflow_by_id( $step->workflow_id ) ) {
-			$wf_info = json_decode( $workflow->wf_info );
+        //GET post_status
+        $ow_workflow_service = new OW_Workflow_Service();
+        $step = $ow_workflow_service->get_step_by_id($step_id);
+
+        if ( $step && $workflow = $ow_workflow_service->get_workflow_by_id( $step->workflow_id ) ) {
+            $wf_info = json_decode( $workflow->wf_info );
+
 			if ( $wf_info->first_step && count( $wf_info->first_step ) == 1 ) {
-				$first_step = $wf_info->first_step[ 0 ];
-				if ( is_object( $first_step ) && isset( $first_step->post_status ) && ! empty( $first_step->post_status ) ) {
 
-					switch($action_name){
-						case 'delete':
-							$status_prefix = 'del-';
-							break;
-						case 'unpublish':
-							$status_prefix = 'unpub-';
-							break;
-						case 'revise':
-							$status_prefix = 'rev-';
-							break;
-						default:
-							$status_prefix = 'pub-';
-							break;
-					}
+                //CHECK IF STEP ID PASSED IN IS LAST STEP (i.e. PAGE IS BEING EDITED WHEN ON THE APPROVAL STEP)
+                $wfl_steps = get_object_vars($wf_info->steps);
+                $wfl_step = intval($step_id);
+                
+                if($wfl_step === count($wfl_steps)){
+                    //NEXT STEP IS THE LAST STEP
+                    $wfl_conn = get_object_vars($wf_info->conns);
+                    $post_status = $wfl_conn[$wfl_step-1]->post_status;
 
-					$post_status = $status_prefix.$first_step->post_status;
-				}
+                }else{
+                    //GO AND GET THE FIRST STEP IN THE WORKFLOW
+                    $first_step = $wf_info->first_step[0];
+                    if ( is_object( $first_step ) && isset( $first_step->post_status ) && ! empty( $first_step->post_status ) ) {
+
+                        switch($action_name){
+                            case 'delete':
+                                $status_prefix = 'del-';
+                                break;
+                            case 'unpublish':
+                                $status_prefix = 'unpub-';
+                                break;
+                            case 'revise':
+                                $status_prefix = 'rev-';
+                                break;
+                            default:
+                                $status_prefix = 'pub-';
+                                break;
+                        }
+
+                        $post_status = $status_prefix.$first_step->post_status;
+                    }
+                }   
 			}
 		}
 
@@ -727,6 +742,10 @@ class OW_Process_Flow {
       wp_send_json_error();
    }
 
+   function rpg_maybe_get($array = array(), $key = 0, $default = null) {
+	    return isset($array[$key]) ? $array[$key] : $default;
+    }
+
    /**
     * AJAX function - complete the workflow
     */
@@ -768,6 +787,94 @@ class OW_Process_Flow {
          $action_name = sanitize_text_field($_POST['owf_action_name']);
       }
 
+      //NEED TO SAVE OFF POST META ETC AS MAY HAVE CHANGED ON EDIT SCREEN
+     /* if($action_name == 'publish'){
+            
+            //GET ALL CURRENT META DATA FIRST
+            $meta = get_post_meta($post_id);
+
+            //GET POSTED DATA
+            $params = array();
+            parse_str($_POST['form'], $params);
+
+            if (array_key_exists('acf', $params)) {
+                $has_acf = true;
+            }
+            
+            if (array_key_exists('page_template', $params)) {
+                $has_pg_template = true;
+            }
+
+            if (array_key_exists('rpg-team', $params)) {
+                $has_team = true;
+            }
+
+            if (array_key_exists('rpg-theme', $params)) {
+                $has_theme = true;
+            }
+
+            //DEAL WITH POSTED ACF FIELDS FIRST
+            if($has_acf){
+                foreach ($params['acf'] as $name => $value) {
+                    $field = get_field_object($name);
+
+                    if($field){
+                        $key = rpg_maybe_get($meta, $field->name);
+                        if(!$key){
+                            //NOT IN THE META DATA SO ADD THE META DATA
+                            update_post_meta($post_id, $field->name, $value);
+                            update_post_meta($post_id, '_'.$field->name, $name);
+                        }
+                    }
+                }
+            }
+
+            //LOOP ROUND META DATA - PULL OUT VALUES FROM POSTED DATA TO UPDATE ANY MATCHES
+            if($meta) {
+                foreach($meta as $name => $meta_value) {
+                    if($has_acf){
+                        $key = rpg_maybe_get($meta, '_'.$name);
+                        if(!$key) continue;
+                   
+                        //ACF FIELD?
+                        if(substr($key, 0, 6) === 'field_'){
+
+                            //GET VALUE FROM POSTED DATA
+                            if (array_key_exists($key, $params['acf'])) {
+                                //UPDATE META DATA
+                                update_post_meta($post_id, $name, $params['acf'][$key], $meta_value);
+                            } 
+                        }
+                    }  
+                    
+                    //PAGE TEMPLATE
+                    if($has_pg_template){
+                        if ($name == '_wp_page_template') {
+                            //UPDATE META DATA
+                            update_post_meta($post_id, $name, $params['page_template'], $meta_value);
+                        }
+                    }
+
+                    //RPG TEAM
+                    if($has_team){
+                        if ($name == 'rpg-team') {
+                            //UPDATE META DATA
+                            update_post_meta($post_id, $name, $params['rpg-team'], $meta_value);
+                        }
+                    }
+
+                    //RPG THEME
+                    if($has_theme){
+                        if ($name == 'rpg-theme') {
+                            //UPDATE META DATA
+                            update_post_meta($post_id, $name, $params['rpg-theme'], $meta_value);
+                        }
+                    }
+
+                }
+            }
+        }
+*/
       // $_POST will get changed after the call to get_post_data, so get all the $_POST data before this call
       // get post data, either from the form or from the post_id
       $post_data = $this->get_post_data( $post_id );
@@ -2052,6 +2159,7 @@ class OW_Process_Flow {
 
       $page_var = isset( $_GET[ 'page' ] ) ? sanitize_text_field( $_GET[ "page" ] ) : "";
       $selected_user = intval( $selected_user );
+      $post_status = '';
       $post_id = "";
       if ( isset( $_GET[ 'post' ] ) ) {
          $post_id = intval( $_GET[ "post" ] );
@@ -2093,6 +2201,12 @@ class OW_Process_Flow {
          }
       }
 
+      //CHECK FOR pub-sign-off i.e. PAGE IS BEING EDITED PRIOR TO SIGN OFF
+      if($post_status == 'pub-sign-off'){
+        return 999;
+      }
+
+
       // there are no current tasks, so most likely this post is not in any workflow
       if ( 0 === $current_tasks ) {
          return 'submit';
@@ -2131,6 +2245,7 @@ class OW_Process_Flow {
 
       $users_and_process_info = null;
       $wf_info = $workflow_service->get_step_by_id( $step_id );
+
       if ( $wf_info ) {
          $step_info = json_decode( $wf_info->step_info );
 
@@ -2647,35 +2762,48 @@ class OW_Process_Flow {
 		if( $step && $workflow = $ow_workflow_service->get_workflow_by_id( $step->workflow_id ) ) {
 			$wf_info = json_decode( $workflow->wf_info );
 			if( $wf_info->first_step && count( $wf_info->first_step ) == 1 ) {
-				$first_step = $wf_info->first_step[0];
-				if( is_object( $first_step ) && isset( $first_step->post_status ) && ! empty( $first_step->post_status ) ) {
 
-					switch($action_name){
-						case 'delete':
-							$status_prefix = 'del-';
-							break;
-						case 'unpublish':
-							$status_prefix = 'unpub-';
-							break;
-						case 'revise':
-							$status_prefix = 'rev-';
-							break;
-						case 'publish':
-							$status_prefix = 'pub-';
-							//CHECK TO SEE IF THIS IS A REVISION
-							$parent_id = $this->get_revision_of($post);
-							if ($parent_id) {
-								$status_prefix = 'rev-';
-							}
-							break;
-						default:
-							$status_prefix = 'pub-';
-							break;
-					}
+                //CHECK IF STEP ID PASSED IN IS LAST STEP (i.e. PAGE IS BEING EDITED WHEN ON THE APPROVAL STEP)
+                $wfl_steps = get_object_vars($wf_info->steps);
 
-					$post_status = $status_prefix.$first_step->post_status;
-					$this->ow_update_post_status($post_id, $post_status);
-				}
+                if($step_id === count($wfl_steps)){
+                    //NEXT STEP IS THE LAST STEP
+                    $wfl_conn = get_object_vars($wf_info->conns);
+                    $post_status = $wfl_conn[$step_id-1]->post_status;
+
+                }else{
+                    //GO AND GET THE FIRST STEP IN THE WORKFLOW
+                    $first_step = $wf_info->first_step[0];
+                    if ( is_object( $first_step ) && isset( $first_step->post_status ) && ! empty( $first_step->post_status ) ) {
+
+                        switch($action_name){
+                            case 'delete':
+                                $status_prefix = 'del-';
+                                break;
+                            case 'unpublish':
+                                $status_prefix = 'unpub-';
+                                break;
+                            case 'revise':
+                                $status_prefix = 'rev-';
+                                break;
+                            case 'publish':
+                                $status_prefix = 'pub-';
+                                //CHECK TO SEE IF THIS IS A REVISION
+                                $parent_id = $this->get_revision_of($post);
+                                if ($parent_id) {
+                                    $status_prefix = 'rev-';
+                                }
+                                break;
+                            default:
+                                $status_prefix = 'pub-';
+                                break;
+                        }
+    
+                        $post_status = $status_prefix.$first_step->post_status;
+                    }
+                }  
+                
+                $this->ow_update_post_status($post_id, $post_status);
 			}
 		}
 
@@ -3878,7 +4006,6 @@ class OW_Process_Flow {
       $selected_user = (int) isset( $_GET[ 'user' ] ) ? $_GET[ 'user' ] : get_current_user_id();
 
       $chkResult = $this->workflow_submit_check( $selected_user );
-
       $inbox_service = new OW_Inbox_Service();
 
       if ( get_option( "oasiswf_activate_workflow" ) == "active" &&
@@ -3886,23 +4013,24 @@ class OW_Process_Flow {
 
          if ( $chkResult == "inbox" ) {
             $this->enqueue_and_localize_submit_step_script();
-
             $inbox_service->enqueue_and_localize_script();
-         } else if ( current_user_can( 'ow_submit_to_workflow' ) && $chkResult == "submit" &&
-                 is_admin() && preg_match_all( '/page=oasiswf(.*)|post-new\.(.*)|post\.(.*)/', $_SERVER[ 'REQUEST_URI' ], $matches ) ) {
 
-            include( OASISWF_PATH . "includes/pages/subpages/submit-workflow.php" );
-            $this->enqueue_and_localize_submit_workflow_script();
-        } else {
-            if ( current_user_can( 'ow_sign_off_step' ) && is_numeric( $chkResult ) &&
+        } else if ( current_user_can( 'ow_sign_off_step' ) && is_numeric( $chkResult ) &&
                     is_admin() && preg_match_all( '/page=oasiswf(.*)|post-new\.(.*)|post\.(.*)/', $_SERVER[ 'REQUEST_URI' ], $matches ) ) {
                include( OASISWF_PATH . "includes/pages/subpages/submit-step.php" );
                $this->enqueue_and_localize_submit_step_script();
 
                $inbox_service->enqueue_and_localize_script();
             }
-         }
 
+        else {
+            if (current_user_can( 'ow_submit_to_workflow' ) && $chkResult == "submit" &&
+                 is_admin() && preg_match_all( '/page=oasiswf(.*)|post-new\.(.*)|post\.(.*)/', $_SERVER[ 'REQUEST_URI' ], $matches ) ) {
+
+                include( OASISWF_PATH . "includes/pages/subpages/submit-workflow.php" );
+                $this->enqueue_and_localize_submit_workflow_script();
+            }
+        }
          /* filter to add more scripts, like "make revision" */
          apply_filters( 'owf_step_signoff_popup_setup', $chkResult );
 
