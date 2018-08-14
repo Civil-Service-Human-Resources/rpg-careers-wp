@@ -94,7 +94,7 @@ class rpgutils{
 		add_action('admin_enqueue_scripts', array($this, 'media_team_scripts'));
 		add_action('add_attachment', array($this, 'media_add_attachment'));
 		add_filter('upload_mimes', array($this, 'media_mime_types'), 1, 1);
-		add_filter('wp_handle_upload_prefilter', array($this, 'media_check_size'));
+		add_filter('wp_handle_upload_prefilter', array($this, 'media_check_upload_file'));
 		add_action('admin_head', array($this, 'media_css'));
 		add_action('post-upload-ui', array($this, 'media_max_size_info'));
 		add_filter('option_uploads_use_yearmonth_folders', '__return_false', 100);
@@ -1301,23 +1301,70 @@ switch ($post_status) {
 		$mime_types['gif'] = 'image/gif';
 		$mime_types['png'] = 'image/png';
 		$mime_types['mp4|m4v'] = 'video/mp4';
-
+		
 		return $mime_types;
 	}
 
-	function media_check_size($file){
+	function media_check_upload_file($file){
 
-		$media_size = $file['size']/1024;
-		$media_limit_large = MEDIA_LIMIT_LARGE;
-		$media_limit = MEDIA_LIMIT;
-		$media_is_video = false;
+		//SCAN THE FILE BEING UPLOADED
+		if(MEDIA_SCAN_ON) {
+			$file_info = array('file' => '@' . $file['tmp_name'], 'filename' => $file['name']);
+			$ch_error = false;
 
-		if (strpos($file['type'], 'video') !== false) {
-			$media_limit = $media_limit_large;
+			$ch = curl_init(MEDIA_SCAN_SEND);                                                                      
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');                                                                     
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $file_info);            
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  
+			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, MEDIA_SCAN_CONNECT_TIMEOUT);
+			curl_setopt($ch, CURLOPT_TIMEOUT, MEDIA_SCAN_TIMEOUT);   
+			curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+			curl_setopt($ch, CURLOPT_USERPWD, MEDIA_SCAN_AUTH_A . ':' . MEDIA_SCAN_AUTH_B);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);  
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);                                                                
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));                                                                                                                   
+			
+			$result = json_decode(curl_exec($ch));
+			
+			if($errno = curl_errno($ch)) {
+				$err_message = curl_strerror($errno);
+				$ch_error = true;
+			}
+
+			$returnCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			curl_close($ch);
+			
+			if ($ch_error) {
+				//GOT A cURL ERROR
+				$file['error'] = 'Media cannot be added - scan request has failed (' . $err_message . ')';
+			}else{
+				if($returnCode === 200){
+					//SUCCESSFUL SCAN HAS TAKEN PLACE - CHECK RETURN CODE
+					if($result === 'CSHR_301'){
+						//BAD FILE
+						$file['error'] = 'Media cannot be added - file was found to contain a known virus or malware';
+					}
+				}else{
+					//SCAN REQUEST HAS FAILED
+					$file['error'] = 'Media cannot be added - scan request has returned a failure code (' . $returnCode . ')';
+				}
+			}
 		}
 
-		if ($media_size > $media_limit){
-			$file['error'] = 'Media cannot be added - file size is too large.  The maximum allowed size is '. $media_limit .'KB.';
+		if($file['error'] === UPLOAD_ERR_OK){
+			//CHECK FILE SIZE
+			$media_size = $file['size']/1024;
+			$media_limit_large = MEDIA_LIMIT_LARGE;
+			$media_limit = MEDIA_LIMIT;
+			$media_is_video = false;
+
+			if (strpos($file['type'], 'video') !== false) {
+				$media_limit = $media_limit_large;
+			}
+
+			if ($media_size > $media_limit){
+				$file['error'] = 'Media cannot be added - file size is too large.  The maximum allowed size is '. $media_limit .'KB.';
+			}
 		}
 
 		return $file;
