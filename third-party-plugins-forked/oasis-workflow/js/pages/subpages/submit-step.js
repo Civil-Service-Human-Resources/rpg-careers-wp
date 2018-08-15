@@ -474,9 +474,9 @@ jQuery( document ).ready( function () {
             } else {
                 jQuery("#save-post").click();
 
-               // if(response.data.new_post_status == 'publish'){
-                 //   setTimeout(function() {window.location.replace(window.location.origin + '/wp-admin/edit.php?post_type=page');}, 2000);
-                //}
+               if(response.data.new_post_status == 'publish'){
+                    window.location.replace(window.location.origin + '/wp-admin/edit.php?post_type=page');
+                }
             }
          }
       } );

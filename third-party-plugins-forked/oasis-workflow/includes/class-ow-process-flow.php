@@ -743,6 +743,9 @@ class OW_Process_Flow {
    }
 
    function rpg_maybe_get($array = array(), $key = 0, $default = null) {
+
+
+
 	    return isset($array[$key]) ? $array[$key] : $default;
     }
 
@@ -788,7 +791,7 @@ class OW_Process_Flow {
       }
 
       //NEED TO SAVE OFF POST META ETC AS MAY HAVE CHANGED ON EDIT SCREEN
-     /* if($action_name == 'publish'){
+      if($action_name == 'publish'){
             
             //GET ALL CURRENT META DATA FIRST
             $meta = get_post_meta($post_id);
@@ -800,7 +803,7 @@ class OW_Process_Flow {
             if (array_key_exists('acf', $params)) {
                 $has_acf = true;
             }
-            
+
             if (array_key_exists('page_template', $params)) {
                 $has_pg_template = true;
             }
@@ -819,7 +822,7 @@ class OW_Process_Flow {
                     $field = get_field_object($name);
 
                     if($field){
-                        $key = rpg_maybe_get($meta, $field->name);
+                        $key = $this->rpg_maybe_get($meta, $field->name);
                         if(!$key){
                             //NOT IN THE META DATA SO ADD THE META DATA
                             update_post_meta($post_id, $field->name, $value);
@@ -828,21 +831,21 @@ class OW_Process_Flow {
                     }
                 }
             }
-
+           
             //LOOP ROUND META DATA - PULL OUT VALUES FROM POSTED DATA TO UPDATE ANY MATCHES
             if($meta) {
                 foreach($meta as $name => $meta_value) {
                     if($has_acf){
-                        $key = rpg_maybe_get($meta, '_'.$name);
+                        $key = $this->rpg_maybe_get($meta, '_'.$name);
                         if(!$key) continue;
-                   
+                        $key = $key[0];
+
                         //ACF FIELD?
                         if(substr($key, 0, 6) === 'field_'){
-
                             //GET VALUE FROM POSTED DATA
                             if (array_key_exists($key, $params['acf'])) {
                                 //UPDATE META DATA
-                                update_post_meta($post_id, $name, $params['acf'][$key], $meta_value);
+                                update_post_meta($post_id, $name, $params['acf'][$key], $meta_value[0]);
                             } 
                         }
                     }  
@@ -851,7 +854,7 @@ class OW_Process_Flow {
                     if($has_pg_template){
                         if ($name == '_wp_page_template') {
                             //UPDATE META DATA
-                            update_post_meta($post_id, $name, $params['page_template'], $meta_value);
+                            update_post_meta($post_id, $name, $params['page_template'], $meta_value[0]);
                         }
                     }
 
@@ -859,7 +862,7 @@ class OW_Process_Flow {
                     if($has_team){
                         if ($name == 'rpg-team') {
                             //UPDATE META DATA
-                            update_post_meta($post_id, $name, $params['rpg-team'], $meta_value);
+                            update_post_meta($post_id, $name, $params['rpg-team'], $meta_value[0]);
                         }
                     }
 
@@ -867,14 +870,14 @@ class OW_Process_Flow {
                     if($has_theme){
                         if ($name == 'rpg-theme') {
                             //UPDATE META DATA
-                            update_post_meta($post_id, $name, $params['rpg-theme'], $meta_value);
+                            update_post_meta($post_id, $name, $params['rpg-theme'], $meta_value[0]);
                         }
                     }
 
                 }
             }
         }
-*/
+
       // $_POST will get changed after the call to get_post_data, so get all the $_POST data before this call
       // get post data, either from the form or from the post_id
       $post_data = $this->get_post_data( $post_id );
