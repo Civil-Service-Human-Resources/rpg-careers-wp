@@ -47,9 +47,11 @@ get_header(); ?>
         <div class="content-two-col__first">
 			<div class="text-image-list text-image-list--three-col">
 				<?php $list_items = get_post_meta($post_id, 'list_repeater_items', true);
-				if($list_items):
-				for ($i=0;$i<$list_items;$i++) { ?>
-					<div class="text-image-list__item">
+				if($list_items):?>
+				<ul class="text-image-list text-image-list--three-col">
+				<?php for ($i=0;$i<$list_items;$i++) { ?>
+					<li>
+						<a href="<?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_target', true)); ?>" class="text-image-list__item">
 					<?php 
 					$item_theme = get_post_meta($post_id, 'list_repeater_items_'.$i.'_team', true);
 					$logo_band = '';
@@ -109,10 +111,14 @@ get_header(); ?>
 						</div>
 						<div class="text-image-list__content">
 							<p class="smaller"><?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_body', true)); ?></p>
-							<a href="<?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_target', true)); ?>" class="readmore-link"><span><?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_target_text', true)); ?></span><i aria-hidden="true"></i></a>
+							<div class="readmore-link">
+								<span><?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_target_text', true)); ?></span><i aria-hidden="true"></i>
+							</div>
 						</div>
-					</div>
+						</a>
+					</li>
 				<?php } ?>
+				</ul>
 				<?php endif; ?>
 			</div>
         </div>
