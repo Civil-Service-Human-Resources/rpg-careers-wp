@@ -45,22 +45,24 @@ get_header(); ?>
 <div class="content-two-col content-two-col--two-thirds-left">
     <div class="content-two-col__inner">
         <div class="content-two-col__first">
-			<div class="text-image-list">
 		<?php $main_items = get_post_meta($post_id, 'main_repeater_items', true);
-		if($main_items):
-			for ($i=0;$i<$main_items;$i++) { ?>
-                <div class="text-image-list__item">
+			if($main_items):?>
+			<ul class="text-image-list">
+			<?php for ($i=0;$i<$main_items;$i++) { ?>
+				<li>
+					<a href="<?php echo esc_html(get_post_meta($post_id, 'main_repeater_items_'.$i.'_heading_target', true)); ?>" class="text-image-list__item">
                     <div class="text-image-list__img">
 						<img src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'main_repeater_items_'.$i.'_image', true), 'medium_large')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'main_repeater_items_'.$i.'_image', true), '_wp_attachment_image_alt', true); ?>">
                     </div>
                     <div class="text-image-list__content">
-                        <h2 class="h3"><a href="<?php echo esc_html(get_post_meta($post_id, 'main_repeater_items_'.$i.'_heading_target', true)); ?>"><?php echo esc_html(get_post_meta($post_id, 'main_repeater_items_'.$i.'_heading', true)); ?></a></h2>
+                        <h2 class="h3"><?php echo esc_html(get_post_meta($post_id, 'main_repeater_items_'.$i.'_heading', true)); ?></h2>
                         <p><?php echo esc_html(get_post_meta($post_id, 'main_repeater_items_'.$i.'_body', true)); ?></p>
                     </div>
-                </div>
+					</a>
+				</li>
             <?php } ?>
+			</ul>
 			<?php endif; ?>
-			</div>
         </div>
         <div class="content-two-col__last">
             <div class="aside aside--img-top">
