@@ -730,7 +730,12 @@ switch ($post_status) {
 					switch(a){
 						case 'save':
 							h.setAttribute('style','display:none;');
-							if(g) g.setAttribute('style','float:right;');
+							if(g) {
+								g.setAttribute('style','float:right;');
+								if(g.classList){
+									g.classList.remove('disabled', 'button-disabled', 'button-primary-disabled');
+								}
+							}
 							break;
 						case 'revise':
 							h.setAttribute('style','display:none;');
