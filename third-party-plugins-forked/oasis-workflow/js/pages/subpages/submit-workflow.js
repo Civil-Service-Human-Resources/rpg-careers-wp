@@ -245,6 +245,7 @@ jQuery( document ).ready( function () {
                }
             }
             add_option_to_select("actors-list-select", users, 'name', 'ID');
+            check_for_dupes('actors-list-select');
          }
 
          action_setting("step", "after");

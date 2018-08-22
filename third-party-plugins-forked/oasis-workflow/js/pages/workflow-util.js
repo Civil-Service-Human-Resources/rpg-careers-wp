@@ -49,6 +49,17 @@ function add_option_to_select(obj,dt,lbl,vl)
 	}	
 }
 
+function check_for_dupes(a){
+	var optValues =[];
+	jQuery('#' + a +' option').each(function(){
+		if($.inArray(this.value, optValues) >-1){
+			jQuery(this).remove()
+		}else{
+			optValues.push(this.value);
+		}
+	});
+}
+
 function numKeys(obj)
 {
     var count = 0;
