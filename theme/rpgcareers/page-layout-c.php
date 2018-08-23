@@ -97,12 +97,12 @@
 		<div class="content-two-col__inner">
 			<div class="content-two-col__first">
 				<div class="image image--spaced">
-					<iframe width="480" height="235" src="<?php echo esc_html($media_embed_link); ?>" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+					<iframe width="480" height="235" src="<?php echo esc_url($media_embed_link); ?>" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 				</div>
 			</div>
 			<div class="content-two-col__last">
 				<blockquote><p class="intro"><?php echo esc_html($media_embed_quote); ?></p></blockquote>
-				<p class="intro"><a href="<?php echo esc_html($media_embed_cta_link); ?>" class="cta--arrow-link"><?php echo esc_html($media_embed_cta_text); ?></a></p>
+				<p class="intro"><a href="<?php echo esc_url($media_embed_cta_link); ?>" class="cta--arrow-link"><?php echo esc_html($media_embed_cta_text); ?></a></p>
 			</div>
 		</div>
 	</div>

@@ -868,7 +868,7 @@ switch ($post_status) {
 		global $post;
 		$gtm_head = '';
 
-		$title = (is_404() ? 'Page not found' : $post->post_title);
+		$title = (is_404() ? 'Page not found' : esc_html($post->post_title));
 		$author = (is_404() ? 'NOT_SET' : get_the_author_meta('display_name', $post->post_author));
 		$post_id = (is_404() ? 'NOT_SET' :  $post->ID);
 		$post_date = (is_404() ? 'NOT_SET' : $post->post_date_gmt);
