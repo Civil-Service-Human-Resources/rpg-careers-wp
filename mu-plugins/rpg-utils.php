@@ -647,9 +647,15 @@ switch ($post_status) {
 				var j = document.getElementById('submitdiv');
 				var e = document.querySelectorAll('input[name=page_action]'), f = document.querySelector('input[name=page_action]:checked');
 				var g = document.getElementById('save-post'), h = document.getElementById('workflow_submit'), i, l, m, n;
-				var o = document.getElementById('workflow_revise_draft'), p = document.getElementById('post-preview'), q = document.getElementById('exit_link'),r = false;
+				var o = document.getElementById('workflow_revise_draft'), p = document.getElementById('post-preview'), q = document.getElementById('exit_link'),r = false,
+				s = document.getElementById('claimButton'), t, u = 0;
 
 				j.setAttribute('style','opacity:0.3;');
+				if(s!==null){
+					s.setAttribute('style','display:none;');
+				}else{
+					t = setInterval(getElementJ, 500);
+				}
 
 				switch(owf_post_status){
 					case 'del-with-approver':
@@ -848,6 +854,20 @@ switch ($post_status) {
 						clearInterval(i);
 						j.setAttribute('style','opacity:1;');
 					}
+				}
+
+				function getElementJ(){
+					s = document.getElementById('claimButton')
+					if(s!==null){
+						clearInterval(t);
+						j.setAttribute('style','opacity:1;');
+						s.setAttribute('style','display:none;');
+					}else{
+						if(u===5){
+							clearInterval(t);
+						}
+					}
+					u++;
 				}
 
 			})();
