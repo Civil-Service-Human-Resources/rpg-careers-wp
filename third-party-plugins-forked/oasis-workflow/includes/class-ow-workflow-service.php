@@ -828,6 +828,15 @@ class OW_Workflow_Service {
       return $step_info_array;
    }
 
+    public function get_latest_step_id_for_post($post_id){
+        global $wpdb;
+
+        $post_id = (int)$post_id;
+        $result = $wpdb->get_row( $wpdb->prepare("SELECT step_id FROM " . OW_Utility::instance()->get_action_history_table_name() . " WHERE post_id = %d ORDER BY ID desc LIMIT 1", $post_id));
+        $latest_step  = $result->step_id;
+        return $latest_step;
+    }
+
    /**
     * Get Workflows by validity
     *
