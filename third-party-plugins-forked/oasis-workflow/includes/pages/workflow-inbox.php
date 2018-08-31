@@ -26,6 +26,34 @@ $sign_off_label = $workflow_terminology_options['signOffText'];
 $abort_workflow_label = $workflow_terminology_options['abortWorkflowText'];
 $display_name = OW_Utility::instance()->get_display_name($selected_user);
 $header = $ow_inbox_service->get_table_header();
+
+
+//WORK OUT STEPS ACCESS CONTROL
+$user_roles = get_userdata($selected_user)->roles;
+
+//ROLES FOR EACH WORKFLOW STEP
+$roles_per_step = $ow_workflow_service->get_step_info();
+
+//WHICH STEPS CAN CURRENT USER SEE WORKFLOW ITEMS IN
+$step_access = array();
+$it = 0;
+
+foreach($roles_per_step as &$step_roles){
+	foreach($step_roles as &$step_role){
+		$decoded = json_decode($step_role);
+		$roles_in_step = $decoded->task_assignee->roles;
+		$common = array_intersect($roles_in_step, $user_roles);
+
+		if (sizeof($common)>0) {
+			$step_access[$it] = true;
+			break;
+		} else{
+			$step_access[$it] = false;
+		}
+	}
+	$it++;
+}
+
 ?>
 <div class="wrap">
     <div id="icon-edit" class="icon32 icon32-posts-post"><br></div>
@@ -71,7 +99,7 @@ $header = $ow_inbox_service->get_table_header();
                 <?php OW_Utility::instance()->get_page_link( $count_posts, $page_number, $per_page ); ?>
             </div>
         </div>
-        <table class="wp-list-table widefat fixed posts" cellspacing="0" border=0>
+        <table class="wp-list-table widefat fixed posts">
             <thead><?php echo $header; ?></thead>
             <tfoot><?php echo $header; ?></tfoot>
             <tbody id="coupon-list">
@@ -85,11 +113,23 @@ $header = $ow_inbox_service->get_table_header();
 						foreach ( $inbox_items as $inbox_item ){
 							if ( $count >= $end )
 								break;
+							
+							//DOES CURRENT USER HAVE RIGHTS TO SEE THIS WORKFLOW ITEM?
+							//GET LATEST STEP ID FROM ACTION HISTORY TABLE - NEED TO DO THIS AS $ow_process_flow->get_assigned_post DOES NOT RETURN ALL ROWS JUST FIRST ONE FOUND
+							$latest_step = $ow_workflow_service->get_latest_step_id_for_post($inbox_item->post_id);
+
+							//CHECK THIS AGAINST THE step_access ARRAY
+							if(!$step_access[$latest_step-1]){
+								//NO ACCESS SO DO NOT RENDER ITEM
+								break;
+							}
+							
 							if ( $count >= $start )
 							{
 								$post = get_post( $inbox_item->post_id );
 								$user = get_userdata( $post->post_author ) ;
 								$stepId = $inbox_item->step_id;
+
 								if ( $stepId <= 0 || $stepId == "" ) {
 									$stepId = $inbox_item->review_step_id;
 								}
@@ -105,9 +145,9 @@ $header = $ow_inbox_service->get_table_header();
 								if( $due_date != "" && strtotime( $due_date ) < strtotime( $current_date ) ) {
    								$past_due_date_row_class = 'past-due-date-row';
    								$past_due_date_field_class = 'past-due-date-field';
+								}
 
-								 }
-                        echo "<tr id='post-{$inbox_item->post_id}'
+								echo "<tr id='post-{$inbox_item->post_id}'
                         	class='post-{$inbox_item->post_id} post type-post $past_due_date_row_class
                         	status-pending format-standard hentry category-uncategorized alternate iedit author-other'> " ;
                         $workflow_post_id = esc_attr( $inbox_item->post_id );
