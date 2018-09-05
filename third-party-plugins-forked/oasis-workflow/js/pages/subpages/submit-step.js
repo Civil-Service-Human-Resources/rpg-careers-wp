@@ -162,11 +162,16 @@ jQuery( document ).ready( function () {
             }
         }
 
-        if(RPGUtil.validrunrpg && RPGUtil.validrunacf){
-            if(!acf.validation.valid || !RPGUtil.valid){
-                resetControls();
+        if(typeof(RPGUtil)!=='undefined'){
+            if(RPGUtil.validrunrpg && RPGUtil.validrunacf){
+                if(!acf.validation.valid || !RPGUtil.valid){
+                    resetControls();
+                }
             }
         }
+
+        setTimeout(function(){check_for_dupes('actors-list-select');},800);
+        setTimeout(function(){check_for_dupes('actors-set-select');},800);
     });
 
     function resetControls(){
@@ -318,6 +323,7 @@ jQuery( document ).ready( function () {
             }
             add_option_to_select("actors-list-select", users, 'name', 'ID');
             check_for_dupes('actors-list-select');
+            check_for_dupes('actors-set-select');
          }
       });
    });
