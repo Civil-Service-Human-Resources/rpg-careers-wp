@@ -1303,7 +1303,8 @@ class OW_Process_Flow {
     */
    public function get_assigned_users() {
       global $wpdb;
-	  $roles_where = false;
+      $roles_where = false;
+      $content_admin = false;
 
       $sql = "SELECT distinct USERS.ID, USERS.display_name FROM
 		(SELECT U1.ID, U1.display_name FROM {$wpdb->users} AS U1
@@ -1316,23 +1317,28 @@ class OW_Process_Flow {
 
 		$sql .=  " LEFT JOIN (SELECT t.term_id, t.name as team, tr.object_id FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id INNER JOIN wp_term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id WHERE tt.taxonomy = 'content_team') AS D ON USERS.ID = D.object_id";
 
+        $user = wp_get_current_user();
+        if (in_array('content_admin', (array)$user->roles)) {
+            $content_admin = true;
+        }
+
 		//ONLY FILTER ON ROLE IF CURRENT USER IS NOT AN ADMIN ROLE
 		if(!current_user_can('manage_options')){
+            if(!$content_admin){
+                //GET ROLES FOR CURRENT USER
+                $roles = $user->roles;
+                $loop_count = 0;
+                $roles_where = true;
 
-			//GET ROLES FOR CURRENT USER
-			$user = wp_get_current_user();
-			$roles = $user->roles;
-			$loop_count = 0;
-			$roles_where = true;
+                $sql .= " LEFT JOIN wp_usermeta as bb ON USERS.ID = bb.user_id WHERE bb.meta_key = 'wp_capabilities' AND ";
 
-			$sql .= " LEFT JOIN wp_usermeta as bb ON USERS.ID = bb.user_id WHERE bb.meta_key = 'wp_capabilities' AND ";
+                foreach ($roles as $role) {
 
-			foreach ($roles as $role) {
-
-				if($loop_count > 0){ $sql .= " OR "; }
-				$sql .= "bb.meta_value LIKE '%" . $role . "%'";
-				$loop_count ++;
-			}
+                    if($loop_count > 0){ $sql .= " OR "; }
+                    $sql .= "bb.meta_value LIKE '%" . $role . "%'";
+                    $loop_count ++;
+                }
+            }   
 		}
 
 		if(!OW_Utility::instance()->see_all_teams()){
