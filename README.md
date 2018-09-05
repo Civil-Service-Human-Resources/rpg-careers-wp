@@ -15,14 +15,6 @@ See LICENSE file in this repo.
 
 Store of the plugins that have been forked for the RPG Careers site
 
-## Metronet Tag Manager
-```
-https://wordpress.org/plugins/metronet-tag-manager/
-```
-```
-Baseline version: 1.2.7
-```
-
 ## Oasis Workflow
 ```
 https://en-gb.wordpress.org/plugins/oasis-workflow/
