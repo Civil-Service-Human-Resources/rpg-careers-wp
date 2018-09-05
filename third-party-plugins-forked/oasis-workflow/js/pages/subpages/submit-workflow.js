@@ -181,6 +181,10 @@ jQuery( document ).ready( function () {
                 resetControls();
             }
         }
+        
+        setTimeout(function(){check_for_dupes('actors-list-select');},800);
+        setTimeout(function(){check_for_dupes('actors-set-select');},800);
+        
     });
 
    /* On Change of Workflow Step during Submit to Workflow */
@@ -246,6 +250,7 @@ jQuery( document ).ready( function () {
             }
             add_option_to_select("actors-list-select", users, 'name', 'ID');
             check_for_dupes('actors-list-select');
+            check_for_dupes('actors-set-select');
          }
 
          action_setting("step", "after");

@@ -508,7 +508,7 @@ class OW_Process_Flow {
 
       $new_action_history_id = $this->submit_post_to_step_internal( $post_id, $sign_off_workflow_params );
       $submit_post_to_step_results[ "new_history_id" ] = $new_action_history_id;
-
+      
       $ow_history_service = new OW_History_Service();
 
       $history_details = $ow_history_service->get_action_history_by_id( $sign_off_workflow_params[ 'history_id' ] );
@@ -3330,8 +3330,8 @@ class OW_Process_Flow {
             if($pre_workflow_theme === ''){
                 $pre_workflow_theme = get_post_meta($post_id, 'rpg-theme', true);
             }
-
-			if($pre_workflow_status != ''){
+            
+            if($pre_workflow_status != ''){
                 $update_post = $wpdb->query($wpdb->prepare("UPDATE $wpdb->posts SET post_author = %s, post_status = %s WHERE ID = %d", $pre_workflow_author, $pre_workflow_status, $post_id));
                 
                 if($pre_workflow_team != ''){
@@ -3598,6 +3598,7 @@ class OW_Process_Flow {
     */
 
    private function save_review_action( $ddata, $action_history_id, $result, $action_name ) {
+      global $wpdb;
       $ow_history_service = new OW_History_Service();
       $action = $ow_history_service->get_action_history_by_id( $action_history_id );
 
@@ -3668,7 +3669,6 @@ class OW_Process_Flow {
 
 		if($pre_workflow_status != ''){
             $update_post = $wpdb->query($wpdb->prepare("UPDATE $wpdb->posts SET post_author = %s, post_status = %s WHERE ID = %d", $pre_workflow_author, $pre_workflow_status, $post_id));
-            
             if($pre_workflow_team != ''){
                 update_post_meta($post_id, 'rpg-team', $pre_workflow_team);
             }
