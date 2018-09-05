@@ -196,8 +196,8 @@ class OW_Plugin_Init {
       $position = apply_filters( 'ow_workflow_menu_position', $this->get_menu_position( '.8' ) );
 
 		$ow_process_flow = new OW_Process_Flow();
-		$inbox_count = $ow_process_flow->get_assigned_post_count();
-		$count = ($inbox_count) ? '<span class="update-plugins count"><span class="plugin-count">' . $inbox_count . '</span></span>' : '';
+		$inbox_count = $ow_process_flow->get_inbox_count();
+		$count = ($inbox_count > 0) ? '<span class="update-plugins count"><span class="plugin-count">' . $inbox_count . '</span></span>' : '';
 
 		// top level menu for Workflows
 		add_menu_page(
@@ -1979,7 +1979,7 @@ class OW_Plugin_Init {
 		wp_localize_script( 'owf-workflow-inbox', 'owf_workflow_inbox_vars', array(
 				'dateFormat' => OW_Utility::instance()->owf_date_format_to_jquery_ui_format( get_option( 'date_format' ) ),
 				'editDateFormat' => OW_Utility::instance()->owf_date_format_to_jquery_ui_format( OASISWF_EDIT_DATE_FORMAT ),
-				'abortWorkflowConfirm' => __( 'Are you sure to abort the workflow?', 'oasisworkflow' )
+				'abortWorkflowConfirm' => __( 'Are you sure you want to abort the workflow?', 'oasisworkflow' )
 		) );
 	}
 

@@ -17,7 +17,7 @@ $ow_workflow_service = new OW_Workflow_Service();
 
 // get assigned posts for selected user
 $inbox_items = $ow_process_flow->get_assigned_post( null, $selected_user );
-$count_posts = count( $inbox_items );
+$count_posts = $ow_process_flow->get_inbox_count();
 $per_page = OASIS_PER_PAGE;
 
 // get custom terminology
@@ -95,9 +95,6 @@ foreach($roles_per_step as &$step_roles){
                </div>
             <?php } ?>
             <ul class="subsubsub"></ul>
-            <div class="tablenav-pages">
-                <?php OW_Utility::instance()->get_page_link( $count_posts, $page_number, $per_page ); ?>
-            </div>
         </div>
         <table class="wp-list-table widefat fixed posts">
             <thead><?php echo $header; ?></thead>
@@ -121,7 +118,7 @@ foreach($roles_per_step as &$step_roles){
 							//CHECK THIS AGAINST THE step_access ARRAY
 							if(!$step_access[$latest_step-1]){
 								//NO ACCESS SO DO NOT RENDER ITEM
-								break;
+								continue;
 							}
 							
 							if ( $count >= $start )
@@ -240,6 +237,16 @@ foreach($roles_per_step as &$step_roles){
 							}
 							$count++;
 						}
+
+						if($count === 0):
+							echo "<tr>" ;
+							echo "<td class='hurry-td' colspan='8'>
+									<label class='hurray-lbl'>";
+							echo __( "No assignments", "oasisworkflow" );
+							echo "</label></td>" ;
+							echo "</tr>" ;
+						endif;
+
 					else:
 						echo "<tr>" ;
 						echo "<td class='hurry-td' colspan='8'>

@@ -197,13 +197,15 @@ class OW_Process_Flow {
             $action_name = sanitize_text_field($_POST['owf_action_name']);
         }
 
-        //STORE PRE WORKFLOW POST STATUS + TEAM ASSIGNED + PAGE THEME - USED IF WORKFLOW IS ABORTED
+        //STORE PRE WORKFLOW POST STATUS + TEAM ASSIGNED + PAGE THEME + PAGE AUTHOR - USED IF WORKFLOW IS ABORTED
         $current_post_status = get_post_status($post_id);
         $current_team =  get_post_meta($post_id, 'rpg-team', true);
         $current_theme = get_post_meta($post_id, 'rpg-theme', true);
+        $current_author = get_post_field ('post_author', $post_id);
         add_post_meta($post_id, '_rpg_pre_worflow_status', $current_post_status, true);
         add_post_meta($post_id, '_rpg_pre_worflow_team', $current_team, true);
         add_post_meta($post_id, '_rpg_pre_worflow_theme', $current_theme, true);
+        add_post_meta($post_id, '_rpg_pre_worflow_author', $current_author, true);
 
         $post_status = 'draft'; // default status, if nothing found
         $status_prefix = '';
@@ -1519,6 +1521,46 @@ class OW_Process_Flow {
                  AND (AH.assign_actor_id = %d OR A.actor_id = %d)", $selected_user, $selected_user ) );
 
       return $assigned_tasks;
+   }
+
+   public function get_inbox_count(){
+
+        $selected_user = (isset( $_GET['user'] ) && sanitize_text_field( $_GET["user"] )) ? intval( sanitize_text_field( $_GET["user"] ) ) : get_current_user_id();
+        $inbox_items = $this->get_assigned_post( null, $selected_user );
+
+        $inbox_count = 0;
+        $user_roles = get_userdata($selected_user)->roles;
+        $ow_workflow_service = new OW_Workflow_Service();
+        $roles_per_step = $ow_workflow_service->get_step_info();
+        $step_access = array();
+        $it = 0;
+
+        foreach($roles_per_step as &$step_roles){
+            foreach($step_roles as &$step_role){
+                $decoded = json_decode($step_role);
+                $roles_in_step = $decoded->task_assignee->roles;
+                $common = array_intersect($roles_in_step, $user_roles);
+
+                if (sizeof($common)>0) {
+                    $step_access[$it] = true;
+                    break;
+                } else{
+                    $step_access[$it] = false;
+                }
+            }
+            $it++;
+        }
+
+        foreach ( $inbox_items as $inbox_item ){
+            $latest_step = $ow_workflow_service->get_latest_step_id_for_post($inbox_item->post_id);
+
+            if($step_access[$latest_step-1]){
+                $inbox_count++;
+            }
+
+        }
+
+        return $inbox_count;
    }
 
    /**
@@ -3278,19 +3320,19 @@ class OW_Process_Flow {
          $new_action_history_id = $this->save_action( $data, $actors, $history_id );
          //------post status change----------
 		if($step_decision == 'unable'){
-			//REVERT STATUS BACK TO PRE WORKFLOW STATE - STORED IN post_meta DATA AS _rpg_pre_worflow_status + _rpg_pre_worflow_team + _rpg_pre_worflow_theme
+			//REVERT STATUS BACK TO PRE WORKFLOW STATE - STORED IN post_meta DATA AS _rpg_pre_worflow_status + _rpg_pre_worflow_team + _rpg_pre_worflow_theme + _rpg_pre_worflow_author
 			//SET IN FUNCTION validate_submit_to_workflow
             $pre_workflow_status = get_post_meta($post_id, '_rpg_pre_worflow_status', true);
             $pre_workflow_team = get_post_meta($post_id, '_rpg_pre_worflow_team', true);
             $pre_workflow_theme = get_post_meta($post_id, '_rpg_pre_worflow_theme', true);
+            $pre_workflow_author = get_post_meta($post_id, '_rpg_pre_worflow_author', true);
 
             if($pre_workflow_theme === ''){
                 $pre_workflow_theme = get_post_meta($post_id, 'rpg-theme', true);
             }
 
 			if($pre_workflow_status != ''){
-				$post = array('ID' => $post_id, 'post_status' => $pre_workflow_status);
-                wp_update_post($post);
+                $update_post = $wpdb->query($wpdb->prepare("UPDATE $wpdb->posts SET post_author = %s, post_status = %s WHERE ID = %d", $pre_workflow_author, $pre_workflow_status, $post_id));
                 
                 if($pre_workflow_team != ''){
                     update_post_meta($post_id, 'rpg-team', $pre_workflow_team);
@@ -3612,20 +3654,20 @@ class OW_Process_Flow {
 
 	  //--------post status change---------------
       if($result == 'unable'){
-		//REVERT STATUS BACK TO PRE WORKFLOW STATE - STORED IN post_meta DATA AS _rpg_pre_worflow_status + _rpg_pre_worflow_team+ _rpg_pre_worflow_theme
+		//REVERT STATUS BACK TO PRE WORKFLOW STATE - STORED IN post_meta DATA AS _rpg_pre_worflow_status + _rpg_pre_worflow_team + _rpg_pre_worflow_theme + _rpg_pre_worflow_author
         //SET IN FUNCTION validate_submit_to_workflow
         $post_id = intval($action->post_id);
         $pre_workflow_status = get_post_meta($post_id, '_rpg_pre_worflow_status', true);
         $pre_workflow_team = get_post_meta($post_id, '_rpg_pre_worflow_team', true);
         $pre_workflow_theme = get_post_meta($post_id, '_rpg_pre_worflow_theme', true);
+        $pre_workflow_author = get_post_meta($post_id, '_rpg_pre_worflow_author', true);
 
         if($pre_workflow_theme === ''){
             $pre_workflow_theme = get_post_meta($post_id, 'rpg-theme', true);
         }
 
 		if($pre_workflow_status != ''){
-			$post = array('ID' => $post_id, 'post_status' => $pre_workflow_status);
-            wp_update_post($post);
+            $update_post = $wpdb->query($wpdb->prepare("UPDATE $wpdb->posts SET post_author = %s, post_status = %s WHERE ID = %d", $pre_workflow_author, $pre_workflow_status, $post_id));
             
             if($pre_workflow_team != ''){
                 update_post_meta($post_id, 'rpg-team', $pre_workflow_team);
@@ -3726,20 +3768,21 @@ class OW_Process_Flow {
           'create_datetime' => current_time( 'mysql' )
       );
 
-	  //REVERT STATUS BACK TO PRE WORKFLOW STATE - STORED IN post_meta DATA AS _rpg_pre_worflow_status + _rpg_pre_worflow_team + _rpg_pre_worflow_theme
+	  //REVERT STATUS BACK TO PRE WORKFLOW STATE - STORED IN post_meta DATA AS _rpg_pre_worflow_status + _rpg_pre_worflow_team + _rpg_pre_worflow_theme + _rpg_pre_worflow_author
       //SET IN FUNCTION validate_submit_to_workflow
       $post_id = intval($action->post_id);
       $pre_workflow_status = get_post_meta($post_id, '_rpg_pre_worflow_status', true);
       $pre_workflow_team = get_post_meta($post_id, '_rpg_pre_worflow_team', true);
       $pre_workflow_theme = get_post_meta($post_id, '_rpg_pre_worflow_theme', true);
+      $pre_workflow_author = get_post_meta($post_id, '_rpg_pre_worflow_author', true);
       
       if($pre_workflow_theme === ''){
         $pre_workflow_theme = get_post_meta($post_id, 'rpg-theme', true);
       }
 
 	  if($pre_workflow_status != ''){
-		$post = array('ID' => $post_id, 'post_status' => $pre_workflow_status);
-        wp_update_post($post);
+        $update_post = $wpdb->query($wpdb->prepare("UPDATE $wpdb->posts SET post_author = %s, post_status = %s WHERE ID = %d", $pre_workflow_author, $pre_workflow_status, $post_id));
+
         if($pre_workflow_team != ''){
             update_post_meta($post_id, 'rpg-team', $pre_workflow_team);
         }
