@@ -1657,18 +1657,66 @@ switch ($post_status) {
 						}
 					}
 
-					//CHECK POST STATUS - IF draft OR pending OR publish THEN CAN VIEW THE PAGE AND THEREFORE ABLE TO KICK OFF A WORKFLOW REQUEST
-					$post_status = get_post_status($post->ID);
-					if($post_status !== 'draft' && $post_status !== 'pending' && $post_status !== 'publish'){
+					if(!$canaccess){
+						//CHECK POST STATUS - IF draft OR pending OR publish THEN CAN VIEW THE PAGE AND THEREFORE ABLE TO KICK OFF A WORKFLOW REQUEST
+						$post_status = get_post_status($post->ID);
+						if($post_status !== 'draft' && $post_status !== 'pending' && $post_status !== 'publish'){
 
-						//IS CURRENT PAGE ASSIGNED TO USER IN WORKFLOW
-						$ow_process_flow = new OW_Process_Flow();
-						$workflow_item = $ow_process_flow->get_assigned_post($post->ID, get_current_user_id(),'row');
+							//IS CURRENT PAGE ASSIGNED TO USER IN WORKFLOW
+							$ow_process_flow = new OW_Process_Flow();
+							$workflow_item = $ow_process_flow->get_assigned_post($post->ID, get_current_user_id(),'row');
 
-						if($workflow_item){
-							$canaccess = true;
-						} else {
-							$canaccess= false;
+							if($workflow_item){
+								$canaccess = true;
+							} else {
+								$canaccess= false;
+							}
+						
+							//DOES CURRENT USER HAVE RIGHTS TO SEE THIS WORKFLOW ITEM? MIGHT GET HERE IF THE PAGE HAS BEEN PARTIALLY THROUGH A WORKFLOW BEFORE
+							//GET LATEST STEP ID FROM ACTION HISTORY TABLE - NEED TO DO THIS AS $ow_process_flow->get_assigned_post DOES NOT RETURN ALL ROWS JUST FIRST ONE FOUND
+							if(!$canaccess){
+								//WORK OUT STEPS ACCESS CONTROL
+								$current_user = wp_get_current_user();
+								$user_roles = $current_user->roles;
+
+								//ROLES FOR EACH WORKFLOW STEP
+								$roles_per_step = $ow_workflow_service->get_step_info();
+
+								//WHICH STEPS CAN CURRENT USER SEE WORKFLOW ITEMS IN
+								$step_access = array();
+								$it = 0;
+
+								foreach($roles_per_step as &$step_roles){
+									foreach($step_roles as &$step_role){
+										$decoded = json_decode($step_role);
+										$roles_in_step = $decoded->task_assignee->roles;
+										$common = array_intersect($roles_in_step, $user_roles);
+
+										if (sizeof($common)>0) {
+											$step_access[$it] = true;
+											break;
+										} else{
+											$step_access[$it] = false;
+										}
+									}
+									$it++;
+								}
+
+								$latest_step = $ow_workflow_service->get_latest_step_id_for_post($post->ID);
+
+								//CHECK THIS AGAINST THE step_access ARRAY
+								if($step_access[$latest_step-1]){
+									//ABLE TO ACCESS THE POST - JUST NEED TO CHECK TEAMS
+									if(count($teams)>0){
+										foreach ($teams as $team) {
+											if(in_array($team->term_id, $post_teams)){
+												$canaccess = true;
+												break;
+											}
+										}
+									}
+								}
+							}
 						}
 					}
                 }
@@ -1999,14 +2047,11 @@ switch ($post_status) {
 
 	function set_cache_headers($headers){
 		if (!is_admin()){
-			$cache_control_in_seconds = 300;
-			$cache_control_in_minutes = 5;
-			
 			unset($headers['Cache-Control']);
 			unset($headers['Expires']);
 
-			$headers['Cache-Control'] = 'public, must-revalidate, max-age='.$cache_control_in_seconds;
-			$headers['Expires'] = gmdate('D, d M Y H:i:s \G\M\T', time() + (60 * $cache_control_in_minutes));
+			$headers['Cache-Control'] = 'public, must-revalidate, max-age='.CACHE_CONTROL_SECONDS;
+			$headers['Expires'] = gmdate('D, d M Y H:i:s \G\M\T', time() + (60 * CACHE_CONTROL_MINUTES));
 		}
 		return $headers;
 	}
