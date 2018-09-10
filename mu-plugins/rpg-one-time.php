@@ -29,6 +29,7 @@ class rpgonetime{
 		$this->remove_hooks();
 		$this->set_date_time_format();
         $this->set_image_sizes();
+        $this->set_sitemap_options();
 		add_action('shutdown', array($this, 'unlink'), PHP_INT_MAX);
 	}
 
@@ -208,6 +209,22 @@ class rpgonetime{
 
 		update_option('image_default_align', 'center');
 		update_option('image_default_size', 'large');
+    }
+
+    function set_sitemap_options(){
+        $sitemap_options = get_option('sm_options');
+
+		if(isset($sitemap_options)){
+			$sitemap_options['sm_i_hide_survey'] = true;
+			$sitemap_options['sm_i_hide_note'] = true;
+			$sitemap_options['sm_i_hide_works'] = true;
+			$sitemap_options['sm_i_hide_donors'] = true;
+
+			$sitemap_options['sm_in_posts'] = false;
+			$sitemap_options['sm_b_prio_provider'] = '';
+
+			update_option('sm_options', $sitemap_options);
+		}
     }
 }
 
