@@ -1,7 +1,7 @@
 <?php 
 /*
 Plugin Name: RPG Non Auth Preview
-Description: Aloows non-published pages to be viewed by non-authenticated users
+Description: Allows non-published pages to be viewed by non-authenticated users
 Version: 1.0.0
 Author: Valtech Ltd
 Author URI: http://www.valtech.co.uk
