@@ -58,11 +58,13 @@ get_header(); ?>
 				if($list_items):?>
 			<div class="department-filter" id="department-filter" style="display:none;">
 				<div class="department-filter__input-col">
+					<form>
 					<h3>Find a department</h3>
 					<div class="department-filter__inputs">
 						<input type="text" id="department-filter-input" maxlength="100">
 						<button type="reset" id="department-filter-reset">Clear</button>
 					</div>
+					</form>
 				</div>
 				<div class="department-filter__count-col">
 					<span id="filter-count"><?php echo intval($list_items) ?></span> Departments
