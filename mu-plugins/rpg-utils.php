@@ -1334,20 +1334,21 @@ switch ($post_status) {
 
 		//SCAN THE FILE BEING UPLOADED
 		if(MEDIA_SCAN_ON) {
-			$file_info = array('file' => '@' . $file['tmp_name'], 'filename' => $file['name']);
+			$file_info = array('file' => new \CURLFile($file['tmp_name']), 'filename' => $file['name']);
 			$ch_error = false;
 
 			$ch = curl_init(MEDIA_SCAN_SEND);                                                                      
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');                                                                     
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $file_info);            
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  
-			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, MEDIA_SCAN_CONNECT_TIMEOUT);
-			curl_setopt($ch, CURLOPT_TIMEOUT, MEDIA_SCAN_TIMEOUT);   
+			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, intval(MEDIA_SCAN_CONNECT_TIMEOUT));
+			curl_setopt($ch, CURLOPT_TIMEOUT, intval(MEDIA_SCAN_TIMEOUT));   
 			curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 			curl_setopt($ch, CURLOPT_USERPWD, MEDIA_SCAN_AUTH_A . ':' . MEDIA_SCAN_AUTH_B);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);  
 			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);                                                                
-			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));                                                                                                                   
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));  
+			curl_setopt($ch, CURLOPT_SAFE_UPLOAD, true);                                                                                                                 
 			
 			$result = json_decode(curl_exec($ch));
 			
