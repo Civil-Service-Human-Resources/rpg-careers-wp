@@ -35,6 +35,7 @@
 	<meta name="msapplication-TileColor" content="#ffffff">
 	<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
 	<meta name="theme-color" content="#ffffff">
+	<?php echo do_shortcode("[rpg_snippet tagcode='57']"); ?>
 	<?php do_action('gtm_head'); ?>
 	<?php wp_head(); ?>
 	<!--[if lt IE 9]>
