@@ -572,20 +572,17 @@ switch ($post_status) {
 				case 'auto-draft':
 				case 'pending':
 					$action_output = '<li><input type="radio" id="action1" name="page_action" value="save"><label for="action1">Save</label></li>
-										<li><input type="radio" id="action2" name="page_action" value="publish" checked><label for="action2">Publish</label></li>
-										<li><input type="radio" id="action3" name="page_action" value="delete"><label for="action3">Delete</label></li>';
+									  <li><input type="radio" id="action2" name="page_action" value="publish" checked><label for="action2">Publish</label></li>';
+					if(current_user_can('ow_rpg_delete_workflow_item')){
+						$action_output .= '<li><input type="radio" id="action3" name="page_action" value="delete"><label for="action3">Delete</label></li>';
+					}
 					break;
 				case 'publish':
 				case 'future':
 					if(current_user_can('ow_rpg_unpublish_workflow_item')){
 						$action_output .= '<li><input type="radio" id="action4" name="page_action" value="unpublish"><label for="action4">Unpublish</label></li>';
 					}
-
 					$action_output .= '<li><input type="radio" id="action5" name="page_action" value="revise" checked><label for="action5">Revise</label></li>';
-					
-					if(current_user_can('ow_rpg_delete_workflow_item')){
-						$action_output .= '<li><input type="radio" id="action3" name="page_action" value="delete"><label for="action3">Delete</label></li>';
-					}
 					$need_nonce = true;
 					break;
 				case 'del-with-approver':
@@ -1326,7 +1323,7 @@ switch ($post_status) {
 		$mime_types['gif'] = 'image/gif';
 		$mime_types['png'] = 'image/png';
 		$mime_types['mp4|m4v'] = 'video/mp4';
-		
+
 		return $mime_types;
 	}
 
