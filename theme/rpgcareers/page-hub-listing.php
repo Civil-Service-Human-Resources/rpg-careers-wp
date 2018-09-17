@@ -56,18 +56,13 @@ get_header(); ?>
         <div class="content-two-col__first">
 		<?php $list_items = get_post_meta($post_id, 'list_repeater_items', true);
 				if($list_items):?>
-			<div class="department-filter" id="department-filter">
+			<div class="department-filter" id="department-filter" style="display:none;">
 				<div class="department-filter__input-col">
-					<form>
-						<h3>Find a department</h3>
-						<div class="department-filter__inputs">
-							<input type="text" id="department-filter-input" maxlength="100">
-							<noscript>
-								<button type="submit" id="department-filter-find" class="button button--square">Find</button>
-							</noscript>
-							<button type="reset" id="department-filter-reset">Clear</button>
-						</div>
-					</form>
+					<h3>Find a department</h3>
+					<div class="department-filter__inputs">
+						<input type="text" id="department-filter-input" maxlength="100">
+						<button type="reset" id="department-filter-reset">Clear</button>
+					</div>
 				</div>
 				<div class="department-filter__count-col">
 					<span id="filter-count"><?php echo intval($list_items) ?></span> Departments
@@ -89,6 +84,7 @@ get_header(); ?>
 					$theme_display_name_2 = '';
 					$theme_display_name_3 = '';
 					$theme_display_filter = '';
+					$theme_acronym = '';
 
 					if($item_theme !==''){
 						//BACK END ONLY?
@@ -120,10 +116,12 @@ get_header(); ?>
 							}else{
 								$theme_display_filter = createFilterString($theme_display_name. (($theme_display_name_2 !== '') ? ' '.$theme_display_name_2 : '').(($theme_display_name_3 !== '') ? ' '.$theme_display_name_3 : ''));
 							}
+
+							$theme_acronym = get_term_meta($item_theme, 'content_team_acronym', true);
 						}
 					}
 					?>
-					<li class="list-item" data-acronym="" data-filter="<?php echo $theme_display_filter; ?>">
+					<li class="list-item" data-acronym="<?php echo $theme_acronym; ?>" data-filter="<?php echo $theme_display_filter; ?>">
 						<a href="<?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_target', true)); ?>" class="text-image-list__item">
 						<div class="text-image-list__img">
 							<img src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'list_repeater_items_'.$i.'_image', true), 'medium_large')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'list_repeater_items_'.$i.'_image', true), '_wp_attachment_image_alt', true); ?>">
