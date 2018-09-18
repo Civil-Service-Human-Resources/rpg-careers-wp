@@ -31,15 +31,6 @@ get_header(); ?>
 	if ($cont_block_vert_image) {
 		$cont_block_vert_image = wp_get_attachment_image_src($cont_block_vert_image, 'medium_large');
 	}
-
-	function createFilterString($s){
-		$s = trim($s);
-		$s = strtolower($s);
-		$s = preg_replace("/[^a-z0-9_\s-]/", "", $s);
-		$s = preg_replace("/[\s-]+/", " ", $s);
-		$s = preg_replace("/[\s_]/", "-", $s);
-		return $s;
-	}
 ?>
  <div class="hero-text">
     <div class="hero-text__inner">
@@ -54,30 +45,14 @@ get_header(); ?>
 <div class="content-two-col content-two-col--two-thirds-left">
     <div class="content-two-col__inner">
         <div class="content-two-col__first">
-		<?php $list_items = get_post_meta($post_id, 'list_repeater_items', true);
-				if($list_items):?>
-			<div class="department-filter" id="department-filter" style="display:none;">
-				<div class="department-filter__input-col">
-					<form>
-					<h3>Find a department</h3>
-					<div class="department-filter__inputs">
-						<input type="text" id="department-filter-input" maxlength="100">
-						<button type="reset" id="department-filter-reset">Clear</button>
-					</div>
-					</form>
-				</div>
-				<div class="department-filter__count-col">
-					<span id="filter-count"><?php echo intval($list_items) ?></span> Departments
-				</div>
-			</div>	
-			<?php endif; ?>
 			<div class="text-image-list text-image-list--three-col">
-				<?php if($list_items):?>
+				<?php $list_items = get_post_meta($post_id, 'list_repeater_items', true);
+				if($list_items):?>
 				<ul class="text-image-list text-image-list--three-col">
-					<div id="department-filter__error">
-                    	<p>There are no departments that match your criteria</p>
-					</div>
-				<?php for ($i=0;$i<$list_items;$i++) { 
+				<?php for ($i=0;$i<$list_items;$i++) { ?>
+					<li>
+						<a href="<?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_target', true)); ?>" class="text-image-list__item">
+					<?php 
 					$item_theme = get_post_meta($post_id, 'list_repeater_items_'.$i.'_team', true);
 					$logo_band = '';
 					$logo_src = get_template_directory_uri() .'/assets/images/cabinet-office.svg';
@@ -85,8 +60,6 @@ get_header(); ?>
 					$theme_display_name = '';
 					$theme_display_name_2 = '';
 					$theme_display_name_3 = '';
-					$theme_display_filter = '';
-					$theme_acronym = '';
 
 					if($item_theme !==''){
 						//BACK END ONLY?
@@ -115,16 +88,10 @@ get_header(); ?>
 
 							if($theme_display_name ===''){
 								$theme_display_name = 'THEME NOT SET';
-							}else{
-								$theme_display_filter = createFilterString($theme_display_name. (($theme_display_name_2 !== '') ? ' '.$theme_display_name_2 : '').(($theme_display_name_3 !== '') ? ' '.$theme_display_name_3 : ''));
 							}
-
-							$theme_acronym = get_term_meta($item_theme, 'content_team_acronym', true);
 						}
 					}
 					?>
-					<li class="list-item" data-acronym="<?php echo $theme_acronym; ?>" data-filter="<?php echo $theme_display_filter; ?>">
-						<a href="<?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_target', true)); ?>" class="text-image-list__item">
 						<div class="text-image-list__img">
 							<img src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'list_repeater_items_'.$i.'_image', true), 'medium_large')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'list_repeater_items_'.$i.'_image', true), '_wp_attachment_image_alt', true); ?>">
 						</div>
@@ -146,7 +113,7 @@ get_header(); ?>
 							<p class="smaller"><?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_body', true)); ?></p>
 							<div class="readmore-link">
 								<span><?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_target_text', true)); ?></span><i aria-hidden="true"></i>
-							</div>	
+							</div>
 						</div>
 						</a>
 					</li>
