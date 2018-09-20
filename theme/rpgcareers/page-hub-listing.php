@@ -45,11 +45,14 @@ get_header(); ?>
 <div class="content-two-col content-two-col--two-thirds-left">
     <div class="content-two-col__inner">
         <div class="content-two-col__first">
-		<?php $list_items = get_post_meta($post_id, 'list_repeater_items', true);?>
 			<div class="text-image-list text-image-list--three-col">
-				<?php if($list_items):?>
+				<?php $list_items = get_post_meta($post_id, 'list_repeater_items', true);
+				if($list_items):?>
 				<ul class="text-image-list text-image-list--three-col">
-				<?php for ($i=0;$i<$list_items;$i++) { 
+				<?php for ($i=0;$i<$list_items;$i++) { ?>
+					<li>
+						<a href="<?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_target', true)); ?>" class="text-image-list__item">
+					<?php 
 					$item_theme = get_post_meta($post_id, 'list_repeater_items_'.$i.'_team', true);
 					$logo_band = '';
 					$logo_src = get_template_directory_uri() .'/assets/images/cabinet-office.svg';
@@ -89,8 +92,6 @@ get_header(); ?>
 						}
 					}
 					?>
-					<li class="list-item">
-						<a href="<?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_target', true)); ?>" class="text-image-list__item">
 						<div class="text-image-list__img">
 							<img src="<?php echo wp_get_attachment_image_src(get_post_meta($post_id, 'list_repeater_items_'.$i.'_image', true), 'medium_large')[0]; ?>" alt="<?php echo get_post_meta(get_post_meta($post_id, 'list_repeater_items_'.$i.'_image', true), '_wp_attachment_image_alt', true); ?>">
 						</div>
@@ -111,8 +112,8 @@ get_header(); ?>
 						<div class="text-image-list__content">
 							<p class="smaller"><?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_body', true)); ?></p>
 							<div class="readmore-link">
-								<span><?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_target_text', true)); ?></span>
-							</div>	
+								<span><?php echo esc_html(get_post_meta($post_id, 'list_repeater_items_'.$i.'_target_text', true)); ?></span><i aria-hidden="true"></i>
+							</div>
 						</div>
 						</a>
 					</li>
